@@ -1,0 +1,171 @@
+[
+  {
+    "id": "family-suv",
+    "name": "Family SUV",
+    "url": "/models/library/family-suv.glb",
+    "realHeight": 1.8,
+    "source": "lux3d-text-to-3d",
+    "taskId": "7448746",
+    "createdAt": "2026-11-14T08:53:47.102Z",
+    "generation": {
+      "fileBytes": 17201328,
+      "sha256": "eb6ad5bb2a8ea9f28a2716ab6812ff90bf2020602d4b55950dedea931cba1ddf",
+      "shipped": {
+        "fileBytes": 9798452,
+        "sha256": "a36f25aa454e6a727fcabf66fb0322043d1a161b48793a9eca69e641fa909700",
+        "textures": "JPEG (re-encoded from Lux3D PNG); geometry unchanged"
+      }
+    },
+    "thumbnail": "/models/thumbs/family-suv.png"
+  },
+  {
+    "id": "small-car",
+    "name": "Small car",
+    "url": "/models/library/small-car.glb",
+    "realHeight": 1.5,
+    "source": "lux3d-image-to-3d",
+    "taskId": "8032019",
+    "createdAt": "2026-11-16T02:01:13.386Z",
+    "generation": {
+      "version": "G1-Turbo",
+      "sourceImage": {
+        "url": "/models/sources/small-car.jpg",
+        "sha256": "6ac5778ae4394ced73b2899802af88ad2e7479f9190b66919c71a30cb32a6d1a",
+        "sourceUrl": "https://www.flickr.com/photos/133136615@N03/23075023944",
+        "credit": "nicifor28 (Flickr)",
+        "license": "CC0 1.0"
+      },
+      "faceCount": 60000,
+      "fileBytes": 11045760,
+      "sha256": "fa25def79defb0a03d39e07d74c481254bc7455a21d4240739ff9e3d3c046432",
+      "gltfSize": [
+        0.095,
+        0.077,
+        0.153
+      ],
+      "shipped": {
+        "fileBytes": 3066160,
+        "sha256": "94611413a81b4393cae9675507907ad9f04f78307c55034d8c72639279137302",
+        "textures": "JPEG (re-encoded from Lux3D PNG); geometry unchanged"
+      }
+    },
+    "thumbnail": "/models/thumbs/small-car.png"
+  },
+  {
+    "id": "scooter",
+    "name": "Scooter",
+    "url": "/models/library/scooter.glb",
+    "realHeight": 1.15,
+    "source": "lux3d-image-to-3d",
+    "taskId": "8032024",
+    "createdAt": "2026-11-16T02:01:40.760Z",
+    "generation": {
+      "version": "G1-Turbo",
+      "sourceImage": {
+        "url": "/models/sources/scooter.jpg",
+        "sha256": "c485197ea6400bb07441547be76ae39d2e304b1b243817fd89cecd126a233cae",
+        "sourceUrl": "https://wordpress.org/photos/photo/762657a4bd/",
+        "credit": "Nilo Velez (WordPress Photo Directory)",
+        "license": "CC0 1.0"
+      },
+      "faceCount": 60000,
+      "fileBytes": 12386808,
+      "sha256": "90df563e37b02ec1516a0f4ab0a6e620b416d51a8bb2eae47df9fd3b851e6d51",
+      "gltfSize": [
+        1.8,
+        1.8,
+        1.799
+      ],
+      "shipped": {
+        "fileBytes": 3162168,
+        "sha256": "5110a98d0d2cd8e8b49131128bafaffc24435f6552382bec39ea51ec8ca86bab",
+        "textures": "JPEG (re-encoded from Lux3D PNG); geometry unchanged"
+      }
+    },
+    "thumbnail": "/models/thumbs/scooter.png"
+  },
+  {
+    "id": "adult-person",
+    "name": "Adult person",
+    "url": "/models/library/adult-person.glb",
+    "realHeight": 1.75,
+    "source": "lux3d-text-to-3d",
+    "taskId": "8032015",
+    "createdAt": "2026-11-16T02:00:02.564Z",
+    "generation": {
+      "version": "G1-Turbo",
+      "prompt": "a full-body adult person standing upright in a relaxed neutral pose, arms at the sides, wearing jeans, a plain t-shirt and trainers",
+      "style": "photorealistic",
+      "faceCount": 60000,
+      "fileBytes": 8866092,
+      "sha256": "ae081a63fdc1c95ff6c02692a51b8a46b0fbc052c8c0c609277e50622bd3a26c",
+      "gltfSize": [
+        0.591,
+        1.8,
+        0.342
+      ],
+      "shipped": {
+        "fileBytes": 2253144,
+        "sha256": "f6981249084f734dd7823ca1dee9849e532fca4c21269793675437c5b535df15",
+        "textures": "JPEG (re-encoded from Lux3D PNG); geometry unchanged"
+      }
+    },
+    "thumbnail": "/models/thumbs/adult-person.png"
+  },
+  {
+    "id": "wheelie-bin",
+    "name": "Wheelie bin",
+    "url": "/models/library/wheelie-bin.glb",
+    "realHeight": 1.07,
+    "source": "lux3d-text-to-3d",
+    "taskId": "8032018",
+    "createdAt": "2026-11-16T01:59:19.158Z",
+    "generation": {
+      "version": "G1-Turbo",
+      "prompt": "a green plastic wheelie bin for household rubbish, upright, lid closed, two wheels at the back",
+      "style": "photorealistic",
+      "faceCount": 60000,
+      "fileBytes": 9385464,
+      "sha256": "a2fdf4b85c3fe71d06aad75fe9ff68ffba8f7017d2515406cd2c3070b95898c1",
+      "gltfSize": [
+        0.612,
+        1.07,
+        0.708
+      ],
+      "shipped": {
+        "fileBytes": 2561104,
+        "sha256": "50bf39d2978e0971b7feb8ffcfc015bc2a55777b48dc52a4d217cd535d5cd0fa",
+        "textures": "JPEG (re-encoded from Lux3D PNG); geometry unchanged"
+      }
+    },
+    "thumbnail": "/models/thumbs/wheelie-bin.png"
+  },
+  {
+    "id": "front-door",
+    "name": "Front door",
+    "url": "/models/library/front-door.glb",
+    "realHeight": 2.3,
+    "source": "lux3d-text-to-3d",
+    "taskId": "8032119",
+    "createdAt": "2026-11-16T02:04:32.805Z",
+    "generation": {
+      "version": "G1-Turbo",
+      "prompt": "a single closed wooden front door of a house, painted dark blue, set in a white wooden door frame with a stone doorstep, freestanding with no wall around it",
+      "style": "photorealistic",
+      "faceCount": 60000,
+      "fileBytes": 10777212,
+      "sha256": "e19d5512e722daef60919573f0a38d2829103e10639ea91f5facd95b5b3a5e23",
+      "gltfSize": [
+        2.032,
+        3.136,
+        0.861
+      ],
+      "shipped": {
+        "fileBytes": 3372692,
+        "sha256": "7e74e709de857496dd644eca5719b17df908bcbb3aee3fe086cf0085c8d373e9",
+        "textures": "JPEG (re-encoded from Lux3D PNG); geometry unchanged"
+      }
+    },
+    "thumbnail": "/models/thumbs/front-door.png"
+  }
+]

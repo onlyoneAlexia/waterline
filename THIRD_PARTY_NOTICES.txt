@@ -1,0 +1,55 @@
+Waterline — third-party credits and review notes
+
+CesiumJS 1.145.0 — Apache License 2.0.
+https://github.com/CesiumGS/cesium
+Its package includes third-party notices, licenses and required on-screen credits.
+The application serves Cesium's complete Build/Cesium directory without removing notices.
+
+geotiff.js 3.0.5 — MIT.
+https://github.com/geotiffjs/geotiff.js
+Dependency license texts are included in their installed packages. package-lock.json pins dependencies.
+Playwright is a development/test dependency (Apache-2.0), not a production UI library.
+
+Aholo Lux3D — every Library model (public/models/library/*.glb) was generated with Lux3D.
+Task ids, prompts or source photos, file sizes and SHA-256 hashes are in public/models/library.json.
+Use and redistribution are subject to the participant's Aholo account/API and event terms.
+
+Source photos for the photo-made Library models (public/models/sources/), all CC0 1.0:
+- Small car: "Toyota Yaris 5-door (XP90) 2005-2009" by nicifor28, Flickr.
+  https://www.flickr.com/photos/133136615@N03/23075023944
+- Scooter: "Orange scooter parked on the sidewalk" by Nilo Velez, WordPress Photo Directory.
+  https://wordpress.org/photos/photo/762657a4bd/
+
+scripts/build-schematic-library.mjs can still build simple geometric comparison shapes; they are no longer shipped.
+The Studio environment is original illustrative geometry, not Google imagery or a real-city reconstruction.
+
+Typefaces in public/fonts/, all SIL Open Font License 1.1 (https://openfontlicense.org), bundled locally:
+- Cinzel Decorative — Natanael Gama. https://fonts.google.com/specimen/Cinzel+Decorative
+- Poppins — Indian Type Foundry. https://fonts.google.com/specimen/Poppins
+- Allura — TypeSETit (Robert Leuschke). https://fonts.google.com/specimen/Allura
+
+Homepage hero images (public/img/) are renders of the Lux3D Library models.
+The colour palette and layout were inspired by reference images the participant supplied;
+no images, logos or text from those references are used.
+
+Library thumbnails (public/models/thumbs/) are renders of the Lux3D models above, made with
+scripts/render-thumbnails.mjs (Google <model-viewer>, Apache-2.0, used at build time only).
+
+Studio surface photos and normal maps — Poly Haven, CC0-1.0.
+https://polyhaven.com/license
+Assets: asphalt_02, brick_wall_001, concrete_floor_02, aerial_grass_rock.
+Original asset pages, download URLs and file hashes are in public/textures/sources.json.
+These textures are bundled locally and do not require a network connection at runtime.
+Roof and cream-wall texture variants are original seeded procedural images.
+
+Optional live data/services:
+- JRC / Copernicus Emergency Management Service, Global river flood hazard maps v2.1,
+  CC BY 4.0, (c) European Union. https://data.jrc.ec.europa.eu/
+- Cesium ion / Google Photorealistic 3D Tiles: provider account and usage terms apply.
+  Preserve all provider attribution and check image/recording rights before sharing live-map captures.
+- FOSSGIS routing, based on OpenStreetMap data (c) OpenStreetMap contributors.
+  https://www.openstreetmap.org/copyright
+- Moving-water educational facts are attributed in-app to the US National Weather Service.
+
+The participant must confirm all event registration terms and third-party permissions.
+This repository does not assert organizer approval or legal clearance.

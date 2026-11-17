@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Waterline</title>
+  <meta name="description" content="See a flood against the things you own: turn a photo of your car into a true-scale 3D model on your real street, then raise the water.">
+  <meta name="theme-color" content="#8fd3f4">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%238fd3f4'/%3E%3Cpath d='M6 13c3-2.5 5-2.5 8 0s5 2.5 8 0 3.5-1.5 4-1M6 20c3-2.5 5-2.5 8 0s5 2.5 8 0 3.5-1.5 4-1' fill='none' stroke='%233d2318' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+  <link rel="preload" href="/fonts/cinzel-decorative-700.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/poppins-400.woff2" as="font" type="font/woff2" crossorigin>
+  <!-- The homepage shows first, unless a link asks for a mode, a shared scene, or debug. -->
+  <script>
+    if (!/[?&](mode|debug|app)\b/.test(location.search) && !location.hash.startsWith('#s=')) document.documentElement.classList.add('home-open');
+  </script>
+  <script>window.CESIUM_BASE_URL = '/vendor/cesium/';</script>
+  <script defer src="/vendor/cesium/Cesium.js"></script>
+  <link rel="stylesheet" href="/vendor/cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <a class="skip-link" href="#explore">Skip to exploration controls</a>
+
+  <!-- ===================== HOMEPAGE ===================== -->
+  <div id="home" class="home" aria-label="Waterline introduction">
+    <div class="clouds" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
+    <header class="home-bar">
+      <span class="logotype">WATERLINE</span>
+      <span class="counter-pill"><span class="long">Aholo Lux3D · 3D AI Hackathon 2026</span><span class="short">Lux3D Hackathon</span></span>
+    </header>
+
+    <section class="home-hero">
+      <p class="script">before the water comes…</p>
+      <h1 class="display">See the water.<br>Understand the impact.</h1>
+      <p class="home-lede">Turn a photo of your car into a true-scale 3D model with <strong>Aholo Lux3D</strong>, park it on your real street, and raise the flood.</p>
+
+      <div class="hero-stage" aria-hidden="true">
+        <!-- The waterline ring: back half behind the car, front half in front, rising with the water. -->
+        <div class="ring">
+          <svg class="ring-back" viewBox="0 0 1000 200" preserveAspectRatio="none"><path class="surface" d="M12 100 A488 88 0 0 1 988 100 Z"/><path d="M12 100 A488 88 0 0 1 988 100"/></svg>
+          <svg class="ring-front" viewBox="0 0 1000 200" preserveAspectRatio="none"><path d="M12 100 A488 88 0 0 0 988 100"/></svg>
+          <svg class="ring-ripple" viewBox="0 0 1000 200" preserveAspectRatio="none"><ellipse cx="500" cy="100" rx="488" ry="88"/></svg>
+        </div>
+        <img class="hero-car" src="/img/hero-family-suv.png" alt="">
+        <div class="hero-water"><span class="wave"></span></div>
+        <span class="hero-tag">Water at 1.2 m · up to the windows</span>
+      </div>
+
+      <p class="pill-note">Photo → 3D. Real streets. Real flood data.</p>
+      <div class="home-ctas">
+        <button id="home-demo" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>See a real flood</button>
+        <button id="home-studio" class="cta-ghost">Try the studio</button>
+        <button id="home-street" class="cta-ghost">Find my street</button>
+      </div>
+    </section>
+
+    <section class="home-steps" aria-label="How it works">
+      <h2 class="display small">How it works</h2>
+      <div class="step-cards">
+        <article class="step-card sky">
+          <span class="step-no">01</span>
+          <img src="/img/hero-small-car.png" alt="" loading="lazy">
+          <h3>Snap it or describe it</h3>
+          <p>Aholo Lux3D turns a photo, or a few words, into a 3D model of your car, scooter, door or bin.</p>
+        </article>
+        <article class="step-card cream">
+          <span class="step-no">02</span>
+          <img src="/img/hero-adult-person.png" alt="" loading="lazy" class="tall">
+          <h3>Put it on your street</h3>
+          <p>It stands at its real height on a photorealistic 3D map of your street, beside a person for scale.</p>
+        </article>
+        <article class="step-card sky">
+          <span class="step-no">03</span>
+          <span class="step-icon" aria-hidden="true"></span>
+          <h3>Raise the water</h3>
+          <p>Watch it reach the wheels, the windows, your waist. Check real river-flood data, then find higher ground.</p>
+        </article>
+      </div>
+      <div class="steps-cta"><button id="home-demo-2" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>See a real flood</button></div>
+      <p class="home-foot"><strong>Illustration, not a forecast.</strong> Follow official warnings. Never walk or drive into floodwater.</p>
+    </section>
+  </div>
+
+  <!-- ===================== APP ===================== -->
+  <div id="app">
+    <nav class="rail" aria-label="Waterline functions">
+      <button class="rail-home" data-home aria-label="Back to the homepage"><span class="logo" aria-hidden="true"></span></button>
+      <button data-go="spot" aria-current="true"><i class="ri ri-pin"></i>Spot</button>
+      <button data-go="things"><i class="ri ri-cube"></i>Things</button>
+      <button data-go="water"><i class="ri ri-waves"></i>Water</button>
+      <button data-go="risk"><i class="ri ri-chart"></i>Risk</button>
+      <button data-go="safety"><i class="ri ri-mountain"></i>Escape</button>
+      <button data-go="detective"><i class="ri ri-target"></i>Guess</button>
+      <button data-go="share"><i class="ri ri-share"></i>Share</button>
+    </nav>
+
+    <aside id="panel" aria-label="Flood exploration controls">
+      <!-- SPOT -->
+      <section class="space" data-space="spot" id="explore" tabindex="-1">
+        <p class="kicker">Step 1</p>
+        <h2 class="space-title">Your spot</h2>
+        <p class="space-lede">Choose where the water rises.</p>
+
+        <div class="feature-card sky">
+          <p class="script small">start with a story</p>
+          <p class="feature-copy" id="demo-description">Explore an illustrative street with a real Lux3D-generated SUV for scale. No map account needed.</p>
+          <button id="demo-go" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Try a demo</button>
+          <p id="demo-status" class="status-line" role="status"></p>
+        </div>
+
+        <div class="field">
+          <label for="world-mode">Map</label>
+          <select id="world-mode"><option value="studio">Studio street (instant)</option><option value="street">Real street (live 3D city)</option></select>
+          <p id="world-status" class="hint" role="status">Starting the 3D workspace…</p>
+        </div>
+
+        <p class="hint" id="location-help">Click the demo street to choose a spot. Switch to Real street mode to search your own address.</p>
+        <p id="pin-status" class="status">No spot chosen yet.</p>
+        <p class="label" id="scenes-hint">Or see a real flood</p>
+        <div id="scenes" class="scene-list"></div>
+        <p id="scene-story" class="story" hidden></p>
+        <button class="next" data-go="things">Next: add your things</button>
+      </section>
+
+      <!-- THINGS -->
+      <section class="space" data-space="things" id="objects" hidden>
+        <p class="kicker">Step 2</p>
+        <h2 class="space-title">Your things</h2>
+        <p class="space-lede">Made with Aholo Lux3D, shown at real height.</p>
+        <div class="tabs" role="tablist" aria-label="Object source">
+          <button id="tab-library" class="tab-btn active" data-tab="library" role="tab" aria-selected="true" aria-controls="panel-library">Library</button>
+          <button id="tab-photo" class="tab-btn" data-tab="photo" role="tab" aria-selected="false" aria-controls="panel-photo" tabindex="-1">Photo</button>
+          <button id="tab-text" class="tab-btn" data-tab="text" role="tab" aria-selected="false" aria-controls="panel-text" tabindex="-1">Describe</button>
+        </div>
+
+        <div id="kind-row" class="kind-row" hidden>
+          <label for="kind">How tall?</label>
+          <select id="kind"></select>
+          <input id="kind-height" type="number" min="0.1" max="30" step="0.1" placeholder="auto" aria-label="Real height in metres (leave empty to let Lux3D estimate it)" hidden>
+        </div>
+
+        <div id="panel-photo" class="tab" data-tab="photo" role="tabpanel" aria-labelledby="tab-photo" hidden>
+          <label class="file-pick">
+            <input type="file" id="photo-input" accept="image/*">
+            <span class="ri ri-image big" aria-hidden="true"></span>
+            <span><strong>Choose a photo</strong><br>your car, bike, front door…</span>
+          </label>
+          <p class="source">Your photo is sent to Aholo Lux3D (Manycore) to build the model. Waterline itself does not store it.</p>
+          <img id="photo-preview" alt="" hidden>
+          <input id="photo-name" type="text" maxlength="60" placeholder="Name it, e.g. My car" aria-label="Object name">
+          <button id="photo-go" class="cta-pill" disabled><span class="cta-circle" aria-hidden="true"></span>Make it 3D with Lux3D</button>
+        </div>
+
+        <div id="panel-text" class="tab" data-tab="text" role="tabpanel" aria-labelledby="tab-text" hidden>
+          <p class="hint">Describe one real thing you own. Lux3D builds a 3D model of anything you type, even nonsense, so be specific.</p>
+          <div class="examples" aria-label="Example ideas">
+            <button type="button" data-example="a red pickup truck">Red pickup</button>
+            <button type="button" data-example="a yellow motor scooter">Scooter</button>
+            <button type="button" data-example="a folding wheelchair">Wheelchair</button>
+            <button type="button" data-example="a petrol generator">Generator</button>
+            <button type="button" data-example="a wooden garden shed">Garden shed</button>
+          </div>
+          <textarea id="text-prompt" rows="3" maxlength="300" placeholder="e.g. a silver family SUV" aria-label="Describe your object"></textarea>
+          <button id="text-go" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Make it 3D with Lux3D</button>
+        </div>
+
+        <div id="panel-library" class="tab" data-tab="library" role="tabpanel" aria-labelledby="tab-library">
+          <div id="library-list" class="library"><p class="hint">Loading…</p></div>
+        </div>
+
+        <p id="gen-note" class="hint" hidden></p>
+        <p id="place-note" class="status place-note" hidden></p>
+        <div id="jobs"></div>
+        <p class="label">On the map</p>
+        <ul id="object-list" class="objects"></ul>
+        <button id="undo" class="ghost" disabled>Undo last object edit</button>
+        <button class="next" data-go="water">Next: raise the water</button>
+      </section>
+
+      <!-- WATER -->
+      <section class="space" data-space="water" id="water-controls" hidden>
+        <p class="kicker">Step 3</p>
+        <h2 class="space-title">The water</h2>
+        <p class="space-lede">Use the water dock on the map. Watch what each depth means.</p>
+        <div class="big-readout"><span>Water level</span><output id="depth-out">0.00 m</output></div>
+        <p id="depth-source" class="source-line" role="status">Manual illustration · not a forecast</p>
+        <ul id="facts" class="facts"></ul>
+        <p class="source">Moving-water facts: US National Weather Service, “Turn Around Don’t Drown”.</p>
+        <button class="next" data-go="risk">Next: the real risk here</button>
+      </section>
+
+      <!-- RISK -->
+      <section class="space" data-space="risk" id="risk-space" hidden>
+        <p class="kicker">Step 4</p>
+        <h2 class="space-title">Real risk</h2>
+        <p class="space-lede">Modelled river-flood depths at your spot, from JRC / Copernicus.</p>
+        <div id="risk" class="risk" hidden></div>
+        <p class="hint empty-note" id="risk-empty">Set your spot on a real street (or open Kerrville or Paiporta) to see modelled river-flood depths here.</p>
+        <button class="next" data-go="safety">Next: find a way out</button>
+      </section>
+
+      <!-- SAFETY -->
+      <section class="space" data-space="safety" id="safety-section" hidden>
+        <p class="kicker">Step 5</p>
+        <h2 class="space-title">Higher ground</h2>
+        <p class="space-lede">The nearest ground that stays above this flood, and a walking route to it.</p>
+        <button id="safe-go" class="cta-pill" disabled><span class="cta-circle" aria-hidden="true"></span>Find higher ground</button>
+        <div id="safety" class="safety" hidden></div>
+        <button class="next" data-go="detective">Next: test your eye</button>
+      </section>
+
+      <!-- DETECTIVE -->
+      <section class="space" data-space="detective" id="challenge" hidden>
+        <p class="kicker">Game</p>
+        <h2 class="space-title">Depth detective</h2>
+        <p class="script">what's your guess?</p>
+        <p class="space-lede">How deep must the water be to cover the top of…</p>
+        <div class="field"><label for="challenge-object">Object</label><select id="challenge-object"><option value="small-car">Small car</option></select></div>
+        <div class="field"><label for="challenge-guess">Your guess, in metres</label><input id="challenge-guess" type="number" min="0" max="3" step="0.1" value="1"></div>
+        <button id="challenge-go" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Reveal and compare</button>
+        <p id="challenge-result" class="hint" role="status"></p>
+        <p class="source">This compares height only, not when an object floats or becomes unsafe.</p>
+        <button class="next" data-go="share">Next: share it</button>
+      </section>
+
+      <!-- SHARE -->
+      <section class="space" data-space="share" id="share-section" hidden>
+        <p class="kicker">Finish</p>
+        <h2 class="space-title">Share it</h2>
+        <p class="space-lede">Send someone the water on their street.</p>
+        <div class="share-grid">
+          <button id="orbit" class="icon-btn ib-orbit" disabled>Orbit camera</button>
+          <button id="share" class="icon-btn ib-link">Copy share link</button>
+          <button id="save-scene" class="icon-btn ib-save">Save scene</button>
+          <button id="load-scene" class="icon-btn ib-open">Open scene</button>
+          <input type="file" id="scene-file" accept=".json,application/json" aria-label="Open a saved scene" hidden>
+          <button id="snapshot" class="icon-btn ib-image">Save 3D image</button>
+        </div>
+        <footer class="panel-foot">
+          <p><strong>Illustration, not a forecast.</strong> The water is a flat level measured from the street at your pin (a “bathtub” model). It ignores walls, drains and flow. Check your official flood maps.</p>
+          <p>3D models by Aholo Lux3D · Map by CesiumJS and Google · River flood model: JRC / Copernicus EMS (CC BY 4.0) · Walking routes: FOSSGIS OSRM, © OpenStreetMap contributors</p>
+        </footer>
+      </section>
+    </aside>
+
+    <main id="map" aria-label="Interactive 3D street map">
+      <div class="map-top">
+        <div class="map-caption"><span class="live-dot" aria-hidden="true"></span><span id="map-mode-label">LOADING MAP…</span></div>
+        <div class="scene-tools" role="group" aria-label="Camera views">
+          <button data-view="street" aria-pressed="true">Street</button><button data-view="overview" aria-pressed="false">Overview</button><button data-view="focus" aria-pressed="false">Focus</button><button id="cinema" aria-pressed="false">Cinema view</button>
+        </div>
+      </div>
+      <div id="map-placement" class="map-placement" role="status" hidden></div>
+
+      <section id="impact" class="impact" aria-label="Impact at this water level" hidden>
+        <h2>At this water level</h2>
+        <ul id="impact-list"></ul>
+      </section>
+
+      <div class="dock" role="group" aria-label="Water level">
+        <button id="play" class="dock-play" disabled>Play the flood</button>
+        <div class="dock-readout"><span>Water</span><strong id="map-depth-value">0.00 m</strong></div>
+        <div class="dock-main">
+          <div class="dock-slider">
+            <input type="range" id="depth" min="0" max="3" step="0.01" value="0" aria-label="Flood depth in metres">
+            <div id="depth-ticks" class="depth-ticks" aria-hidden="true"></div>
+          </div>
+          <div class="dock-row">
+            <div class="presets">
+              <button data-depth="0.15">15 cm</button>
+              <button data-depth="0.3">30 cm</button>
+              <button data-depth="0.6">60 cm</button>
+              <button data-depth="1">1 m</button>
+              <button data-depth="2">2 m</button>
+            </div>
+            <p id="map-guidance" class="dock-hint">Search an address, then click your street</p>
+          </div>
+        </div>
+      </div>
+      <p class="map-disclaimer">Planning perspective · not a flood forecast</p>
+    </main>
+  </div>
+  <div id="toast" role="status" hidden></div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

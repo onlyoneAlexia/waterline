@@ -1,0 +1,20 @@
+{
+  "officialEvent": "https://www.aholo.ai/hackathon",
+  "submissionPortal": "https://www.aholo.ai/hackathon/my",
+  "deadlineUtc": "2026-11-19T11:00:00Z",
+  "deadlineLagos": "19 November 2026 at 12:00 noon",
+  "ready": [
+    "Project report PDF (12 pages)",
+    "Lux3D evidence for every Library model",
+    "Source archive",
+    "Demo video (WebM): review before uploading",
+    "Demo video (MP4 copy) for forms that need MP4"
+  ],
+  "participantActions": [
+    "Confirm registration and team (solo counts) in the official portal.",
+    "Check the tools list in the report and add any other tool you used.",
+    "Upload the report and the demo video (or a working hosted link) to My Submission before the deadline.",
+    "Post on X with #Manycorehackathon and add the link (5% of the expert score; register it for the Popularity Award by 30 Nov)."
+  ],
+  "submission": "Not submitted by this script."
+}

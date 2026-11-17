@@ -1,0 +1,9 @@
+node_modules
+.env
+.git
+.npm-cache
+.playwright
+.waterline
+submission
+test
+public/models/generated/*.glb

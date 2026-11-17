@@ -1,0 +1,22 @@
+node_modules/
+.env
+public/models/generated/*.glb
+.DS_Store
+
+.npm-cache/
+test/browser-*.png
+.playwright/
+.waterline/
+test/interface-*.png
+submission/recordings/
+
+# Design reference screenshots (third-party work, not part of the project)
+Screenshot_*.jpg
+
+# Large or regenerated submission files (upload videos directly or attach them to a release)
+submission/*.webm
+submission/*.mp4
+submission/waterline-source.tar.gz
+submission/report/*.glb
+submission/evidence/
+test/*.png

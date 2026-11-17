@@ -1,0 +1,18 @@
+{
+  "verifiedAt": "2026-11-17T19:26:58.638Z",
+  "mode": "studio",
+  "checks": [
+    "Actual Cesium scene and bundled Lux3D SUV loaded without external network access.",
+    "Detailed street geometry is batched into at most ten material groups. Focus/Street camera views and Cinema/escape controls passed.",
+    "Flood playback pauses at the current level.",
+    "Demo animation reached 1.20 m with the Lux3D model placed at 1.8 m scale.",
+    "Keyboard tabs, Library placement on the rendered street, move cancellation, duplication cancellation, removal and undo passed.",
+    "Lux3D front door and SUV placement passed with depth picking disabled or throwing, including placement above a flooded street.",
+    "Depth challenge and explicitly labelled synthetic higher-ground example passed.",
+    "Share-link reload, scene JSON export/import and labelled PNG export passed.",
+    "Mobile viewport has no horizontal overflow. No page errors or external requests occurred."
+  ],
+  "limits": [
+    "Live Cesium/Google maps, JRC data, walking-route service and paid Lux3D generation were not exercised by this offline test."
+  ]
+}

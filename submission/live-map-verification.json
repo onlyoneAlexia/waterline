@@ -1,0 +1,30 @@
+{
+  "checkedAt": "2026-11-17T19:27:42.581Z",
+  "mode": "street",
+  "world": "photorealistic",
+  "objects": 2,
+  "demo": "Demo ready. Adjust the depth or try Depth detective.",
+  "rendererError": null,
+  "tiles": [
+    {
+      "loaded": true
+    }
+  ],
+  "errors": [],
+  "denied": [],
+  "failed": [
+    {
+      "path": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2yQDWlcON2cVhUlz8XBsC21mDAPpnR1C-M_lepB4MF6ulLIVZzG2WIfwk8s8jsTFiUmaHQIMM_4srbxMVmTuYiUNjzLypYnvpv1r6Gm8-45IcMJ6BVHJQoYCfDhKOWaLQvOZas1.json",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2wIobcQgRLRtfbwf0ZJBYKe0qeW4ctAjz83HrIv4hMB6LAKll5Pfn8QW_wyEerbquIh3UDNv23aUn0XQdEzvJTqedwj5oL3r9sUKh5BSaagtQ8iZwjd64i_drQVmttbvWG14TUN.json",
+      "error": "net::ERR_ABORTED"
+    },
+    {
+      "path": "https://tile.googleapis.com/v1/3dtiles/datasets/CgIYAQ/files/AJVsH2yjiuYPJElWfFHniYWf30HIDjSHYn62X9HP_3DdwgVUbp43z6MU8bKfdiZb-PqsM5GuIllLTovRfiXOyT5cZYDzfsKuEtYzd1jBycfF_k7W7XoGHAiez0BXcRhHLBb7IJ9f7Mbn.json",
+      "error": "net::ERR_ABORTED"
+    }
+  ],
+  "paidGeneration": "Not requested"
+}
