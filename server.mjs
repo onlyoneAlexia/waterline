@@ -3,6 +3,8 @@
 //   GET  /api/config        -> { cesiumToken, generationEnabled }
 //   POST /api/generate      -> { taskId }   body: { image: dataURL } or { prompt }
 //   GET  /api/task?id=...   -> { state, url?, error? }
+//   POST /api/world         -> { worldId }  body: { image: dataURL, prompt? } or { prompt }   (Aholo World room)
+//   GET  /api/world?id=...  -> { state, progress?, url?, upAxis?, error? }
 //   GET  /api/flood-depth?lat=..&lon=..  -> modelled river-flood depths (JRC / Copernicus)
 //   GET  /api/route?from=lon,lat&to=lon,lat -> walking route (FOSSGIS OSRM, OpenStreetMap)
 //
@@ -24,6 +26,7 @@ const PUBLIC_DIR = path.join(ROOT, 'public');
 const CESIUM_DIR = path.join(ROOT, 'node_modules', 'cesium', 'Build', 'Cesium');
 const GENERATED_DIR = path.join(PUBLIC_DIR, 'models', 'generated');
 const TASKS_DIR = path.join(ROOT, '.waterline', 'tasks');
+const WORLDS_DIR = path.join(PUBLIC_DIR, 'models', 'worlds');
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -41,6 +44,7 @@ const MIME = {
   '.txt': 'text/plain; charset=utf-8',
   '.wasm': 'application/wasm',
   '.woff2': 'font/woff2',
+  '.spz': 'application/octet-stream',
 };
 
 const MAX_BODY_BYTES = 12 * 1024 * 1024;
@@ -74,7 +78,7 @@ function memo(limit = 500) {
   };
 }
 
-export function createAppServer(env = process.env, { floodDepth = createFloodDepthService(), fetchImpl = fetch, luxClient, downloadModel = downloadGlb, generatedDir = GENERATED_DIR, tasksDir = TASKS_DIR } = {}) {
+export function createAppServer(env = process.env, { floodDepth = createFloodDepthService(), fetchImpl = fetch, luxClient, downloadModel = downloadGlb, generatedDir = GENERATED_DIR, tasksDir = TASKS_DIR, worldsDir = WORLDS_DIR } = {}) {
   const maxPerDay = Number(env.MAX_GENERATIONS_PER_DAY ?? 40);
   const maxPerIpPerHour = Number(env.MAX_GENERATIONS_PER_IP_PER_HOUR ?? 6);
   const trustProxy = env.TRUST_PROXY === '1';
@@ -203,6 +207,82 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
     return sendJson(res, 200, await inflight.get(taskId));
   }
 
+  // ---------- Aholo World: your room as Gaussian splats ----------
+
+  const worlds = new Map(); // worldId -> { name, createdAt }
+  const worldChecks = new Map();
+
+  function parsePhoto(image) {
+    const match = /^data:image\/(jpeg|png|webp);base64,([A-Za-z0-9+/=]+)$/.exec(image);
+    if (!match) throw Object.assign(new Error('The photo must be a JPEG, PNG or WebP image.'), { status: 400 });
+    return { bytes: Buffer.from(match[2], 'base64'), ext: match[1] === 'jpeg' ? 'jpg' : match[1] };
+  }
+
+  async function handleWorldCreate(req, res) {
+    if (!lux) return sendJson(res, 503, { error: 'Aholo World is not configured on this server.' });
+    const body = await readJsonBody(req);
+    if (!body || typeof body !== 'object' || Array.isArray(body)) return sendJson(res, 400, { error: 'Request body must be a JSON object.' });
+    const prompt = typeof body.prompt === 'string' ? body.prompt.trim() : '';
+    const image = typeof body.image === 'string' ? body.image : '';
+    if (!prompt && !image) return sendJson(res, 400, { error: 'Send a photo of your room, a description, or both.' });
+    if (prompt.length > MAX_PROMPT_CHARS) return sendJson(res, 400, { error: `Keep the description under ${MAX_PROMPT_CHARS} characters.` });
+    const photo = image ? parsePhoto(image) : null;
+    const blocked = takeQuota(clientIp(req));
+    if (blocked) return sendJson(res, 429, { error: blocked });
+    const imageUrl = photo ? await lux.uploadImage(photo.bytes, `photo.${photo.ext}`) : undefined;
+    const worldId = await lux.createWorld({ prompt, imageUrl, name: 'Waterline room' });
+    const record = { name: 'room', createdAt: Date.now() };
+    worlds.set(worldId, record);
+    await mkdir(tasksDir, { recursive: true });
+    await writeFile(path.join(tasksDir, `world-${worldId}.json`), JSON.stringify(record));
+    console.log(`[world] ${worldId} created (${photo ? 'photo' : 'text'})`);
+    return sendJson(res, 200, { worldId });
+  }
+
+  async function checkWorld(worldId) {
+    const world = await lux.getWorld(worldId);
+    if (world.state === 'succeeded') {
+      if (!world.spzUrl) return { state: 'failed', error: 'Aholo World finished but returned no splat file.' };
+      // Aholo World's file host can be slow to answer from far away, so give the download a few tries.
+      let bytes;
+      for (let attempt = 1; !bytes; attempt++) {
+        try {
+          const response = await fetchImpl(world.spzUrl, { signal: AbortSignal.timeout(300_000) });
+          if (!response.ok) throw new Lux3DError(`Room download failed with HTTP ${response.status}`);
+          bytes = Buffer.from(await response.arrayBuffer());
+        } catch (error) {
+          if (attempt >= 3) throw error instanceof Lux3DError ? error : new Lux3DError('Room download failed. Try again in a minute.');
+        }
+      }
+      await mkdir(worldsDir, { recursive: true });
+      await writeFile(path.join(worldsDir, `${worldId}.spz`), bytes);
+      await writeFile(path.join(worldsDir, `${worldId}.json`), JSON.stringify({ upAxis: world.upAxis }));
+      console.log(`[world] ${worldId} saved (${(bytes.length / 1e6).toFixed(1)} MB)`);
+      return { state: 'done', url: `/models/worlds/${worldId}.spz`, upAxis: world.upAxis };
+    }
+    if (world.state === 'failed' || world.state === 'cancelled') return { state: 'failed', error: world.message || `Aholo World ${world.status?.toLowerCase?.() ?? 'failed'}.` };
+    return { state: world.state, progress: world.progress };
+  }
+
+  async function handleWorld(url, res) {
+    const worldId = url.searchParams.get('id') ?? '';
+    if (!/^[A-Za-z0-9_-]{4,64}$/.test(worldId)) return sendJson(res, 400, { error: 'Invalid world id' });
+    if (await exists(path.join(worldsDir, `${worldId}.spz`))) {
+      let upAxis = 'Z';
+      try { upAxis = JSON.parse(await readFile(path.join(worldsDir, `${worldId}.json`), 'utf8')).upAxis === 'Y' ? 'Y' : 'Z'; } catch { /* default */ }
+      return sendJson(res, 200, { state: 'done', url: `/models/worlds/${worldId}.spz`, upAxis });
+    }
+    if (!worlds.has(worldId)) {
+      try {
+        const record = JSON.parse(await readFile(path.join(tasksDir, `world-${worldId}.json`), 'utf8'));
+        if (record?.createdAt > Date.now() - 7 * 86_400_000) worlds.set(worldId, record);
+      } catch { /* Unknown or expired world. */ }
+    }
+    if (!lux || !worlds.has(worldId)) return sendJson(res, 404, { error: 'Unknown room' });
+    if (!worldChecks.has(worldId)) worldChecks.set(worldId, checkWorld(worldId).finally(() => worldChecks.delete(worldId)));
+    return sendJson(res, 200, await worldChecks.get(worldId));
+  }
+
   const depthCache = memo();
   async function handleFloodDepth(url, res) {
     if (!['lat', 'lon'].every((key) => url.searchParams.get(key)?.trim())) {
@@ -264,7 +344,7 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
       return res.end('Not found');
     }
     const ext = path.extname(file).toLowerCase();
-    const cache = ext === '.glb' ? 'public, max-age=86400' : 'no-cache';
+    const cache = ext === '.glb' || ext === '.spz' ? 'public, max-age=86400' : 'no-cache';
     res.writeHead(200, { 'Content-Type': MIME[ext] ?? 'application/octet-stream', 'Cache-Control': cache });
     res.end(await readFile(file));
   }
@@ -280,6 +360,8 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
       }
       if (url.pathname === '/api/generate' && req.method === 'POST') return await handleGenerate(req, res);
       if (url.pathname === '/api/task' && req.method === 'GET') return await handleTask(url, res);
+      if (url.pathname === '/api/world' && req.method === 'POST') return await handleWorldCreate(req, res);
+      if (url.pathname === '/api/world' && req.method === 'GET') return await handleWorld(url, res);
       if (url.pathname === '/api/flood-depth' && req.method === 'GET') return await handleFloodDepth(url, res);
       if (url.pathname === '/api/route' && req.method === 'GET') return await handleRoute(url, res);
       if (url.pathname.startsWith('/api/')) return sendJson(res, 404, { error: 'Not found' });
@@ -287,7 +369,7 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
       return await serveStatic(url, res);
     } catch (error) {
       const status = error.status ?? (error instanceof Lux3DError ? 502 : 500);
-      if (status >= 500) console.error(`[server] ${req.method} ${url.pathname}:`, error.message);
+      if (status >= 500) console.error(`[server] ${req.method} ${url.pathname}:`, error.message, error.cause?.code ?? error.cause?.message ?? '');
       if (!res.headersSent) sendJson(res, status, { error: error.message || 'Something went wrong' });
       else res.end();
     }

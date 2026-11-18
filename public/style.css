@@ -548,3 +548,23 @@ html.home-open #toast { display: none !important; }
 .hero-tag { left: 50%; right: auto; bottom: 79%; transform: translateX(-50%); white-space: nowrap; }
 @media (max-width: 760px) { .hero-tag { bottom: 82%; } }
 .steps-cta { display: flex; justify-content: center; margin-top: 34px; }
+
+/* ---------- find your own street ---------- */
+.find-street { display: flex; flex-direction: column; gap: 12px; padding: 20px; border-radius: 28px; background: var(--white); box-shadow: var(--shadow-soft); }
+.place-search { position: relative; display: flex; align-items: center; gap: 8px; padding: 6px 6px 6px 50px; border-radius: 999px; border: 1.5px solid var(--line-strong); background: var(--sky-pale); }
+.place-search:focus-within { border-color: var(--sky-deep); box-shadow: 0 0 0 4px rgba(47, 159, 219, .18); }
+.place-search::before { content: ''; position: absolute; left: 18px; top: 50%; width: 22px; height: 22px; margin-top: -11px; background: var(--cocoa-2); -webkit-mask: var(--i-target) center/contain no-repeat; mask: var(--i-target) center/contain no-repeat; }
+.place-search input { flex: 1; min-width: 0; min-height: 52px; padding: 0 6px; border: 0; background: transparent; font-size: 18px; outline: none; }
+.place-search input::-webkit-search-cancel-button { cursor: pointer; }
+.search-go { flex: none; min-height: 52px; padding: 0 24px; border: 0; background: var(--cocoa); color: var(--cream-light); }
+.search-go:hover:not(:disabled) { background: var(--cocoa-2); border: 0; }
+.locate-me { align-self: flex-start; display: inline-flex; align-items: center; gap: 10px; min-height: 46px; padding: 8px 18px; background: var(--sky-pale); border-color: transparent; color: var(--sky-ink); font-size: 16px; }
+.locate-me::before { content: ''; width: 20px; height: 20px; background: currentColor; -webkit-mask: var(--i-pin) center/contain no-repeat; mask: var(--i-pin) center/contain no-repeat; }
+.place-results { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.place-result { width: 100%; min-height: 0; padding: 12px 18px; border-radius: 16px; text-align: left; font-size: 16px; font-weight: 500; line-height: 1.4; }
+.place-result:hover:not(:disabled) { background: var(--cream-light); border-color: var(--cream-deep); box-shadow: none; }
+.place-credit { padding: 2px 6px 0; color: var(--cocoa-3); font-size: 13px; }
+#place-status:empty { display: none; }
+.street-off { display: flex; flex-direction: column; align-items: flex-start; gap: 14px; padding: 20px; border-radius: 28px; background: var(--cream-light); border: 1.5px solid var(--cream-deep); }
+.street-off p { margin: 0; font-size: 17px; line-height: 1.55; }
+@media (max-width: 380px) { .place-search { padding-left: 44px; } .place-search::before { left: 14px; } .search-go { padding: 0 16px; } }

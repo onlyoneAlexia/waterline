@@ -1,0 +1,72 @@
+{
+  "checkedAt": "2026-11-17T23:59:23.369Z",
+  "query": "Meyerland Plaza, Houston",
+  "steps": [
+    {
+      "name": "Search your street",
+      "query": "Meyerland Plaza, Houston",
+      "secondsToSpot": 33,
+      "results": [],
+      "credit": null,
+      "spot": {
+        "lat": 29.68665,
+        "lon": -95.46243,
+        "height": -12,
+        "status": "Your spot: 420 Meyerland Plz. Not quite your street? Click it on the map to move the spot."
+      },
+      "risk": "Modelled river flooding - ~90 m cells10%-a-year flood: up to 0.4 m within 200 mShow5%-a-year flood: 0.1 m hereShow2%-a-y",
+      "googleCreditOnMap": true
+    },
+    {
+      "name": "a red pickup truck",
+      "realHeight": 1.8,
+      "groundAboveSpot": 0.52,
+      "metresFromSpot": 6.6,
+      "readyAfterSeconds": 5,
+      "pendingName": "a red pickup truck"
+    },
+    {
+      "name": "My car",
+      "realHeight": 1.5,
+      "groundAboveSpot": -0.07,
+      "metresFromSpot": 6.8,
+      "readyAfterSeconds": 4,
+      "pendingName": "My car"
+    },
+    {
+      "name": "Raised water to 1.0 m",
+      "impact": [
+        "a red pickup truck0.48 m hereMoving water this deep can float it",
+        "My car1.07 m hereUp to the windows"
+      ]
+    },
+    {
+      "name": "Use my location",
+      "secondsToSpot": 21,
+      "spot": {
+        "lat": 51.50063,
+        "lon": -0.12446,
+        "height": 50.6,
+        "status": "Your spot: Your location. Not quite your street? Click it on the map to move the spot."
+      },
+      "risk": "Modelled river flooding - ~90 m cells10%-a-year flood: up to 4.5 m within 200 mShow5%-a-year flood: up to 4.9 m within 2",
+      "nearbyObjectsShown": 0
+    },
+    {
+      "name": "Nonsense search",
+      "status": "Nothing found for “qzxvbnmplkj nowhere 99999”. Try adding the town or country."
+    }
+  ],
+  "errors": [],
+  "placeTimings": [
+    "[place] flown at 5565 ms",
+    "[place] tiles at 10611 ms",
+    "[place] no quick street level at 12012 ms",
+    "[place] street level found at 15859 ms",
+    "[place] flown at 4709 ms",
+    "[place] tiles at 10105 ms",
+    "[place] no quick street level at 13331 ms",
+    "[place] street level found at 20006 ms"
+  ],
+  "ok": true
+}

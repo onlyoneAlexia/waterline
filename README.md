@@ -42,7 +42,7 @@ For live maps and new generation, configure the optional services below:
 
 ## Using it
 
-1. Start in Studio, or select **Real street** to search an address with configured map credentials. Click the street to set your spot and depth gauge.
+1. Start in Studio, or select **Real street** (needs map credentials) and type your street, town or postcode in **Your spot**, or press **Use my location**. The spot and depth gauge are set on the street there; click the map to fine-tune it.
 2. Add objects: upload a photo, describe one, or pick from the Library. When a model is ready, click the map to place it. Adjust its height and direction in the list.
 3. Drag the slider or press **Play the flood**.
 4. **Orbit camera** for a video shot; **Copy share link** saves the scene in a URL. **Save scene/Open scene** round-trip a validated JSON file; **Save 3D image** exports a labelled PNG.

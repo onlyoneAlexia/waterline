@@ -99,26 +99,42 @@
       <section class="space" data-space="spot" id="explore" tabindex="-1">
         <p class="kicker">Step 1</p>
         <h2 class="space-title">Your spot</h2>
-        <p class="space-lede">Choose where the water rises.</p>
+        <p class="space-lede">Find your street, or start with a real flood story.</p>
+
+        <!-- Find your own street (real 3D city) -->
+        <div class="find-street" id="find-street">
+          <form id="place-search" class="place-search" role="search">
+            <input id="place-input" type="search" placeholder="Your street, town or postcode" aria-label="Search your street, town or postcode" autocomplete="off" enterkeyhint="search">
+            <button type="submit" id="place-go" class="search-go">Search</button>
+          </form>
+          <button id="locate-me" class="locate-me" type="button">Use my location</button>
+          <ul id="place-results" class="place-results" aria-label="Places found" hidden></ul>
+          <p id="place-status" class="hint" role="status"></p>
+        </div>
+        <!-- Studio has no real map: offer the switch instead -->
+        <div class="street-off" id="street-off" hidden>
+          <p><strong>Your own street needs the live 3D city.</strong> The studio is an illustrative street.</p>
+          <button id="go-street" class="cta-pill" type="button"><span class="cta-circle" aria-hidden="true"></span>Switch to real streets</button>
+        </div>
+
+        <p id="pin-status" class="status">No spot chosen yet.</p>
+        <p class="hint" id="location-help">Pick a place from the search, or click any street on the map to put your spot there.</p>
 
         <div class="feature-card sky">
-          <p class="script small">start with a story</p>
+          <p class="script small">or start with a story</p>
           <p class="feature-copy" id="demo-description">Explore an illustrative street with a real Lux3D-generated SUV for scale. No map account needed.</p>
           <button id="demo-go" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Try a demo</button>
           <p id="demo-status" class="status-line" role="status"></p>
         </div>
+        <p class="label" id="scenes-hint">Or see a real flood</p>
+        <div id="scenes" class="scene-list"></div>
+        <p id="scene-story" class="story" hidden></p>
 
         <div class="field">
           <label for="world-mode">Map</label>
           <select id="world-mode"><option value="studio">Studio street (instant)</option><option value="street">Real street (live 3D city)</option></select>
           <p id="world-status" class="hint" role="status">Starting the 3D workspace…</p>
         </div>
-
-        <p class="hint" id="location-help">Click the demo street to choose a spot. Switch to Real street mode to search your own address.</p>
-        <p id="pin-status" class="status">No spot chosen yet.</p>
-        <p class="label" id="scenes-hint">Or see a real flood</p>
-        <div id="scenes" class="scene-list"></div>
-        <p id="scene-story" class="story" hidden></p>
         <button class="next" data-go="things">Next: add your things</button>
       </section>
 
@@ -273,7 +289,7 @@
               <button data-depth="1">1 m</button>
               <button data-depth="2">2 m</button>
             </div>
-            <p id="map-guidance" class="dock-hint">Search an address, then click your street</p>
+            <p id="map-guidance" class="dock-hint">Find your street in “Your spot”, or click the map</p>
           </div>
         </div>
       </div>

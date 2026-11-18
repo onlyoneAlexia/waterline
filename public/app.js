@@ -387,7 +387,7 @@ function setPin(carto) {
 
 // ---------- real flood data: JRC / Copernicus global river flood model ----------
 
-async function loadRisk() {
+async function loadRisk(attempt = 1) {
   const pin = state.pin;
   const box = $('#risk');
   box.hidden = false;
@@ -402,8 +402,10 @@ async function loadRisk() {
     if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
     if (state.pin === pin) renderRisk(data);
   } catch (error) {
+    // The global flood files are large and far away; one quiet retry hides most network hiccups.
+    if (state.pin === pin && attempt < 3) { await sleep(3000 * attempt); if (state.pin === pin) return loadRisk(attempt + 1); return; }
     if (state.pin === pin) {
-      const retry = el('button', '', 'Retry flood lookup'); retry.onclick = loadRisk;
+      const retry = el('button', '', 'Retry flood lookup'); retry.onclick = () => loadRisk();
       box.replaceChildren(el('p', 'hint', 'Flood model unavailable. You can still set the water by hand.'), retry);
     }
   }
@@ -1491,6 +1493,30 @@ async function openStudioScene(animate = false) {
 // ---------- clicks + UI wiring ----------
 
 let groundPickId = 0;
+/**
+ * Google's 3D city is one surface: a click on a tree canopy or a roof lands on top of it, and a car or
+ * your spot would float there, high above the flood. Compare with bare-earth terrain; if the click is
+ * well above it, use the lowest city surface close by, or the terrain itself. Returns true if it moved.
+ */
+async function dropToGround(carto) {
+  let terrain;
+  try { terrain = (await within(sampleHeights([carto.clone()]), 6000))[0].height; } catch { return false; }
+  if (!Number.isFinite(terrain) || carto.height - terrain < 2) return false;
+  let ground = terrain;
+  if (photorealisticTiles()) {
+    const points = [];
+    for (const dx of [-4, 0, 4]) for (const dy of [-4, 0, 4]) points.push(offsetCarto(carto.longitude, carto.latitude, dx, dy));
+    try {
+      const exclude = [state.water, ...state.gauge, ...state.safetyEntities, ...state.objects.map((o) => o.entity)].filter(Boolean);
+      await within(state.viewer.scene.sampleHeightMostDetailed(points, exclude), 8000);
+      const near = points.map((p) => p.height).filter((h) => Number.isFinite(h) && Math.abs(h - terrain) < 1.5);
+      if (near.length) ground = Math.min(...near);
+    } catch { /* bare-earth terrain is close enough */ }
+  }
+  carto.height = ground;
+  return true;
+}
+
 async function onMapClick(event) {
   const pickId = ++groundPickId;
   const pending = state.pending, moving = state.moving;
@@ -1519,6 +1545,8 @@ async function onMapClick(event) {
     return;
   }
   if (state.mode === 'studio') carto.height = studioHeight(carto.longitude, carto.latitude) + .07;
+  else if (await dropToGround(carto) && pickId === groundPickId) toast('That spot was a roof or treetop in the 3D city, so Waterline used the ground below it.', 6000);
+  if (pickId !== groundPickId || pending !== state.pending || moving !== state.moving) return;
   if (state.moving) {
     rememberObjects();
     const obj = state.moving;
@@ -1535,6 +1563,161 @@ async function onMapClick(event) {
   } else {
     setPin(carto);
   }
+}
+
+// ---------- find your own street ----------
+
+let placeService;
+/** Google's geocoder through Cesium ion: the only geocoder Google's 3D tiles may be paired with. */
+function geocoder() {
+  placeService ??= new Cesium.IonGeocoderService({ scene: state.viewer.scene, geocodeProviderType: Cesium.IonGeocodeProviderType.GOOGLE });
+  return placeService;
+}
+
+/** The middle of a geocoder result, which is either a point or an area. */
+function placeCentre(destination) {
+  return destination instanceof Cesium.Rectangle ? Cesium.Rectangle.center(destination) : Cesium.Cartographic.fromCartesian(destination);
+}
+
+/**
+ * Addresses usually resolve to the middle of a building or a block, which would put "street level" on a
+ * roof or a treetop. Sample the 3D city around the point (a 24 m grid, then rings at 25 m and 45 m) and
+ * use the nearest open ground: a sample within 2 m of the bare-earth terrain.
+ */
+async function streetPointNear(centre, terrain, { precise = true } = {}) {
+  const points = [];
+  const add = (dx, dy) => { const p = offsetCarto(centre.longitude, centre.latitude, dx, dy); p.away = Math.hypot(dx, dy); points.push(p); };
+  for (const dx of [-12, -6, 0, 6, 12]) for (const dy of [-12, -6, 0, 6, 12]) add(dx, dy);
+  for (const r of [25, 45]) for (let i = 0; i < 8; i++) add(r * Math.cos(i * Math.PI / 4), r * Math.sin(i * Math.PI / 4));
+  const bare = Number.isFinite(terrain);
+  if (!photorealisticTiles()) return bare ? Cesium.Cartographic.fromRadians(centre.longitude, centre.latitude, terrain) : null;
+  const exclude = [state.water, ...state.gauge, ...state.safetyEntities, ...state.objects.map((o) => o.entity)].filter(Boolean);
+  if (precise) {
+    try { await within(state.viewer.scene.sampleHeightMostDetailed(points, exclude), 30_000); } catch { return null; }
+  } else {
+    // Quick: only the city tiles already loaded for this view (accurate to a metre or so).
+    points.forEach((p) => { p.height = state.viewer.scene.sampleHeight(p, exclude); });
+  }
+  // Ignore holes in the mesh: nothing far below the bare-earth terrain counts as street.
+  const usable = points.filter((p) => Number.isFinite(p.height) && (!bare || p.height > terrain - 15));
+  if (!usable.length) return null;
+  if (!bare) return usable.filter((p) => p.away <= 17).reduce((low, p) => (p.height < low.height ? p : low), usable[0]);
+  const open = usable.filter((p) => Math.abs(p.height - terrain) < 2);
+  if (open.length) return open.reduce((best, p) => (p.away < best.away || (p.away === best.away && p.height < best.height) ? p : best));
+  // Nothing open nearby (a big building or dense trees): use the bare-earth height at the address itself.
+  return Cesium.Cartographic.fromRadians(centre.longitude, centre.latitude, terrain);
+}
+
+/** Fly to a place, then set your spot on the street there. */
+async function goToPlace(name, centre, note = '') {
+  stopPlaying();
+  if (state.orbitOff) toggleOrbit();
+  const short = String(name).split(',')[0];
+  const t0 = performance.now();
+  const lap = (what) => console.debug(`[place] ${what} at ${Math.round(performance.now() - t0)} ms`);
+  $('#place-status').textContent = `Flying to ${short}…`;
+  $('#place-results').hidden = true;
+  // Start reading the flood model for this area now, before the 3D city starts streaming in.
+  fetch(`/api/flood-depth?lat=${deg(centre.latitude).toFixed(6)}&lon=${deg(centre.longitude).toFixed(6)}`).catch(() => {});
+  let rough = NaN;
+  try { rough = (await within(sampleHeights([centre.clone()]), 15_000))[0].height; } catch { /* use the city mesh alone */ }
+  await flyAround(Cesium.Cartesian3.fromRadians(centre.longitude, centre.latitude, (Number.isFinite(rough) ? rough : 0) + 1), { heading: 0, pitch: -38, range: 240 }, 2.5);
+  markView(null);
+  lap('flown');
+  await waitForTiles(5000);
+  lap('tiles');
+  $('#place-status').textContent = 'Finding street level…';
+  // Set the spot straight away from the city already on screen, then refine it from the most detailed tiles.
+  const quick = await streetPointNear(centre, rough, { precise: false });
+  lap(quick ? 'quick street level' : 'no quick street level');
+  const spot = quick ?? await streetPointNear(centre, rough);
+  lap(spot ? 'street level found' : 'no street level');
+  if (!spot) {
+    $('#place-status').textContent = 'Couldn’t find the street level here yet. Click your street on the map to set your spot.';
+    return;
+  }
+  state.objects.filter((o) => o.sceneId).forEach(removeObject); // example-scene objects belong to their own city
+  $('#scene-story').hidden = true;
+  setDepth(0);
+  setPin(spot);
+  const pin = state.pin;
+  $('#pin-status').textContent = `Your spot: ${short}. Not quite your street? Click it on the map to move the spot.`;
+  $('#place-status').textContent = note;
+  toast('Spot set. Next: add your things, then raise the water.', 7000);
+  const view = flyAround(Cesium.Cartesian3.fromRadians(spot.longitude, spot.latitude, spot.height + 1), { heading: 20, pitch: -24, range: 70 }, 1.6);
+  const exact = await streetPointNear(centre, rough);
+  await view;
+  if (exact && state.pin === pin && Math.abs(exact.height - pin.height) > 0.03) {
+    pin.lon = exact.longitude; pin.lat = exact.latitude; pin.height = exact.height;
+    drawGauge(); updateWater(); renderImpact();
+  }
+}
+
+/** Show the geocoder's attributions on the map, as Cesium's own search box does. */
+let placeCredits = [];
+function showPlaceCredits(results) {
+  const display = state.viewer.scene.frameState.creditDisplay;
+  placeCredits.forEach((credit) => display.removeStaticCredit(credit));
+  placeCredits = results.flatMap((result) => Cesium.GeocoderService.getCreditsFromResult(result) ?? []);
+  placeCredits.forEach((credit) => display.addStaticCredit(credit));
+}
+
+async function searchPlaces(event) {
+  event?.preventDefault();
+  const query = $('#place-input').value.trim();
+  const list = $('#place-results');
+  if (query.length < 2) return toast('Type a street, town or postcode first.');
+  list.hidden = true;
+  $('#place-status').textContent = 'Searching…';
+  let results;
+  try {
+    results = await within(geocoder().geocode(query), 12_000);
+  } catch {
+    $('#place-status').textContent = 'Search is unavailable right now. You can still click any street on the map.';
+    return;
+  }
+  if (!results?.length) {
+    $('#place-status').textContent = `Nothing found for “${query}”. Try adding the town or country.`;
+    return;
+  }
+  showPlaceCredits(results);
+  if (results.length === 1) return goToPlace(results[0].displayName, placeCentre(results[0].destination));
+  $('#place-status').textContent = 'Which one is it?';
+  list.replaceChildren(...results.slice(0, 5).map((result) => {
+    const li = el('li');
+    const button = el('button', 'place-result', result.displayName);
+    button.type = 'button';
+    button.addEventListener('click', () => goToPlace(result.displayName, placeCentre(result.destination)));
+    li.append(button);
+    return li;
+  }), el('li', 'place-credit', 'Results by Google'));
+  list.hidden = false;
+}
+
+function useMyLocation() {
+  if (!navigator.geolocation) return toast('This browser can’t share its location. Search your street instead.');
+  $('#place-status').textContent = 'Asking your browser where you are… (it stays on this device and the map services)';
+  navigator.geolocation.getCurrentPosition(
+    (position) => {
+      const { latitude, longitude, accuracy } = position.coords;
+      const note = accuracy > 60 ? `Your browser placed you within about ${Math.round(accuracy)} m. Click your exact street to move the spot.` : '';
+      goToPlace('Your location', Cesium.Cartographic.fromDegrees(longitude, latitude), note);
+    },
+    (error) => {
+      $('#place-status').textContent = error.code === error.PERMISSION_DENIED
+        ? 'Location sharing was turned off. Search your street instead.'
+        : 'Couldn’t get your location. Search your street instead.';
+    },
+    { enableHighAccuracy: true, timeout: 15_000, maximumAge: 60_000 },
+  );
+}
+
+function wireFindStreet() {
+  $('#place-search').addEventListener('submit', searchPlaces);
+  $('#locate-me').addEventListener('click', useMyLocation);
+  $('#go-street').addEventListener('click', () => {
+    const url = new URL(location.href); url.searchParams.set('mode', 'street'); url.hash = ''; location.href = url.href;
+  });
 }
 
 // ---------- homepage + one space per function ----------
@@ -1576,15 +1759,15 @@ function wireHome() {
   };
   $('#home-street').onclick = () => {
     leaveHome();
-    if (state.mode !== 'street') { showSpace('spot'); return toast('Real streets need a Cesium ion token on this server, so here is the studio street.', 7000); }
     showSpace('spot');
-    toast('Type your address in the search box at the top right, then click your street.', 7000);
-    document.querySelector('.cesium-geocoder-input')?.focus();
+    if (state.mode !== 'street') return toast(state.streetAvailable ? 'This is the studio street. Use “Switch to real streets” to find your own.' : 'Real streets need a Cesium ion token on this server, so here is the studio street.', 7000);
+    $('#place-input').focus();
   };
 }
 
 function wireUi() {
   wireHome();
+  wireFindStreet();
   document.querySelectorAll('[data-view]').forEach(button => { button.onclick = () => cameraView(button.dataset.view).catch(error => toast(error.message)); });
   $('#cinema').onclick = () => {
     const cinema = $('#app').classList.toggle('cinema');
@@ -1742,6 +1925,7 @@ async function init() {
   const requestedMode = new URLSearchParams(location.search).get('mode');
   const requestedStreet = requestedMode === 'street' || (!requestedMode && !!config.cesiumToken);
   state.mode = requestedStreet && config.cesiumToken ? 'street' : 'studio';
+  state.streetAvailable = Boolean(config.cesiumToken);
   Cesium.Ion.defaultAccessToken = config.cesiumToken || '';
   state.generationEnabled = Boolean(config.generationEnabled);
   if (requestedStreet && !config.cesiumToken) toast('Real streets need a Cesium token. Studio is ready to explore instead.', 8000);
@@ -1770,7 +1954,7 @@ async function init() {
     infoBox: false,
     selectionIndicator: false,
     baseLayer: false, // Google's 3D tiles carry their own imagery; the fallback adds a layer
-    geocoder: state.mode === 'street' ? Cesium.IonGeocodeProviderType.GOOGLE : false,
+    geocoder: false, // the "Your spot" search uses Google's geocoder through Cesium ion instead
     contextOptions: { webgl: { preserveDrawingBuffer: true } },
   });
   state.viewer = viewer;
@@ -1797,7 +1981,7 @@ async function init() {
   $('#world-status').textContent = state.mode === 'studio' ? 'Ready · illustrative terrain, no live hazard data.' : state.worldKind === 'photorealistic' ? 'Real street · photorealistic city, modelled river data.' : 'Real street · terrain fallback, modelled river data.';
   $('#map-mode-label').textContent = state.mode === 'studio' ? 'STUDIO · ILLUSTRATIVE STREET' : 'REAL STREET · LIVE MAP';
   if (state.mode === 'street') {
-    $('#location-help').textContent = 'Search an address on the map, then click the street to choose your spot.';
+    $('#location-help').textContent = 'Search or use your location, and your spot is set on the street there. Click the map any time to move it.';
     $('#demo-description').textContent = 'Visit Kerrville, Texas, with a Lux3D car for scale and an illustrative rising flood.';
   }
   new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
@@ -1807,12 +1991,22 @@ async function init() {
   const leftPreset = () => markView(null);
   viewer.scene.canvas.addEventListener('wheel', leftPreset, { passive: true });
   viewer.scene.canvas.addEventListener('pointermove', (event) => { if (event.buttons) leftPreset(); });
-  if (state.mode !== 'studio') markView(null);
+  if (state.mode !== 'studio') { markView(null); terrainProvider().catch(() => {}); }
+  else {
+    // Studio is one illustrative street: finding your own needs the live 3D city.
+    $('#find-street').hidden = true;
+    $('#street-off').hidden = false;
+    if (!state.streetAvailable) {
+      $('#street-off p').textContent = 'Your own street needs the live 3D city, which needs a Cesium ion token on this server. The studio is an illustrative street.';
+      $('#go-street').hidden = true;
+    }
+    $('#location-help').textContent = 'Click anywhere on the studio street to put your spot there.';
+  }
 
   // ?debug exposes internals for testing in the browser console.
   if (new URLSearchParams(location.search).has('debug')) {
     window.waterline = {
-      state, undoObjects, renderRisk, removeObject, setPending, copyShareLink, restoreFromHash, setPin, setDepth, loadTemplate, placeObject, playFlood, findHigherGround, openScene, SCENES, groundHeightAt, sceneData,
+      state, undoObjects, renderRisk, removeObject, setPending, copyShareLink, restoreFromHash, setPin, setDepth, loadTemplate, placeObject, playFlood, findHigherGround, openScene, SCENES, groundHeightAt, sceneData, goToPlace, searchPlaces,
       setHeightSampler: (fn) => { heightSampler = fn; },
     };
   }
@@ -1822,7 +2016,7 @@ async function init() {
     if (state.mode === 'studio') await openStudioScene();
     // From the homepage, the visitor chooses; a direct app link starts the real-street demo.
     else if (!onHome && !new URLSearchParams(location.search).has('nodemo')) $('#demo-go').click();
-    else if (!onHome) toast('Search your address in the box at the top right, then click your street.', 7000);
+    else if (!onHome) { showSpace('spot'); toast('Search your street in “Your spot”, or click the map.', 7000); }
   }
   markReady();
 }
