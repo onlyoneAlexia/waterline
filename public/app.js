@@ -1047,9 +1047,10 @@ async function startGeneration(payload, name) {
   }
 }
 
-async function fileToDataUrl(file, maxSide = 1600) {
+async function fileToDataUrl(file, maxSide = 1600, minSide = 0) {
   const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
-  const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
+  const longest = Math.max(bitmap.width, bitmap.height);
+  const scale = Math.max(Math.min(1, maxSide / longest), minSide / longest);
   const canvas = document.createElement('canvas');
   canvas.width = Math.round(bitmap.width * scale);
   canvas.height = Math.round(bitmap.height * scale);
@@ -1181,6 +1182,7 @@ function setDepth(value, source = 'Manual illustration - not a forecast') {
   });
   updateWater();
   renderFacts();
+  syncRoomWater();
   if (state.safety && Math.abs(state.safety.depth - state.depth) > 0.01) {
     clearSafety('The water level changed. Press “Find higher ground” again.');
   }
@@ -1196,7 +1198,7 @@ function stopPlaying() {
 }
 
 function playFlood(targetDepth, source = state.depthSource) {
-  if (!state.pin) return toast('Choose your spot on the map first.');
+  if (!state.pin && !state.room) return toast('Choose your spot on the map first.');
   stopPlaying();
   const target = Number(targetDepth) > 0 ? Number(targetDepth) : state.depth >= 0.1 ? state.depth : 1.2;
   const start = performance.now();
@@ -1565,6 +1567,167 @@ async function onMapClick(event) {
   }
 }
 
+// ---------- inside your home: an Aholo World room ----------
+
+const EXAMPLE_ROOM = { url: '/models/worlds/example-living-room.spz', upAxis: 'Z', name: 'Example living room' };
+const ROOM_TIMEOUT_MS = 45 * 60 * 1000; // Aholo World rooms take about 10 minutes
+
+/** Water inside = street water minus how far your floor sits above the street. */
+function roomWaterDepth() {
+  const step = Math.max(0, Number($('#room-step').value) || 0);
+  return Math.max(0, state.depth - step);
+}
+
+function syncRoomWater() {
+  const readout = $('#room-readout');
+  const box = $('#room-water');
+  if (!readout || !box) return;
+  const inside = roomWaterDepth();
+  state.room?.setWater(inside);
+  let level = 'low', title, text;
+  if (state.depth < 0.005) { title = 'Dry'; text = 'Raise the water on the slider below to see it come in.'; }
+  else if (inside < 0.005) { title = 'Not inside yet'; text = `The street has ${state.depth.toFixed(2)} m of water, but your floor is higher. Water still finds gaps under doors and through air vents.`; }
+  else if (inside < 0.3) { level = 'mid'; title = `${inside.toFixed(2)} m inside`; text = 'Floors, carpets and anything stored low are soaked. Floodwater is dirty: it often carries sewage.'; }
+  else if (inside < 0.9) { level = 'high'; title = `${inside.toFixed(2)} m inside`; text = 'Above most wall sockets (about 30 cm): an electric-shock risk. Turn the power off at the mains only if it is dry and safe to reach.'; }
+  else { level = 'high'; title = `${inside.toFixed(2)} m inside`; text = 'Over table and worktop height. Go upstairs or to higher ground if you can; never walk or drive into floodwater.'; }
+  box.replaceChildren(el('strong', '', title), el('span', '', text));
+  box.hidden = !state.room;
+  readout.dataset.level = state.room ? level : 'low';
+  readout.textContent = state.room ? `${title}. Street water: ${state.depth.toFixed(2)} m.` : 'Open a room, then raise the water.';
+}
+
+async function openRoomView({ url, upAxis = 'Z', name = 'Your room' }) {
+  closeRoomView();
+  showSpace('inside');
+  $('#room-view').hidden = false;
+  $('#map').classList.add('room-open');
+  $('#room-label').textContent = `INSIDE · ${name.toUpperCase()}`;
+  $('#room-loading').textContent = 'Loading the room…';
+  $('#play').disabled = false;
+  if (state.viewer) state.viewer.useDefaultRenderLoop = false; // give the graphics card to the room
+  const ticket = (state.roomTicket = (state.roomTicket ?? 0) + 1);
+  try {
+    const { openRoom } = await import('./room.js');
+    const room = await openRoom($('#room-canvas'), {
+      url, upAxis, roomHeight: Number($('#room-height').value) || 2.5,
+      onProgress: (share) => { $('#room-loading').textContent = `Loading the room… ${Math.round(share * 100)}%`; },
+    });
+    if (ticket !== state.roomTicket) return room.close();
+    state.room = room;
+    $('#room-loading').textContent = '';
+    if (state.depth < 0.05) setDepth(0.6); else syncRoomWater();
+  } catch (error) {
+    console.error(error);
+    if (ticket === state.roomTicket) $('#room-loading').textContent = 'This room could not be shown here. Try another browser, or go back to the street.';
+  }
+}
+
+function closeRoomView() {
+  state.roomTicket = (state.roomTicket ?? 0) + 1;
+  state.room?.close();
+  state.room = null;
+  $('#room-view').hidden = true;
+  $('#map').classList.remove('room-open');
+  $('#play').disabled = !state.pin;
+  if (state.viewer && !state.viewer.useDefaultRenderLoop) { state.viewer.useDefaultRenderLoop = true; state.viewer.resize(); }
+  syncRoomWater();
+}
+
+function roomJobRow(text) {
+  const row = el('div', 'job');
+  row.setAttribute('role', 'status');
+  const label = el('span', '', text);
+  row.append(el('span', 'spinner'), label);
+  $('#room-jobs').replaceChildren(row);
+  return { row, label, finish(message, failed = false) { row.querySelector('.spinner')?.remove(); row.classList.toggle('failed', failed); label.textContent = message; } };
+}
+
+/** Ask Aholo World for a room, then keep checking until it's ready (about 10 minutes). */
+async function buildRoom(payload) {
+  const job = roomJobRow('Room: sending to Aholo World…');
+  $('#room-go').disabled = true;
+  const started = Date.now();
+  try {
+    const response = await fetch('/api/world', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(data.error || `Request failed (HTTP ${response.status}).`);
+    try { localStorage.setItem('waterline-room', JSON.stringify({ worldId: data.worldId, started })); } catch { /* storage off */ }
+    const done = await pollRoom(data.worldId, started, job.label);
+    try { localStorage.removeItem('waterline-room'); } catch { /* storage off */ }
+    job.finish('Room: ready!');
+    await openRoomView({ url: done.url, upAxis: done.upAxis, name: 'Your room' });
+  } catch (error) {
+    job.finish(`Room: ${error.message}`, true);
+  } finally {
+    $('#room-go').disabled = !state.roomPhoto && !$('#room-prompt').value.trim();
+  }
+}
+
+async function pollRoom(worldId, started, label) {
+  let errors = 0;
+  const clock = () => { const s = Math.floor((Date.now() - started) / 1000); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
+  while (Date.now() - started < ROOM_TIMEOUT_MS) {
+    await sleep(Math.min(10_000 * (1 + errors), 30_000));
+    let response, data;
+    try { response = await fetch(`/api/world?id=${encodeURIComponent(worldId)}`); data = await response.json(); } catch { response = null; }
+    if (!response || response.status >= 500) { errors++; label.textContent = `Room: connection hiccup. Aholo World keeps building… (${clock()})`; continue; }
+    errors = 0;
+    if (!response.ok) throw new Error(data?.error || `Status check failed (HTTP ${response.status}).`);
+    if (data.state === 'failed') throw new Error(data.error || 'Aholo World could not build this room. Try an ordinary (not panoramic) photo taken from the doorway.');
+    if (data.state === 'done') return data;
+    const pct = Number.isFinite(data.progress) && data.progress > 0 ? ` ${Math.round(data.progress * 100)}%` : '';
+    label.textContent = `Room: Aholo World is building it${pct}. Usually about 10 minutes. (${clock()})`;
+  }
+  throw new Error('This is taking too long. Try again later.');
+}
+
+function wireRoom() {
+  $('#room-example').addEventListener('click', () => openRoomView(EXAMPLE_ROOM));
+  $('#room-close').addEventListener('click', closeRoomView);
+  $('#room-step').addEventListener('input', syncRoomWater);
+  $('#room-height').addEventListener('change', () => {
+    state.room?.setRoomHeight(Math.min(5, Math.max(2, Number($('#room-height').value) || 2.5)));
+    syncRoomWater();
+  });
+  const go = $('#room-go');
+  const ready = () => { go.disabled = !state.generationEnabled || (!state.roomPhoto && !$('#room-prompt').value.trim()); };
+  $('#room-photo').addEventListener('change', (event) => {
+    state.roomPhoto = event.target.files?.[0] ?? null;
+    const preview = $('#room-preview');
+    if (preview.src) URL.revokeObjectURL(preview.src);
+    preview.hidden = !state.roomPhoto;
+    if (state.roomPhoto) preview.src = URL.createObjectURL(state.roomPhoto);
+    ready();
+  });
+  $('#room-prompt').addEventListener('input', ready);
+  go.addEventListener('click', async () => {
+    const prompt = $('#room-prompt').value.trim();
+    let image;
+    if (state.roomPhoto) {
+      // Aholo World's upload limit is about 1 MB, and small or panoramic pictures fail: send an ordinary
+      // photo about 1280 pixels across.
+      try { image = await fileToDataUrl(state.roomPhoto, 1280, 1280); } catch { return toast('Could not read this photo. Try a JPEG or PNG.'); }
+    }
+    buildRoom({ image, prompt });
+  });
+  if (!state.generationEnabled) go.title = 'Building rooms is switched off on this server.';
+  // A room that was still building when the page closed: keep waiting for it.
+  try {
+    const saved = JSON.parse(localStorage.getItem('waterline-room') || 'null');
+    if (saved?.worldId && /^[A-Za-z0-9_-]{4,64}$/.test(saved.worldId) && Date.now() - saved.started < ROOM_TIMEOUT_MS) {
+      const job = roomJobRow('Room: still building…');
+      pollRoom(saved.worldId, saved.started, job.label).then((done) => {
+        job.finish('Room: ready!');
+        const open = el('button', '', 'Open my room');
+        open.onclick = () => openRoomView({ url: done.url, upAxis: done.upAxis, name: 'Your room' });
+        job.row.append(open);
+        try { localStorage.removeItem('waterline-room'); } catch { /* storage off */ }
+      }, (error) => job.finish(`Room: ${error.message}`, true));
+    }
+  } catch { /* storage off */ }
+  syncRoomWater();
+}
+
 // ---------- find your own street ----------
 
 let placeService;
@@ -1582,9 +1745,9 @@ function placeCentre(destination) {
 /**
  * Addresses usually resolve to the middle of a building or a block, which would put "street level" on a
  * roof or a treetop. Sample the 3D city around the point (a 24 m grid, then rings at 25 m and 45 m) and
- * use the nearest open ground: a sample within 2 m of the bare-earth terrain.
+ * use the lowest spot close by: the street or yard beside the building.
  */
-async function streetPointNear(centre, terrain, { precise = true } = {}) {
+async function streetPointNear(centre, terrain) {
   const points = [];
   const add = (dx, dy) => { const p = offsetCarto(centre.longitude, centre.latitude, dx, dy); p.away = Math.hypot(dx, dy); points.push(p); };
   for (const dx of [-12, -6, 0, 6, 12]) for (const dy of [-12, -6, 0, 6, 12]) add(dx, dy);
@@ -1592,20 +1755,26 @@ async function streetPointNear(centre, terrain, { precise = true } = {}) {
   const bare = Number.isFinite(terrain);
   if (!photorealisticTiles()) return bare ? Cesium.Cartographic.fromRadians(centre.longitude, centre.latitude, terrain) : null;
   const exclude = [state.water, ...state.gauge, ...state.safetyEntities, ...state.objects.map((o) => o.entity)].filter(Boolean);
-  if (precise) {
-    try { await within(state.viewer.scene.sampleHeightMostDetailed(points, exclude), 30_000); } catch { return null; }
-  } else {
-    // Quick: only the city tiles already loaded for this view (accurate to a metre or so).
-    points.forEach((p) => { p.height = state.viewer.scene.sampleHeight(p, exclude); });
-  }
+  // The most detailed tiles: the ones on screen can be coarse enough to be metres out.
+  try { await within(state.viewer.scene.sampleHeightMostDetailed(points, exclude), 30_000); } catch { return null; }
   // Ignore holes in the mesh: nothing far below the bare-earth terrain counts as street.
   const usable = points.filter((p) => Number.isFinite(p.height) && (!bare || p.height > terrain - 15));
   if (!usable.length) return null;
-  if (!bare) return usable.filter((p) => p.away <= 17).reduce((low, p) => (p.height < low.height ? p : low), usable[0]);
-  const open = usable.filter((p) => Math.abs(p.height - terrain) < 2);
-  if (open.length) return open.reduce((best, p) => (p.away < best.away || (p.away === best.away && p.height < best.height) ? p : best));
-  // Nothing open nearby (a big building or dense trees): use the bare-earth height at the address itself.
-  return Cesium.Cartographic.fromRadians(centre.longitude, centre.latitude, terrain);
+  // Terrain data isn't bare earth everywhere (in some cities it includes roofs), so judge by the city itself:
+  // the lowest spot close to the address is the street or yard beside the building.
+  const lowest = (list) => list.reduce((low, p) => (p.height < low.height ? p : low));
+  const inner = usable.filter((p) => p.away <= 17);
+  const outer = usable.filter((p) => p.away > 17);
+  const near = inner.length ? lowest(inner) : null;
+  if (!outer.length) return near;
+  const far = lowest(outer);
+  // Everything close is far above the ground a little further out: the address is a big roof, so use
+  // the nearest ground beyond it.
+  if (!near || near.height - far.height > 3) {
+    const ground = outer.filter((p) => p.height < far.height + 1);
+    return ground.reduce((best, p) => (p.away < best.away ? p : best));
+  }
+  return near;
 }
 
 /** Fly to a place, then set your spot on the street there. */
@@ -1627,10 +1796,7 @@ async function goToPlace(name, centre, note = '') {
   await waitForTiles(5000);
   lap('tiles');
   $('#place-status').textContent = 'Finding street level…';
-  // Set the spot straight away from the city already on screen, then refine it from the most detailed tiles.
-  const quick = await streetPointNear(centre, rough, { precise: false });
-  lap(quick ? 'quick street level' : 'no quick street level');
-  const spot = quick ?? await streetPointNear(centre, rough);
+  const spot = await streetPointNear(centre, rough);
   lap(spot ? 'street level found' : 'no street level');
   if (!spot) {
     $('#place-status').textContent = 'Couldn’t find the street level here yet. Click your street on the map to set your spot.';
@@ -1640,17 +1806,10 @@ async function goToPlace(name, centre, note = '') {
   $('#scene-story').hidden = true;
   setDepth(0);
   setPin(spot);
-  const pin = state.pin;
   $('#pin-status').textContent = `Your spot: ${short}. Not quite your street? Click it on the map to move the spot.`;
   $('#place-status').textContent = note;
   toast('Spot set. Next: add your things, then raise the water.', 7000);
-  const view = flyAround(Cesium.Cartesian3.fromRadians(spot.longitude, spot.latitude, spot.height + 1), { heading: 20, pitch: -24, range: 70 }, 1.6);
-  const exact = await streetPointNear(centre, rough);
-  await view;
-  if (exact && state.pin === pin && Math.abs(exact.height - pin.height) > 0.03) {
-    pin.lon = exact.longitude; pin.lat = exact.latitude; pin.height = exact.height;
-    drawGauge(); updateWater(); renderImpact();
-  }
+  await flyAround(Cesium.Cartesian3.fromRadians(spot.longitude, spot.latitude, spot.height + 1), { heading: 20, pitch: -24, range: 70 }, 1.6);
 }
 
 /** Show the geocoder's attributions on the map, as Cesium's own search box does. */
@@ -1768,6 +1927,7 @@ function wireHome() {
 function wireUi() {
   wireHome();
   wireFindStreet();
+  wireRoom();
   document.querySelectorAll('[data-view]').forEach(button => { button.onclick = () => cameraView(button.dataset.view).catch(error => toast(error.message)); });
   $('#cinema').onclick = () => {
     const cinema = $('#app').classList.toggle('cinema');

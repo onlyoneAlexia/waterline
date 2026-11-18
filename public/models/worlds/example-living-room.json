@@ -1,0 +1,10 @@
+{
+  "name": "Example living room",
+  "source": "Aholo World (Manycore) generation from text",
+  "worldId": "3FO4K4V9FLA6",
+  "prompt": "A cosy ground-floor living room seen from the doorway: wooden floor, a grey sofa, a low coffee table, a TV on a cabinet, a bookshelf, a window and a front door. Daylight.",
+  "generatedAt": "2026-11-17",
+  "generationSeconds": 610,
+  "upAxis": "Z",
+  "format": "SPZ Gaussian splats"
+}

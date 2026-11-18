@@ -48,7 +48,7 @@ th { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #8a
 .flow div b { display: block; font-size: 13.5px; margin-bottom: 2px; }
 .flow div.lux { background: linear-gradient(140deg, #efe8ff, #dff3ff); border: 1.5px solid #c9b8ff; }
 .flow span { align-self: center; color: #0d4f74; font-weight: 700; }
-.timeline { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
 .timeline .day { background: rgba(255,255,255,.85); border-radius: 18px; padding: 14px 16px; font-size: 12.5px; line-height: 1.45; }
 .timeline .day b.date { display: inline-block; margin-bottom: 6px; padding: 2px 10px; border-radius: 999px; background: #0d4f74; color: #fff; font-size: 11px; }
 .ui3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
@@ -105,7 +105,7 @@ figcaption { font-size: 11.5px; color: #6b4a3a; margin-top: 4px; }
 <section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">3 · How it works</span></div><h1>Snap it. Place it.<br>Raise the water.</h1>
 <div class="grid g3">
   <div class="card"><img class="art" src="report/asset-pickup.png" alt="Lux3D pickup truck"><span class="step">01 · Lux3D</span><h3>Snap it or describe it</h3><p>Upload a photo of your car, scooter or door, or type “a red pickup truck”. Aholo Lux3D builds a textured 3D model in about two minutes, live inside the app.</p></div>
-  <div class="card"><img class="art map" src="report/app-describe.jpg" alt="Typed pickup placed on a real street"><span class="step">02 · True scale</span><h3>Put it on your street</h3><p>Search your address and click your street in Google’s photorealistic 3D city. The model stands at its real height on the real ground, beside a person for scale.</p></div>
+  <div class="card"><img class="art map" src="report/app-describe.jpg" alt="Typed pickup placed on a real street"><span class="step">02 · True scale</span><h3>Put it on your street</h3><p>Type your street, town or postcode, anywhere in the world, or press Use my location. Waterline finds street level in Google’s photorealistic 3D city, and the model stands at its real height on the real ground.</p></div>
   <div class="card"><img class="art map" src="report/app-escape.jpg" alt="Walking route to higher ground"><span class="step">03 · Impact</span><h3>Raise the water</h3><p>Play the flood and watch it reach the wheels, the windows, your waist. Then check modelled river-flood depths for that spot and find the walking route to higher ground.</p></div>
 </div>
 <p class="foot">Works in two modes: Real street (live 3D city and data) and Studio (an original illustrative street that needs no map account, for instant demos).</p></section>
@@ -162,7 +162,7 @@ figcaption { font-size: 11.5px; color: #6b4a3a; margin-top: 4px; }
   <div><img class="shot" src="report/app-kerrville.jpg" alt="Kerrville demo on the real 3D city"><p class="small muted" style="margin-top:6px">Kerrville, Texas: Louise Hays Park on the Guadalupe. The Lux3D SUV is “up to the windows”, the adult chest-deep.</p></div>
   <div><img class="shot" src="report/app-risk.jpg" alt="Modelled river-flood depths"><p class="small muted" style="margin-top:6px">Modelled river-flood depths for the spot, from 10%-a-year to 0.2%-a-year floods. Each can be shown on the street.</p></div>
 </div>
-<div class="panel small" style="margin-top:12px"><b>Under the hood:</b> CesiumJS with Google Photorealistic 3D Tiles and address search (Cesium ion) · ground height sampled from the 3D city at every object · JRC / Copernicus <i>Global river flood hazard maps</i> v2.1 read directly from cloud GeoTIFFs with HTTP range requests · honest gaps: where the model shows 0 m, the app says that does <b>not</b> mean safe (it omits flash and coastal floods, the kind that struck Kerrville and Valencia).</div></section>
+<div class="panel small" style="margin-top:12px"><b>Under the hood:</b> CesiumJS with Google Photorealistic 3D Tiles and Google place search (Cesium ion) or the browser’s location · the spot is moved off roofs and treetops to the street automatically · ground height sampled from the 3D city at every object · JRC / Copernicus <i>Global river flood hazard maps</i> v2.1 read directly from cloud GeoTIFFs with HTTP range requests · honest gaps: where the model shows 0 m, the app says that does <b>not</b> mean safe (it omits flash and coastal floods, the kind that struck Kerrville and Valencia).</div></section>
 
 <section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">8 · A way out</span></div><h1>Then it shows<br>the way to higher ground.</h1>
 <div class="grid g37">
@@ -178,25 +178,45 @@ figcaption { font-size: 11.5px; color: #6b4a3a; margin-top: 4px; }
   <img class="shot" src="report/app-escape.jpg" alt="Higher ground route in Kerrville">
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">9 · Fun and engagement</span></div><h1>Play with it,<br>and it plays back.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">9 · Aholo World · inside your home</span></div><h1>Then it shows the water<br>coming inside.</h1>
+<div class="flow">
+  <div><b>One photo</b>of a room, or a description</div><span>→</span>
+  <div class="lux"><b>Aholo World</b>builds the room in 3D as Gaussian splats (SPZ), in about 10 minutes</div><span>→</span>
+  <div><b>Scale</b>to the ceiling height you give (a room from one photo has no true size)</div><span>→</span>
+  <div><b>Same flood</b>the street’s water, minus how far your floor sits above the street</div>
+</div>
+<div class="grid" style="grid-template-columns: 40fr 60fr">
+  <div class="panel small">
+    <p style="margin-top:0">The street shows the water outside. <b>Inside</b> shows it coming in: everything below the waterline turns muddy, and the panel says what that depth means indoors (sockets at about 30 cm, furniture, when to go upstairs).</p>
+    <p>An example living room ships with the app; your own room keeps building even if you close the page. Shown with three.js and Spark.</p>
+    <p style="margin:0"><b>Iterations:</b> a 2:1 panorama crop failed in 7 s; an ordinary 4:3 photo built a room in about 8 minutes, so the app now always sends an ordinary photo about 1280 px across. The example room: 4.1 MB, about 250,000 splats.</p>
+  </div>
+  <div class="grid g2" style="gap:10px; align-content:start">
+    <figure style="margin:0"><img class="shot" src="report/app-room-dry.jpg" alt="Aholo World room before the flood"><figcaption class="small muted">Dry</figcaption></figure>
+    <figure style="margin:0"><img class="shot" src="report/app-room.jpg" alt="The same room with 0.4 m of water inside"><figcaption class="small muted">0.6 m in the street → 0.4 m inside</figcaption></figure>
+  </div>
+</div></section>
+
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">10 · Fun and engagement</span></div><h1>Play with it,<br>and it plays back.</h1>
 <div class="grid g45">
   <div>
     <div class="panel small">
       <h2>Live impact</h2><p>As the water rises, every object reports what is happening to it: <i>wheels in water → can float → up to the windows</i>; a person goes <i>ankle-deep → waist-deep → over their head</i>, with blue-amber-red bars.</p>
       <h2>Aim the water</h2><p>The water slider carries a marker at the top of each object, so you can drag the flood to “just over the car”.</p>
       <h2>Depth detective</h2><p>Guess the depth that covers an object, then watch the flood play to the answer.</p>
-      <h2 style="margin-top:8px">One space per job</h2><p style="margin:0">A homepage, then seven focused spaces (Spot, Things, Water, Risk, Escape, Guess, Share) with big type, share links, saved scenes, 3D image export and a cinema mode for recording.</p>
+      <h2 style="margin-top:8px">One space per job</h2><p style="margin:0">A homepage, then eight focused spaces (Spot, Things, Water, Risk, Escape, Inside, Guess, Share) with big type, share links, saved scenes, 3D image export and a cinema mode for recording.</p>
     </div>
   </div>
   <div class="grid" style="grid-template-columns: 3fr 1.05fr; gap:14px"><img class="shot" src="report/app-water.jpg" alt="Water space with facts and the water dock"><img class="shot" src="report/app-phone.jpg" alt="Phone layout"></div>
 </div></section>
 
-<section class="cream"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">10 · Development process</span></div><h1>Four days, built<br>and rebuilt by testing.</h1>
+<section class="cream"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">11 · Development process</span></div><h1>Five days, built<br>and rebuilt by testing.</h1>
 <div class="timeline">
   <div class="day"><b class="date">14 November</b><br><b>Idea → working core.</b> Chose floods over other map ideas. Built the Lux3D client (upload, create, poll, download), the real 3D street with a “bathtub” water level and moving-water facts. Asked “does a picture help anyone?” and added real JRC flood depths and the higher-ground finder.</div>
   <div class="day"><b class="date">15 November</b><br><b>A demo that always works.</b> Studio street needing no map account; Depth detective; move, duplicate, undo; share links, scene files and image export; an automated browser test suite.</div>
   <div class="day"><b class="date">16 November</b><br><b>Lux3D everywhere, then real users.</b> Rebuilt the Library as six Lux3D models; lighter textures. User test: “it doesn’t seem functional”, so the demo now starts itself, framed at street level. Live “Describe” test led to Auto size. The interface was redesigned twice: a homepage and one space per function.</div>
   <div class="day"><b class="date">17 November</b><br><b>Finishing.</b> A “waterline” ring that rises with the water around the homepage car; the homepage appears instantly while the 3D engine loads behind it; the app behind the homepage is keyboard-safe; this report and the captioned demo video, all captured from the running app.</div>
+  <div class="day"><b class="date">18 November</b><br><b>Your street, anywhere; then inside.</b> User test: “I can’t put in my location”. Now a search box and Use my location set the spot at street level by themselves (tested in Houston, London, Lagos, Abuja, Buenos Aires, Mendoza). Then Aholo World: the water inside a room.</div>
 </div>
 <div class="ui3">
   <figure><img class="" src="report/ui-v1.jpg" alt="Interface version 1"><figcaption>v1 · a long sidebar form</figcaption></figure>
@@ -204,18 +224,20 @@ figcaption { font-size: 11.5px; color: #6b4a3a; margin-top: 4px; }
   <figure><img class="" src="report/app-things.jpg" alt="Interface version 3"><figcaption>v3 · sky and cream, big type, one space per function</figcaption></figure>
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">11 · Build and tools</span></div><h1>How it is built,<br>and with what.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">12 · Build and tools</span></div><h1>How it is built,<br>and with what.</h1>
 <div class="grid g37">
   <div class="panel small">
     <h2>Architecture</h2>
     <p>Browser: CesiumJS 1.145 and plain JavaScript, served locally. Server: a zero-framework Node app that proxies Lux3D (key stays server-side, with quotas), JRC data and routing.</p>
     <h2>Quality</h2>
-    <p style="margin:0">35 automated unit tests and three browser checks: the full Studio flow offline, the interface at three screen sizes, and the live map. Every screenshot in this report is of the running app; the asset pictures are renders of the actual Lux3D files.</p>
+    <p style="margin:0">37 automated unit tests and five browser checks: the full Studio flow offline, the interface at three screen sizes, the live map, your own street (search, location, live Lux3D models placed) and the Aholo World room. Every screenshot in this report is of the running app; the asset pictures are renders of the actual Lux3D files.</p>
   </div>
   <div class="panel" style="padding:10px 16px"><table>
     <tr><th>Tool</th><th>Used for</th></tr>
     <tr><td><b>Aholo Lux3D API</b></td><td>Image-to-3D and Text-to-3D for every 3D object, including live generation in the app</td></tr>
-    <tr><td>CesiumJS · Cesium ion</td><td>Google Photorealistic 3D Tiles, Cesium World Terrain, address search</td></tr>
+    <tr><td><b>Aholo World API</b></td><td>3D rooms (Gaussian splats) from a photo or a description, for “Inside your home”</td></tr>
+    <tr><td>CesiumJS · Cesium ion</td><td>Google Photorealistic 3D Tiles, Cesium World Terrain, Google place search</td></tr>
+    <tr><td>three.js · Spark (MIT)</td><td>Showing Aholo World rooms in the browser</td></tr>
     <tr><td>JRC / Copernicus EMS (CC BY 4.0)</td><td>Global river flood hazard maps v2.1, read with geotiff.js</td></tr>
     <tr><td>FOSSGIS OSRM · OpenStreetMap</td><td>Walking routes to higher ground</td></tr>
     <tr><td>US National Weather Service</td><td>Moving-water safety facts</td></tr>
@@ -226,18 +248,19 @@ figcaption { font-size: 11.5px; color: #6b4a3a; margin-top: 4px; }
   </table></div>
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">12 · Limits and next steps</span></div><h1>Honest about what<br>it is, and is not.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">13 · Limits and next steps</span></div><h1>Honest about what<br>it is, and is not.</h1>
 <div class="grid g2">
   <div class="panel small"><h2>Limits</h2><ul>
     <li>The water is a flat level from your spot (a “bathtub” model): no flow, walls, drains or timing. It is a planning illustration, not a forecast.</li>
     <li>The JRC model has ~90 m cells and covers river floods only: no flash or coastal floods.</li>
     <li>Google’s 3D city blurs at street level in narrow streets; the camera frames from above the roofs there.</li>
-    <li>AI sizes are estimates: the app shows the height it used and lets you correct it.</li>
+    <li>AI sizes are estimates: the app shows the height it used and lets you correct it. Rooms from one photo are scaled to the ceiling height you give.</li>
     <li>Higher ground is planning help, not an evacuation order. Follow official warnings; never enter floodwater.</li>
   </ul></div>
   <div class="panel small"><h2>Next</h2><ul>
     <li><b>More of Lux3D:</b> retopology for lighter models, multi-format export for AR so you can see the water line in your own driveway.</li>
-    <li><b>Aholo World:</b> scan your ground floor with a phone video, reconstruct it as a 3D Gaussian-splat space, and see the water rise inside your own home.</li>
+    <li><b>Aholo World reconstruction:</b> a phone video of your ground floor for a true-scale room, instead of one photo.</li>
+    <li><b>SpatialLM:</b> find the doors, sockets and furniture in that room, so the water reads out “over the sofa”.</li>
     <li>Community flood marks: “the water reached here in 2024”.</li>
     <li>Official local warnings beside the illustration.</li>
     <li>More languages, starting with Spanish.</li>

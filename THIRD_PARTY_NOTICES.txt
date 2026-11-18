@@ -35,6 +35,12 @@ no images, logos or text from those references are used.
 Library thumbnails (public/models/thumbs/) are renders of the Lux3D models above, made with
 scripts/render-thumbnails.mjs (Google <model-viewer>, Apache-2.0, used at build time only).
 
+"Inside your home" room viewer, bundled in public/vendor/ (both MIT licence; licence files alongside):
+- three.js r180 — three.js authors. https://threejs.org
+- Spark 2.4.0 (Gaussian splat renderer for three.js) — World Labs Technologies, Inc. https://sparkjs.dev
+The example room (public/models/worlds/example-living-room.*) was generated with Aholo World (Manycore)
+from a text description; details in example-living-room.json.
+
 Studio surface photos and normal maps — Poly Haven, CC0-1.0.
 https://polyhaven.com/license
 Assets: asphalt_02, brick_wall_001, concrete_floor_02, aerial_grass_rock.
@@ -45,7 +51,8 @@ Roof and cream-wall texture variants are original seeded procedural images.
 Optional live data/services:
 - JRC / Copernicus Emergency Management Service, Global river flood hazard maps v2.1,
   CC BY 4.0, (c) European Union. https://data.jrc.ec.europa.eu/
-- Cesium ion / Google Photorealistic 3D Tiles: provider account and usage terms apply.
+- Cesium ion / Google Photorealistic 3D Tiles and the Google geocoder (place search, via Cesium ion):
+  provider account and usage terms apply.
   Preserve all provider attribution and check image/recording rights before sharing live-map captures.
 - FOSSGIS routing, based on OpenStreetMap data (c) OpenStreetMap contributors.
   https://www.openstreetmap.org/copyright

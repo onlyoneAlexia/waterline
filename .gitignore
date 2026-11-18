@@ -20,3 +20,7 @@ submission/waterline-source.tar.gz
 submission/report/*.glb
 submission/evidence/
 test/*.png
+
+# Rooms people build with Aholo World (only the example room ships)
+public/models/worlds/*
+!public/models/worlds/example-living-room.*

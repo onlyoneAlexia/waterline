@@ -260,7 +260,7 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
       console.log(`[world] ${worldId} saved (${(bytes.length / 1e6).toFixed(1)} MB)`);
       return { state: 'done', url: `/models/worlds/${worldId}.spz`, upAxis: world.upAxis };
     }
-    if (world.state === 'failed' || world.state === 'cancelled') return { state: 'failed', error: world.message || `Aholo World ${world.status?.toLowerCase?.() ?? 'failed'}.` };
+    if (world.state === 'failed' || world.state === 'cancelled') return { state: 'failed', error: world.message || 'Aholo World could not build a room from this. Try an ordinary (not panoramic) photo of the room, taken from the doorway.' };
     return { state: world.state, progress: world.progress };
   }
 

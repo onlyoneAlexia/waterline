@@ -13,6 +13,8 @@
   <script>
     if (!/[?&](mode|debug|app)\b/.test(location.search) && !location.hash.startsWith('#s=')) document.documentElement.classList.add('home-open');
   </script>
+  <!-- three.js and Spark (Gaussian splats) for "Inside your home"; they load only when a room opens. -->
+  <script type="importmap">{"imports":{"three":"/vendor/three/three.module.js","three/addons/":"/vendor/three/addons/","@sparkjsdev/spark":"/vendor/spark/spark.module.js"}}</script>
   <script>window.CESIUM_BASE_URL = '/vendor/cesium/';</script>
   <script defer src="/vendor/cesium/Cesium.js"></script>
   <link rel="stylesheet" href="/vendor/cesium/Widgets/widgets.css">
@@ -90,6 +92,7 @@
       <button data-go="water"><i class="ri ri-waves"></i>Water</button>
       <button data-go="risk"><i class="ri ri-chart"></i>Risk</button>
       <button data-go="safety"><i class="ri ri-mountain"></i>Escape</button>
+      <button data-go="inside"><i class="ri ri-home"></i>Inside</button>
       <button data-go="detective"><i class="ri ri-target"></i>Guess</button>
       <button data-go="share"><i class="ri ri-share"></i>Share</button>
     </nav>
@@ -240,6 +243,45 @@
       </section>
 
       <!-- SHARE -->
+      <!-- INSIDE (Aholo World) -->
+      <section class="space" data-space="inside" id="inside-space" hidden>
+        <p class="kicker">Extra · Aholo World</p>
+        <h2 class="space-title">Inside your home</h2>
+        <p class="space-lede">Aholo World turns one photo of a room into a 3D space you can look around. Then the same water comes in.</p>
+
+        <div class="feature-card sky room-example">
+          <img id="room-example-img" class="room-example-img" src="/models/worlds/example-living-room.jpg" alt="The example living room made by Aholo World" loading="lazy">
+          <p class="script small">see it first</p>
+          <p class="feature-copy">A ground-floor living room that Aholo World built from a short description.</p>
+          <button id="room-example" class="cta-pill" type="button"><span class="cta-circle" aria-hidden="true"></span>Open the example room</button>
+        </div>
+
+        <p class="label">Or build your own room</p>
+        <label class="file-pick">
+          <input type="file" id="room-photo" accept="image/*">
+          <span class="ri ri-image big" aria-hidden="true"></span>
+          <span><strong>Photo of your room</strong><br>from the doorway, with the floor in view</span>
+        </label>
+        <img id="room-preview" class="room-preview" alt="" hidden>
+        <textarea id="room-prompt" rows="2" maxlength="300" placeholder="Optional: describe it, e.g. a ground-floor kitchen with a back door" aria-label="Describe your room (optional)"></textarea>
+        <p class="source">Your photo is sent to Aholo World (Manycore) to build the room. Waterline itself does not store it. A room takes about 10 minutes.</p>
+        <button id="room-go" class="cta-pill" type="button" disabled><span class="cta-circle" aria-hidden="true"></span>Build my room</button>
+        <div id="room-jobs"></div>
+
+        <div class="room-settings">
+          <div class="field">
+            <label for="room-step">Your floor sits above the street by</label>
+            <div class="unit-input"><input id="room-step" type="number" min="0" max="2" step="0.05" value="0.20"><span>m</span></div>
+          </div>
+          <div class="field">
+            <label for="room-height">Floor to ceiling</label>
+            <div class="unit-input"><input id="room-height" type="number" min="2" max="5" step="0.1" value="2.5"><span>m</span></div>
+          </div>
+        </div>
+        <p id="room-readout" class="status room-readout">Open a room, then raise the water.</p>
+        <p class="hint">A room rebuilt from one photo has no true size, so Waterline scales it to the ceiling height above. Read the depths inside as a guide.</p>
+      </section>
+
       <section class="space" data-space="share" id="share-section" hidden>
         <p class="kicker">Finish</p>
         <h2 class="space-title">Share it</h2>
@@ -267,6 +309,16 @@
         </div>
       </div>
       <div id="map-placement" class="map-placement" role="status" hidden></div>
+      <section id="room-view" class="room-view" aria-label="Inside your home" hidden>
+        <div id="room-canvas" class="room-canvas"></div>
+        <div class="room-bar">
+          <div class="map-caption"><span class="live-dot" aria-hidden="true"></span><span id="room-label">INSIDE · AHOLO WORLD ROOM</span></div>
+          <button id="room-close" class="room-close" type="button">Back to the street</button>
+        </div>
+        <p id="room-loading" class="room-loading" role="status">Loading the room…</p>
+        <p id="room-water" class="room-water" aria-live="polite"></p>
+        <p class="room-hint">Drag to look around · scroll to move closer</p>
+      </section>
 
       <section id="impact" class="impact" aria-label="Impact at this water level" hidden>
         <h2>At this water level</h2>

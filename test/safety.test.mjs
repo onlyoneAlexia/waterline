@@ -34,7 +34,7 @@ function harness(heights = [10, 10]) {
       Cartographic: { fromRadians: () => ({}), fromDegrees: () => ({}) },
       EllipsoidGeodesic: class { surfaceDistance = 100; },
     },
-    drawSafety() {}, adviceList() {}, updateWater() {}, renderFacts() {}, renderImpact() {},
+    drawSafety() {}, adviceList() {}, updateWater() {}, renderFacts() {}, renderImpact() {}, syncRoomWater() {},
     el: (tag, style, text) => text, deg: (value) => value,
   });
   vm.runInContext(`async ${functionSource('findHigherGround', 'adviceList')}

@@ -16,6 +16,14 @@ Built for the Manycore Aholo Global 3D AI Hackathon (2026).
 
 The map is CesiumJS with Google Photorealistic 3D Tiles. The flood is a flat water level ("bathtub" model) measured from the street at your pin.
 
+## Inside your home (Aholo World)
+
+The street shows the water outside. **Inside** shows it coming in. Aholo World turns one photo of a room (or a description) into a 3D room made of Gaussian splats. Waterline shows the room with three.js and Spark, scales it to the ceiling height you give (a room rebuilt from one photo has no true size of its own), and floods it with the same water level as the street, minus how far your floor sits above the street. Everything below the waterline is tinted, and a panel says what that depth means indoors (sockets, furniture, when to go upstairs).
+
+- An example living room (built by Aholo World from a short description) ships with the app, so anyone can try it at once.
+- Building your own room takes about 10 minutes. If the page is closed, it keeps waiting for the room next time.
+- Server: `POST /api/world` (photo and/or description → `worldId`), `GET /api/world?id=` (status; the finished `.spz` is saved under `public/models/worlds/`).
+
 ## Beyond the picture: real risk and a way out
 
 - **Real flood risk.** When you set your spot, Waterline looks up modelled river-flood depths there (10% down to 0.2% chance each year) from the JRC / Copernicus *Global river flood hazard maps* v2.1, and lets you show them on your street. The app says plainly when the model shows nothing: it leaves out flash floods from rain and coastal floods, the kind that killed people in Kerrville, Texas (2025) and Valencia, Spain (2024).
@@ -43,10 +51,11 @@ For live maps and new generation, configure the optional services below:
 ## Using it
 
 1. Start in Studio, or select **Real street** (needs map credentials) and type your street, town or postcode in **Your spot**, or press **Use my location**. The spot and depth gauge are set on the street there; click the map to fine-tune it.
-2. Add objects: upload a photo, describe one, or pick from the Library. When a model is ready, click the map to place it. Adjust its height and direction in the list.
-3. Drag the slider or press **Play the flood**.
-4. **Orbit camera** for a video shot; **Copy share link** saves the scene in a URL. **Save scene/Open scene** round-trip a validated JSON file; **Save 3D image** exports a labelled PNG.
-5. Use **Street view**, **Overview** or **Focus object** to reframe the camera. **Cinema view** hides the panel for recording; press Esc to bring it back. The flood button pauses an active animation.
+2. Optional: open **Inside** to see the water come into a room (the example room, or one built from your photo).
+3. Add objects: upload a photo, describe one, or pick from the Library. When a model is ready, click the map to place it. Adjust its height and direction in the list.
+4. Drag the slider or press **Play the flood**.
+5. **Orbit camera** for a video shot; **Copy share link** saves the scene in a URL. **Save scene/Open scene** round-trip a validated JSON file; **Save 3D image** exports a labelled PNG.
+6. Use **Street view**, **Overview** or **Focus object** to reframe the camera. **Cinema view** hides the panel for recording; press Esc to bring it back. The flood button pauses an active animation.
 
 The Studio street uses batched static geometry, pitched roofs, window/door details, front gardens, curbs, drains, crossings, lamps, soft shadows and locally bundled CC0 photo/normal textures from Poly Haven. Texture provenance and hashes are in `public/textures/sources.json`. Camera orbit and water motion use elapsed time, and the facts list is reused during animation to reduce UI churn. The street is an illustrative environment, not a fluid simulation or a claim of photorealistic reconstruction.
 
@@ -72,7 +81,9 @@ server.mjs              web server + private Lux3D proxy (key never reaches the 
 lib/lux3d.mjs           Lux3D OpenAPI client: upload, create task, poll, download
 lib/flood-depth.mjs     reads JRC flood-depth GeoTIFFs with HTTP range requests
 scripts/generate.mjs    CLI to add Library models
-public/app.js           map, water, models, sharing
+public/app.js           map, water, models, sharing, place search
+public/room.js          "Inside your home": Aholo World room viewer (three.js + Spark, loaded on demand)
+public/vendor/          three.js and Spark, bundled locally (MIT)
 public/glb-measure.js   reads a GLB's bounding box to place it at true scale
 test/                   node --test suites (npm test)
 ```
@@ -81,6 +92,8 @@ test/                   node --test suites (npm test)
 
 - **Illustration, not a forecast.** The water is a level plane: it does not model flow, walls, drains or timing.
 - AI-generated models are approximate; set the real height for best results.
+- Rooms from one photo are AI reconstructions without a true scale; Waterline scales them to the ceiling height you set, so indoor depths are a guide.
+- Searching a neighbourhood (rather than a street address) lands on its middle, which can be a yard, a roof edge or a riverbank. Click your street to move the spot.
 - The global river model has ~90 m cells: it can miss a street by one cell or overstate depth near river channels, and it has no flash or coastal floods.
 - Higher-ground search uses bare-earth terrain (~30 m), so small embankments or walls may be missed. It is planning help, not an evacuation order.
 
