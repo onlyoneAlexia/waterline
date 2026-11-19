@@ -38,6 +38,22 @@ test('direct OSM rejects Overpass "remarks" (server-side timeouts) and reports e
   await assert.rejects(fetchOsmDirect(LAT, LON, 900, { fetchImpl }), /All Overpass servers failed.*remark: runtime error/);
 });
 
+test('direct OSM falls back to the nearest 400 m when the full area fails everywhere', async () => {
+  const radii = [];
+  const fetchImpl = async (url, init) => {
+    const radius = Number(/around%3A(\d+)/.exec(init.body)[1]);
+    radii.push(radius);
+    if (radius === 900) return new Response('busy', { status: 504 });
+    return new Response(JSON.stringify(overpass), { status: 200 });
+  };
+  const body = await fetchOsmDirect(LAT, LON, 900, { fetchImpl });
+  assert.deepEqual(radii, [900, 900, 900, 400]);
+  assert.equal(body.partial, true);
+  assert.equal(body.radius, 400);
+  assert.equal(body.requestedRadius, 900);
+  assert.equal(body.buildings.length, 1);
+});
+
 test('race: a quick server answer wins and the browser never asks Overpass', async () => {
   let direct = 0;
   const out = await raceWithDirect(() => wait(5, 'server'), async () => { direct += 1; return 'direct'; }, { headStartMs: 50 });

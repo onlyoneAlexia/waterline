@@ -128,12 +128,8 @@ export function parseOverpass(json, centre) {
 
 // ---------- direct requests (the browser fallback) ----------
 
-/** Ask the Overpass servers in turn, straight from the browser. Same body shape as GET /api/osm. */
-export async function fetchOsmDirect(lat, lon, radius, {
-  fetchImpl = fetch, endpoints = OVERPASS_ENDPOINTS, endpointTimeoutMs = 45_000, totalBudgetMs = 120_000,
-} = {}) {
+async function askOverpass(lat, lon, radius, { fetchImpl, endpoints, endpointTimeoutMs, deadline }) {
   const body = new URLSearchParams({ data: buildQuery(lat, lon, radius) }).toString();
-  const deadline = Date.now() + totalBudgetMs;
   const failures = [];
   for (const endpoint of endpoints) {
     const remaining = deadline - Date.now();
@@ -149,19 +145,39 @@ export async function fetchOsmDirect(lat, lon, radius, {
       const json = await response.json();
       if (!json || typeof json !== 'object' || !Array.isArray(json.elements)) throw new Error('not Overpass JSON');
       if (json.remark) throw new Error(`remark: ${String(json.remark).slice(0, 120)}`);
-      return {
-        ...parseOverpass(json, { lat, lon }),
-        radius,
-        fetchedAt: new Date().toISOString(),
-        status: 'live',
-        attribution: ATTRIBUTION,
-        direct: true,
-      };
+      return parseOverpass(json, { lat, lon });
     } catch (error) {
       failures.push(`${new URL(endpoint).host}: ${error.name === 'TimeoutError' ? 'timed out' : error.message}`);
     }
   }
   throw new Error(`All Overpass servers failed (${failures.join('; ') || 'no time left'})`);
+}
+
+/**
+ * Ask the Overpass servers in turn, straight from the browser. Same body shape as GET /api/osm.
+ * Busy servers can need most of a minute for a dense town, so each gets up to a minute. If the
+ * full area fails, the streets nearest the spot (`fallbackRadius`) are tried, as the server does.
+ */
+export async function fetchOsmDirect(lat, lon, radius, {
+  fetchImpl = fetch, endpoints = OVERPASS_ENDPOINTS, endpointTimeoutMs = 60_000,
+  fullBudgetMs = 120_000, totalBudgetMs = 170_000, fallbackRadius = 400,
+} = {}) {
+  const started = Date.now();
+  const options = { fetchImpl, endpoints, endpointTimeoutMs };
+  const wrap = (data, extra = {}) => ({
+    ...data, radius, fetchedAt: new Date().toISOString(), status: 'live', attribution: ATTRIBUTION, direct: true, ...extra,
+  });
+  try {
+    return wrap(await askOverpass(lat, lon, radius, { ...options, deadline: started + fullBudgetMs }));
+  } catch (error) {
+    if (radius <= fallbackRadius) throw error;
+    try {
+      const nearer = await askOverpass(lat, lon, fallbackRadius, { ...options, deadline: started + totalBudgetMs });
+      return wrap(nearer, { radius: fallbackRadius, partial: true, requestedRadius: radius });
+    } catch {
+      throw error;
+    }
+  }
 }
 
 /**
