@@ -51,7 +51,8 @@ const card = (step, title, text, picture) => `<div class="card">${picture ?? ''}
 const P = stats.paiporta ?? {};
 const K = stats.kerrville ?? {};
 const L = stats.lagos ?? {};
-const statLine = (s) => (s.buildings ? `${num(s.areaKm2)} km² flooded · ${num(s.buildings.wet)} of ${num(s.buildings.total)} buildings in water · ${num(s.buildings.deep)} ground floors flooded · ${num(s.roadsCutKm)} km of road cut · ${num(s.services?.hit)} of ${num(s.services?.total)} services in water` : `${num(s.areaKm2)} km² flooded`);
+const plural = (n, one, many) => `${num(n)} ${n === 1 ? one : many}`;
+const statLine = (s) => (s.buildings ? `${num(s.areaKm2)} km² flooded · ${num(s.buildings.wet)} of ${plural(s.buildings.total, 'building', 'buildings')} in water · ${plural(s.buildings.deep, 'ground floor', 'ground floors')} flooded · ${num(s.roadsCutKm)} km of road cut · ${num(s.services?.hit)} of ${plural(s.services?.total, 'service', 'services')} in water` : `${num(s.areaKm2)} km² flooded`);
 const extraRow = (kind) => extras.filter((e) => e.kind === kind);
 const taskList = (items) => items.flatMap((i) => i.taskIds ?? []).join(', ');
 
