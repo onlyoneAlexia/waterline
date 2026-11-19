@@ -147,6 +147,15 @@ npm start                 # http://localhost:3000
 Optional settings in `.env`: `PORT`, `MAX_GENERATIONS_PER_DAY` (default 40),
 `MAX_GENERATIONS_PER_IP_PER_HOUR` (6), `TRUST_PROXY=1` behind a trusted proxy, `LUX3D_BASE_URL`.
 
+### Deploy on Render (one click)
+
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/onlyoneAlexia/waterline)
+
+`render.yaml` sets up a free Node web service (`npm ci --omit=dev`, `node server.mjs`, health check
+`/api/health`). Render asks for `LUX3D_API_KEY` and `CESIUM_ION_TOKEN`; public generation caps are
+20 a day and 3 per visitor per hour. A free service sleeps after 15 idle minutes (the first visit then
+takes about a minute), and models made on it last until the next restart.
+
 ### Docker
 
 ```bash

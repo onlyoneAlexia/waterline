@@ -1,0 +1,25 @@
+# One-click deploy on Render (https://render.com/deploy?repo=https://github.com/onlyoneAlexia/waterline).
+# Render asks for the two secret keys during setup; they stay on the server and never reach the browser
+# (the Cesium ion token is a public browser token by design).
+services:
+  - type: web
+    name: waterline
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: node server.mjs
+    healthCheckPath: /api/health
+    envVars:
+      - key: LUX3D_API_KEY
+        sync: false
+      - key: CESIUM_ION_TOKEN
+        sync: false
+      - key: TRUST_PROXY
+        value: "1"
+      # Every visitor's new model or room spends your Aholo credits: keep the public caps modest.
+      - key: MAX_GENERATIONS_PER_DAY
+        value: "20"
+      - key: MAX_GENERATIONS_PER_IP_PER_HOUR
+        value: "3"
+      - key: NODE_VERSION
+        value: "22.12.0"
