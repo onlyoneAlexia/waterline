@@ -154,6 +154,17 @@ html.home-open .home {
 .icon-btn { min-height: 92px; border-radius: 16px; background: var(--surface-2); border: 1px solid var(--line); box-shadow: none; font-size: 14px; }
 .icon-btn::before { background: var(--rain); width: 28px; height: 28px; }
 
+/* Lux3D extras */
+.lux-extras { display: flex; flex-direction: column; gap: 10px; }
+.extras-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.extras-list li { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 12px; background: var(--surface-2); border: 1px solid var(--line); }
+.extras-list li > div { flex: 1; min-width: 0; }
+.extras-list strong { display: block; font-size: 13.5px; text-transform: none; }
+.extras-list span { display: block; font-size: 12px; color: var(--muted); line-height: 1.4; }
+.extra-link { flex: none; padding: 5px 10px; border-radius: 8px; background: rgba(79, 179, 255, .14); color: var(--sky-ink); font-size: 11.5px; font-weight: 600; text-decoration: none; }
+.extra-link:hover { background: rgba(79, 179, 255, .26); }
+.follow-walker { align-self: flex-start; }
+
 /* Scenario picker */
 .scenario-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .scenario { position: relative; display: flex; flex-direction: column; align-items: flex-start; gap: 2px; min-height: 0; padding: 12px 12px 12px 14px; text-align: left; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--line); }

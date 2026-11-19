@@ -477,6 +477,7 @@ function renderRisk(data) {
 // ---------- get to higher ground ----------
 
 function clearSafety(message) {
+  if (state.walker) stopWalker();
   state.safetySearch += 1;
   state.safety = null;
   state.safetyEntities.forEach((entity) => state.viewer.entities.remove(entity));
@@ -699,6 +700,7 @@ async function findHigherGround() {
     await sampleHeights(along);
     if (searchId !== state.safetySearch) return;
     drawSafety(along, goal, Boolean(route), waterLevel);
+    startWalker(along).catch(() => {});
     const completeHeights = along.length > 0 && along.every((p) => Number.isFinite(p.height));
     const worst = Math.max(0, ...along.filter((p) => Number.isFinite(p.height)).map((p) => waterLevel - p.height));
 
@@ -722,6 +724,15 @@ async function findHigherGround() {
     if (!route) parts.push(el('p', 'hint', state.mode === 'studio'
       ? 'Synthetic terrain and a straight-line example, not a real walking route. Switch to Real street mode for terrain and routing data.'
       : 'No walking route was found, so this is a straight line. Follow real streets.'));
+    if (state.extras?.walk) {
+      const follow = el('button', 'follow-walker', 'Follow the walker');
+      follow.id = 'follow-walker';
+      follow.addEventListener('click', () => {
+        if (!state.walker) return toast('Press “Find higher ground” again to start the walk.');
+        followWalker(!state.followOff);
+      });
+      parts.push(el('p', 'hint', 'A Lux3D person, rigged and animated by Lux3D, walks the route (sped up).'), follow);
+    }
     parts.push(adviceList());
     box.replaceChildren(...parts);
   } catch (error) {
@@ -729,6 +740,187 @@ async function findHigherGround() {
   } finally {
     button.disabled = false;
   }
+}
+
+// ---------- Lux3D extras: a rigged person who walks the route, and what the water leaves behind ----------
+
+/** Read public/models/extras/extras.json (made by scripts/lux3d-extras.mjs). Optional: the app works without it. */
+async function loadExtras() {
+  state.extras = { walk: null, aftermath: new Map(), items: [] };
+  try {
+    const response = await fetch('/models/extras/extras.json');
+    if (!response.ok) return;
+    const items = await response.json();
+    if (!Array.isArray(items)) return;
+    state.extras.items = items.filter((item) => typeof item?.file === 'string' && item.file.startsWith('/models/extras/'));
+    for (const item of state.extras.items) {
+      if (item.kind === 'rig-walk' && item.file.endsWith('.glb')) state.extras.walk = item.file;
+      if (item.kind === 'material-transfer' && item.file.endsWith('.glb')) state.extras.aftermath.set(`/models/library/${item.input}.glb`, item.file);
+    }
+    // Warm the browser cache so the "after the flood" swap and the walker appear without a pause.
+    if (state.mode === 'street') for (const url of [...state.extras.aftermath.values(), state.extras.walk].filter(Boolean)) fetch(url).catch(() => {});
+  } catch { /* No extras: the core app still works. */ }
+  renderExtras();
+}
+
+const EXTRA_TEXT = {
+  'rig-walk': ['Walks your escape route', 'Lux3D rigging + animation retargeting turned the Library person into a walking figure.'],
+  'material-transfer': ['What the water leaves behind', 'Lux3D material transfer re-textured the SUV with flood mud; it swaps in as the water drops.'],
+  'part-split': ['Split into parts', 'Lux3D part-split separates the SUV into its parts (body, wheels…) for repair estimates.'],
+  'export-usdz': ['AR on your phone (USDZ)', 'Lux3D multi-format export: open it in AR and stand it on your own street.'],
+  'export-stl': ['3D print (STL)', 'Lux3D multi-format export for a printed flood-awareness model.'],
+  articulation: ['Opens on its hinge', 'Lux3D articulation found the door’s hinge, so it swings open in 3D.'],
+};
+
+function renderExtras() {
+  const box = $('#lux-extras');
+  if (!box) return;
+  const items = state.extras?.items?.filter((item) => EXTRA_TEXT[item.kind]) ?? [];
+  box.hidden = !items.length;
+  const list = el('ul', 'extras-list');
+  for (const item of items) {
+    const [title, text] = EXTRA_TEXT[item.kind];
+    const li = el('li');
+    const name = (state.library.find((e) => e.id === item.input)?.name ?? item.input ?? '').replace(/-/g, ' ');
+    const body = el('div');
+    body.append(el('strong', '', `${title} · ${name}`), el('span', '', text));
+    li.append(body);
+    if (/\.(usdz|stl|glb)$/.test(item.file)) {
+      const link = el('a', 'extra-link', item.file.split('.').pop().toUpperCase());
+      link.href = item.file;
+      link.download = '';
+      link.setAttribute('aria-label', `Download ${title} (${name})`);
+      li.append(link);
+    }
+    list.append(li);
+  }
+  box.replaceChildren(el('p', 'label', 'More from Lux3D'), list);
+}
+
+/** Lux3D multi-format export of a placed object to USDZ (AR Quick Look), live through the server. */
+async function exportForAr(obj, button) {
+  if (obj.exportUrl) { window.open(obj.exportUrl, '_blank', 'noopener'); return; }
+  const shipped = state.extras?.items?.find((item) => item.kind === 'export-usdz' && obj.url === `/models/library/${item.input}.glb`);
+  if (shipped) { obj.exportUrl = shipped.file; button.textContent = 'Open AR file'; window.open(shipped.file, '_blank', 'noopener'); return; }
+  button.disabled = true;
+  button.textContent = 'Lux3D export…';
+  try {
+    const started = await fetch('/api/export', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ model: obj.url, format: 'usdz' }), signal: AbortSignal.timeout(180_000) });
+    const job = await started.json();
+    if (!started.ok) throw new Error(job.error || `HTTP ${started.status}`);
+    for (let i = 0; i < 120; i++) {
+      await sleep(5000);
+      const response = await fetch(`/api/export?id=${encodeURIComponent(job.taskId)}`);
+      const status = await response.json().catch(() => ({}));
+      if (status.state === 'done' && status.url) { obj.exportUrl = status.url; button.textContent = 'Open AR file'; toast(`${obj.name} is ready as USDZ for AR (Lux3D multi-format export).`); return; }
+      if (status.state === 'failed' || response.status === 404) throw new Error(status.error || 'Lux3D export failed');
+    }
+    throw new Error('Lux3D export is taking too long');
+  } catch (error) {
+    button.textContent = 'AR / 3D print';
+    toast(`Couldn’t export: ${error.message}`);
+  } finally {
+    button.disabled = false;
+  }
+}
+
+/** After the water has reached an object and started to fall, swap in its "after the flood" Lux3D model. */
+function updateAftermath() {
+  const aftermath = state.extras?.aftermath;
+  if (!aftermath?.size || !state.pin) return;
+  for (const obj of state.objects) {
+    const flooded = aftermath.get(obj.url);
+    if (!flooded || !obj.entity?.model) continue;
+    const here = Math.max(0, state.pin.height + state.depth - obj.ground);
+    if (state.depth < 0.01) obj.peak = 0;
+    obj.peak = Math.max(obj.peak ?? 0, here);
+    const muddy = obj.peak >= 0.3 && here < obj.peak - 0.15;
+    if (muddy !== Boolean(obj.muddy)) {
+      obj.muddy = muddy;
+      obj.entity.model.uri = muddy ? flooded : obj.url;
+      if (muddy) toast('The water is going down. Lux3D material transfer shows the mud it leaves on the SUV.', 6000);
+    }
+  }
+}
+
+const WALK_SPEED_SHOWN = 9; // m/s on screen: about 7× walking pace, with the walk cycle sped up to match
+const WALK_HEADING_OFFSET = Math.PI; // the rigged model faces −Y in Cesium's frame
+
+function stopWalker() {
+  followWalker(false);
+  if (state.walker) state.viewer.entities.remove(state.walker);
+  state.walker = null;
+  state.walkerAt = null;
+  state.viewer.clock.multiplier = 1;
+}
+
+/** Chase camera behind the walker (Cesium's own tracking can't see through RELATIVE_TO_GROUND heights). */
+function followWalker(on) {
+  const { viewer } = state;
+  if (state.followOff) { state.followOff(); state.followOff = null; viewer.camera.lookAtTransform(Cesium.Matrix4.IDENTITY); }
+  const button = document.querySelector('#follow-walker');
+  if (button) button.textContent = on && state.walkerAt ? 'Stop following' : 'Follow the walker';
+  if (!on || !state.walkerAt) return false;
+  if (state.orbitOff) toggleOrbit();
+  markView(null);
+  let heading = null;
+  state.followOff = viewer.scene.preRender.addEventListener(() => {
+    if (!state.walkerAt) return;
+    const p = state.walkerAt();
+    // Ease the heading so corners in the route don't jerk the camera.
+    heading = heading == null ? p.heading : heading + Math.atan2(Math.sin(p.heading - heading), Math.cos(p.heading - heading)) * 0.06;
+    const centre = Cesium.Cartesian3.fromRadians(p.lon, p.lat, p.h + 1.2);
+    viewer.camera.lookAt(centre, new Cesium.HeadingPitchRange(heading, rad(-24), 26));
+  });
+  return true;
+}
+
+/** A Lux3D person (rigged and animated by Lux3D) walking the escape route on the 3D city. */
+async function startWalker(path) {
+  stopWalker();
+  if (!state.extras?.walk || path.length < 2) return;
+  let template;
+  try { template = await loadTemplate({ name: 'Adult person (walking)', url: state.extras.walk, realHeight: 1.75 }); } catch { return; }
+  const R = 6_378_137;
+  const pts = path.map((p) => ({ lon: p.longitude, lat: p.latitude, h: Number.isFinite(p.height) ? p.height : state.pin.height }));
+  const cum = [0];
+  for (let i = 1; i < pts.length; i++) {
+    const dx = (pts[i].lon - pts[i - 1].lon) * R * Math.cos(pts[i].lat);
+    const dy = (pts[i].lat - pts[i - 1].lat) * R;
+    cum.push(cum[i - 1] + Math.hypot(dx, dy));
+  }
+  const total = cum.at(-1);
+  const started = performance.now();
+  const at = () => {
+    const d = Math.min(total, ((performance.now() - started) / 1000) * WALK_SPEED_SHOWN);
+    let i = 1;
+    while (i < cum.length - 1 && cum[i] < d) i++;
+    const k = cum[i] > cum[i - 1] ? (d - cum[i - 1]) / (cum[i] - cum[i - 1]) : 0;
+    const a = pts[i - 1];
+    const b = pts[i];
+    return { lon: a.lon + (b.lon - a.lon) * k, lat: a.lat + (b.lat - a.lat) * k, h: a.h + (b.h - a.h) * k, heading: Math.atan2((b.lon - a.lon) * Math.cos(a.lat), b.lat - a.lat) };
+  };
+  state.walkerAt = at;
+  const scale = template.realHeight / Math.max(template.bounds.size[1], 1e-6);
+  const lift = -template.bounds.min[1] * scale; // metres from the model's origin down to its feet
+  const position = new Cesium.CallbackPositionProperty((time, result) => {
+    const p = at();
+    return Cesium.Cartesian3.fromRadians(p.lon, p.lat, lift, Cesium.Ellipsoid.WGS84, result);
+  }, false);
+  const orientation = new Cesium.CallbackProperty(() => {
+    const p = at();
+    return Cesium.Transforms.headingPitchRollQuaternion(Cesium.Cartesian3.fromRadians(p.lon, p.lat, p.h), new Cesium.HeadingPitchRoll(p.heading + WALK_HEADING_OFFSET, 0, 0));
+  }, false);
+  state.walker = state.viewer.entities.add({
+    name: 'Walking to higher ground',
+    position,
+    orientation,
+    // The rigged model is centred on its hips, so stand it on the ground by lifting it half its height.
+    model: { uri: state.extras.walk, scale, minimumPixelSize: 48, heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND, runAnimations: true },
+  });
+  // The walk cycle plays on the scene clock: speed it up to match the shown pace (the sun barely moves).
+  state.viewer.clock.multiplier = WALK_SPEED_SHOWN / 1.3;
+  state.viewer.clock.shouldAnimate = true;
 }
 
 function adviceList() {
@@ -875,6 +1067,12 @@ function renderObjectList() {
     const duplicate = el('button', '', 'Duplicate');
     duplicate.onclick = () => setPending({...obj});
     actions.append(move, duplicate);
+    if (state.generationEnabled && /^\/models\/(library|generated)\/[\w.-]+\.glb$/.test(obj.url)) {
+      const ar = el('button', '', obj.exportUrl ? 'Open AR file' : 'AR / 3D print');
+      ar.title = 'Lux3D multi-format export: USDZ for AR on a phone';
+      ar.onclick = () => exportForAr(obj, ar);
+      actions.append(ar);
+    }
     const title = el('span', 'object-title');
     title.append(el('span', 'name', obj.name), el('small', 'library-meta', obj.source?.startsWith('lux3d') ? `Aholo Lux3D · task ${obj.taskId}` : obj.source === 'schematic' ? 'Schematic comparison' : '3D object'));
     li.append(title, remove, controls, actions);
@@ -1139,7 +1337,7 @@ function renderImpact() {
     list.children[i].dataset.level = level;
     name.textContent = obj.name;
     depth.textContent = here < 0.02 ? `${obj.realHeight.toFixed(2)} m tall` : `${here.toFixed(2)} m here`;
-    status.textContent = text;
+    status.textContent = obj.muddy ? `${text} · mud left behind (Lux3D material transfer)` : text;
     bar.firstChild.style.width = `${Math.min(1, share) * 100}%`;
   });
   renderDepthTicks(objects);
@@ -1206,6 +1404,7 @@ function setDepth(value, source = 'Manual illustration - not a forecast', { from
   });
   updateWater();
   if (!fromArea && state.area?.ready) state.area.showDepth(state.depth);
+  updateAftermath();
   renderFacts();
   syncRoomWater();
   if (state.safety && Math.abs(state.safety.depth - state.depth) > 0.01) {
@@ -1271,6 +1470,7 @@ function toggleOrbit() {
 
 async function cameraView(view) {
   if (!state.pin) return toast('Choose a street first.');
+  if (state.followOff) followWalker(false);
   if (state.orbitOff) toggleOrbit();
   const obj = state.selected ?? state.objects[0];
   const focus = view !== 'overview' && obj;
@@ -1979,7 +2179,8 @@ function wireUi() {
   $('#demo-go').onclick = async () => {
     const button = $('#demo-go'); button.disabled = true;
     $('#demo-status').textContent = 'Loading street and Lux3D SUV...';
-    try { await openScene(SCENES[0]); $('#demo-status').textContent = 'Demo ready. Adjust the depth or try Depth detective.'; }
+    // The real 3D city replays Paiporta's storm (the most complete OpenStreetMap data); Studio has one street.
+    try { await openScene(SCENES[state.mode === 'studio' ? 0 : 1]); $('#demo-status').textContent = 'Demo ready. Drag the timeline, or open Escape to find higher ground.'; }
     catch(error) { $('#demo-status').textContent = 'Demo could not load: ' + error.message + '. Try again.'; }
     finally { button.disabled = false; }
   };
@@ -2173,6 +2374,7 @@ async function init() {
   }
   else await loadWorld(viewer);
   state.water = createWater(viewer);
+  loadExtras();
   // The area simulation needs real terrain, so it runs in Real street mode only.
   if (state.mode === 'street') {
     try {
@@ -2187,11 +2389,12 @@ async function init() {
     console.warn('Storm desk unavailable.', error);
   }
   await loadLibrary();
+  renderExtras();
   $('#world-status').textContent = state.mode === 'studio' ? 'Ready · illustrative terrain, no live hazard data.' : state.worldKind === 'photorealistic' ? 'Real street · photorealistic city, modelled river data.' : 'Real street · terrain fallback, modelled river data.';
   $('#map-mode-label').textContent = state.mode === 'studio' ? 'STUDIO · ILLUSTRATIVE STREET' : 'REAL STREET · LIVE MAP';
   if (state.mode === 'street') {
     $('#location-help').textContent = 'Search or use your location, and your spot is set on the street there. Click the map any time to move it.';
-    $('#demo-description').textContent = 'Visit Kerrville, Texas, with a Lux3D car for scale and an illustrative rising flood.';
+    $('#demo-description').textContent = 'Replay the storm that flooded Paiporta, Spain, in October 2024, with its recorded rainfall and a Lux3D car for scale.';
   }
   new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas)
     .setInputAction(onMapClick, Cesium.ScreenSpaceEventType.LEFT_CLICK);
@@ -2216,7 +2419,7 @@ async function init() {
   if (new URLSearchParams(location.search).has('debug')) {
     window.waterline = {
       state, undoObjects, renderRisk, removeObject, setPending, copyShareLink, restoreFromHash, setPin, setDepth, loadTemplate, placeObject, playFlood, findHigherGround, openScene, SCENES, groundHeightAt, sceneData, goToPlace, searchPlaces,
-      get storm() { return state.storm; }, get area() { return state.area; },
+      get storm() { return state.storm; }, get area() { return state.area; }, followWalker, startWalker,
       setHeightSampler: (fn) => { heightSampler = fn; },
     };
   }

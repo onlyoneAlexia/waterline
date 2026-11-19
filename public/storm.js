@@ -58,7 +58,7 @@ export function createStorm({ Cesium, state, setDepth, stopPlaying, toast, el, r
 
   function renderWeather() {
     const card = $('#wx-card');
-    card.hidden = !pin;
+    card.hidden = !pin || state.mode === 'studio'; // the studio street is not a real place
     $('#wx-place').textContent = placeName || 'Your spot';
     if (!weather) return;
     const tz = weather.place?.timezone;
@@ -130,7 +130,7 @@ export function createStorm({ Cesium, state, setDepth, stopPlaying, toast, el, r
       if (!area || pin !== forPin) return false;
       const info = state.area.info;
       areaStatus(`Simulating ${(info.sizeM / 1000).toFixed(1)} × ${(info.sizeM / 1000).toFixed(1)} km at ${info.cellM.toFixed(0)} m`
-        + (info.osm ? ` · ${info.osm.buildings.toLocaleString()} buildings, ${info.osm.facilities} services (OpenStreetMap)` : ''));
+        + (info.osm ? ` · ${info.osm.buildings.toLocaleString()} buildings, ${info.osm.facilities} services (OpenStreetMap${info.osm.partial ? `, nearest ${info.osm.radius} m: the full area is busy` : ''})` : ''));
       $('#layers').hidden = false;
       $('#legend').hidden = false;
       if (scenario) { rebuildSeries(); seek(t); } else setDepth(state.depth, state.depthSource);

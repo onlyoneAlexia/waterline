@@ -1,0 +1,486 @@
+[
+  {
+    "id": "family-suv-flooded-reference",
+    "kind": "reference-image",
+    "input": "family-suv",
+    "endpoint": "/global/lux3d/v1/generate/multimodal-to-image/task/create",
+    "taskIds": [
+      "8384560"
+    ],
+    "seconds": [
+      37
+    ],
+    "request": {
+      "prompt": "The same SUV from the same camera angle, after a muddy river flood: brown silt and dried mud caked on the tyres, wheels, bumpers and lower doors, a clear dirty tide line along the body at window-sill height, water stains and grime above it, dull dirty paint and glass. Photorealistic, plain white background, no water, no people.",
+      "img": "/models/thumbs/family-suv.png"
+    },
+    "createdAt": "2026-11-19T03:23:01.521Z",
+    "file": "/models/extras/family-suv-flooded-reference.png",
+    "bytes": 1122872,
+    "sha256": "a0d98966df9f97aeecbf7d5296385493e5eddaf3a909332ad793f9a0a5f5c692"
+  },
+  {
+    "id": "front-door-usdz",
+    "kind": "export-usdz",
+    "input": "front-door",
+    "endpoint": "/global/lux3d/v1/multi-format-export/task/create",
+    "taskIds": [
+      "8384603"
+    ],
+    "seconds": [
+      49
+    ],
+    "request": {
+      "outputFormat": [
+        "usdz",
+        "stl"
+      ],
+      "trueScale": {
+        "realHeight": 2.3,
+        "scale": 0.733488
+      }
+    },
+    "createdAt": "2026-11-19T03:24:11.323Z",
+    "file": "/models/extras/front-door.usdz",
+    "bytes": 6812094,
+    "sha256": "e32f8af01488bb814ffb5ba78b3fb69bf15ec29f3f63fc767a8096349ec9c7c8",
+    "firstEntry": "RealityKitPreview.usdc"
+  },
+  {
+    "id": "front-door-stl",
+    "kind": "export-stl",
+    "input": "front-door",
+    "endpoint": "/global/lux3d/v1/multi-format-export/task/create",
+    "taskIds": [
+      "8384603"
+    ],
+    "seconds": [
+      49
+    ],
+    "request": {
+      "outputFormat": [
+        "usdz",
+        "stl"
+      ],
+      "trueScale": {
+        "realHeight": 2.3,
+        "scale": 0.733488
+      }
+    },
+    "createdAt": "2026-11-19T03:24:14.374Z",
+    "file": "/models/extras/front-door.stl",
+    "bytes": 3878884,
+    "sha256": "ea01b3cb68bee9f8a0fbcac55685a4427ea6765540b4aa10600c4b023cb00d90",
+    "format": "binary",
+    "triangles": 77576,
+    "size": [
+      51.861,
+      21.961,
+      80
+    ]
+  },
+  {
+    "id": "family-suv-usdz",
+    "kind": "export-usdz",
+    "input": "family-suv",
+    "endpoint": "/global/lux3d/v1/multi-format-export/task/create",
+    "taskIds": [
+      "8384647"
+    ],
+    "seconds": [
+      88
+    ],
+    "request": {
+      "outputFormat": [
+        "usdz",
+        "stl"
+      ],
+      "trueScale": {
+        "realHeight": 1.8,
+        "scale": 0.444478
+      }
+    },
+    "createdAt": "2026-11-19T03:24:48.454Z",
+    "file": "/models/extras/family-suv.usdz",
+    "bytes": 10529995,
+    "sha256": "359889352ef63b3ac3e5b18bc224df35810aac3b328eda6d0e4e601a6cc16b6a",
+    "firstEntry": "RealityKitPreview.usdc"
+  },
+  {
+    "id": "family-suv-stl",
+    "kind": "export-stl",
+    "input": "family-suv",
+    "endpoint": "/global/lux3d/v1/multi-format-export/task/create",
+    "taskIds": [
+      "8384647"
+    ],
+    "seconds": [
+      88
+    ],
+    "request": {
+      "outputFormat": [
+        "usdz",
+        "stl"
+      ],
+      "trueScale": {
+        "realHeight": 1.8,
+        "scale": 0.444478
+      }
+    },
+    "createdAt": "2026-11-19T03:24:52.406Z",
+    "file": "/models/extras/family-suv.stl",
+    "bytes": 13964284,
+    "sha256": "e6c081b34f665e93cd7cc143d93064d7270f9fc9d9b6608aa2f7c254dff92fbc",
+    "format": "binary",
+    "triangles": 279284,
+    "size": [
+      39.472,
+      80,
+      32.429
+    ]
+  },
+  {
+    "id": "family-suv-flooded",
+    "kind": "material-transfer",
+    "input": "family-suv",
+    "endpoint": [
+      "/global/lux3d/v1/generate/multimodal-to-image/task/create",
+      "/global/lux3d/v1/generate/material-transfer/task/create"
+    ],
+    "taskIds": [
+      "8384560",
+      "8384646"
+    ],
+    "seconds": [
+      37,
+      186
+    ],
+    "request": {
+      "version": "v3.0-standard",
+      "outputFormat": [
+        "glb"
+      ],
+      "referenceImage": "/models/extras/family-suv-flooded-reference.png"
+    },
+    "createdAt": "2026-11-19T03:26:38.335Z",
+    "file": "/models/extras/family-suv-flooded.glb",
+    "bytes": 10065364,
+    "sha256": "30871c003ecbe9bc856fffb1ab846d2bb2ddb1c84b97230a6a9073f31af24b00",
+    "original": {
+      "bytes": 18879144,
+      "sha256": "b649902d3f2a5d16838acd9589a12e4ed13e05937a984d6ac15346402d9f4cd8",
+      "file": ".waterline/original-models/family-suv-flooded.glb"
+    },
+    "gltfSize": [
+      4.93,
+      4.05,
+      9.988
+    ],
+    "images": [
+      "image/png",
+      "image/png",
+      "image/png"
+    ]
+  },
+  {
+    "id": "adult-person-apose-reference",
+    "kind": "reference-image",
+    "input": "adult-person",
+    "endpoint": "/global/lux3d/v1/generate/multimodal-to-image/task/create",
+    "taskIds": [
+      "8385044"
+    ],
+    "seconds": [
+      40
+    ],
+    "request": {
+      "prompt": "The same man with the same face, hair and clothes (grey t-shirt, blue jeans, white trainers), full body, front view, standing in a neutral A-pose for 3D character rigging: both arms straight and held out about 45 degrees away from the body, hands open, legs slightly apart, feet flat. Photorealistic, plain white background, even lighting.",
+      "img": "/models/thumbs/adult-person.png"
+    },
+    "createdAt": "2026-11-19T03:35:02.870Z",
+    "file": "/models/extras/adult-person-apose-reference.png",
+    "bytes": 1030596,
+    "sha256": "8b6642a47602efe908e5623be015a8bcd523c308dc988aea2577aa387e349bfb"
+  },
+  {
+    "id": "adult-person-walk",
+    "kind": "rig-walk",
+    "input": "adult-person",
+    "endpoint": [
+      "/global/lux3d/v1/generate/multimodal-to-image/task/create",
+      "/global/lux3d/v1/generate/img-to-3d/task/create",
+      "/global/lux3d/v1/animations/rig/task/create",
+      "/global/lux3d/v1/animations/retarget/task/create"
+    ],
+    "taskIds": [
+      "8385044",
+      "8385075",
+      "8385131",
+      "8385236"
+    ],
+    "seconds": [
+      40,
+      64,
+      72,
+      16
+    ],
+    "request": {
+      "animationIds": [
+        "Walk_Loop"
+      ],
+      "animateInPlace": true,
+      "outFormat": "glb",
+      "aPoseReference": "/models/extras/adult-person-apose-reference.png"
+    },
+    "note": "The Library person (arms down) was refused by auto-rigging (task 8384588, MODEL_NOT_RIGGABLE), so the same person was re-posed in an A-pose with multimodal-to-image and rebuilt with image-to-3D before rigging.",
+    "createdAt": "2026-11-19T03:35:15.276Z",
+    "file": "/models/extras/adult-person-walk.glb",
+    "bytes": 2921008,
+    "sha256": "05a20ae028614450505ce9d98850ba09e4b47ea44712c2969125aa7e4b89e867",
+    "original": {
+      "bytes": 17827376,
+      "sha256": "0018446e3887a5b58d64fd58bf24fdb00b7e4f27925c3c3631fa2dc7a80682fc",
+      "file": ".waterline/original-models/adult-person-walk.glb"
+    },
+    "hasSkin": true,
+    "hasAnimation": true,
+    "skins": [
+      {
+        "name": "Armature",
+        "joints": 52
+      }
+    ],
+    "animations": [
+      {
+        "name": "animation_1",
+        "channels": 53,
+        "duration": 1.333,
+        "netTranslation": 0,
+        "netTranslationNode": "mixamorig:Hips"
+      }
+    ],
+    "gltfSize": [
+      1.256,
+      1.8,
+      0.363
+    ]
+  },
+  {
+    "id": "family-suv-parts",
+    "kind": "part-split",
+    "input": "family-suv",
+    "endpoint": "/global/lux3d/v1/part-split/task/create",
+    "taskIds": [
+      "8384643"
+    ],
+    "seconds": [
+      116
+    ],
+    "createdAt": "2026-11-19T03:34:23.387Z",
+    "file": "/models/extras/family-suv-parts.glb",
+    "bytes": 9804352,
+    "sha256": "fe38472f9515ef2e288193f1dcefb3688bb9f0786c77fdb8202159facfd3694d",
+    "original": {
+      "bytes": 9802816,
+      "sha256": "15edb010e999f038ca611cdd5ff310e948cd20ba5b9ec119e9386501f3c088d8",
+      "file": ".waterline/original-models/family-suv-parts.glb"
+    },
+    "lux3dResult": {
+      "bytes": 9801824,
+      "sha256": "5cef4cdd2f7ee0e2f6da4a64c19acb048542be83f3eb6722976c3322f857bcc6"
+    },
+    "repairs": "Lux3D returned 5 unnamed parts with no POSITION min/max (required by glTF); bounds were computed and parts named by size and position (+Z front, +X left, the glTF convention).",
+    "parts": [
+      {
+        "name": "wheel-front-left",
+        "heightFraction": [
+          0,
+          0.444
+        ],
+        "vertices": 13981,
+        "min": [
+          1.468,
+          -2.023,
+          2.167
+        ],
+        "max": [
+          2.141,
+          -0.226,
+          3.911
+        ]
+      },
+      {
+        "name": "wheel-front-right",
+        "heightFraction": [
+          0,
+          0.444
+        ],
+        "vertices": 13724,
+        "min": [
+          -2.143,
+          -2.024,
+          2.166
+        ],
+        "max": [
+          -1.487,
+          -0.226,
+          3.915
+        ]
+      },
+      {
+        "name": "wheel-rear-right",
+        "heightFraction": [
+          0,
+          0.445
+        ],
+        "vertices": 13818,
+        "min": [
+          -2.144,
+          -2.025,
+          -3.779
+        ],
+        "max": [
+          -1.488,
+          -0.224,
+          -2.054
+        ]
+      },
+      {
+        "name": "body",
+        "heightFraction": [
+          0.154,
+          1
+        ],
+        "vertices": 126925,
+        "min": [
+          -2.465,
+          -1.401,
+          -4.994
+        ],
+        "max": [
+          2.465,
+          2.025,
+          4.994
+        ]
+      },
+      {
+        "name": "wheel-rear-left",
+        "heightFraction": [
+          0,
+          0.445
+        ],
+        "vertices": 13223,
+        "min": [
+          1.469,
+          -2.024,
+          -3.781
+        ],
+        "max": [
+          2.154,
+          -0.223,
+          -2.053
+        ]
+      }
+    ],
+    "meshes": [
+      {
+        "name": "wheel-front-left",
+        "primitives": 1
+      },
+      {
+        "name": "wheel-front-right",
+        "primitives": 1
+      },
+      {
+        "name": "wheel-rear-right",
+        "primitives": 1
+      },
+      {
+        "name": "body",
+        "primitives": 1
+      },
+      {
+        "name": "wheel-rear-left",
+        "primitives": 1
+      }
+    ],
+    "gltfSize": [
+      4.93,
+      4.05,
+      9.988
+    ]
+  },
+  {
+    "id": "front-door-open",
+    "kind": "articulation",
+    "input": "front-door",
+    "endpoint": "/global/lux3d/v1/articulation-animation/task/create",
+    "taskIds": [
+      "8385490"
+    ],
+    "seconds": [
+      157
+    ],
+    "request": {
+      "prompt": "Keep the door frame fixed. Add a hinge joint on one vertical edge of the door leaf so the door swings open about 90 degrees and then closes again slowly."
+    },
+    "createdAt": "2026-11-19T03:41:17.773Z",
+    "file": "/models/extras/front-door-open.glb",
+    "bytes": 10039224,
+    "sha256": "4a626c060dee2eb0bd451ddc45f9d8173d41b9151316bcb814c65fff05a181cc",
+    "original": {
+      "bytes": 17402040,
+      "sha256": "266c18494b09942c72d6df4bda960bb10793a48ead50312989955fe803f99441",
+      "file": ".waterline/original-models/front-door-open.glb"
+    },
+    "lux3dResult": {
+      "file": ".waterline/extras/front-door-open.lux3d.zip",
+      "bytes": 11491348,
+      "sha256": "47862eea7cb424fc2a04acfab9a60777f2e524aff831052f5164b0086e548e08",
+      "format": "URDF in ZIP"
+    },
+    "conversion": "URDF links merged into one GLB; the revolute joint became node \"hinge\" with a 5 s open-hold-close rotation clip \"door-open\" (Waterline, not Lux3D).",
+    "joint": {
+      "name": "door_leaf_joint",
+      "type": "revolute",
+      "origin": [
+        0.604574,
+        1.47329554,
+        0.008669
+      ],
+      "axis": [
+        0.002887,
+        -0.999968,
+        -0.007471
+      ],
+      "limits": [
+        -1.570796,
+        0
+      ]
+    },
+    "nodes": [
+      "urdf_source_world_0",
+      "source_surface_0",
+      "urdf_export_frame",
+      "urdf_source_world_0",
+      "source_surface_0",
+      "urdf_export_frame",
+      "frame",
+      "hinge"
+    ],
+    "animations": [
+      {
+        "name": "door-open",
+        "channels": 1,
+        "duration": 5,
+        "netTranslation": 0,
+        "netTranslationNode": null
+      }
+    ],
+    "gltfSize": [
+      2.032,
+      3.136,
+      0.861
+    ]
+  }
+]

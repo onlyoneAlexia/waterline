@@ -39,5 +39,23 @@ await page.evaluate(() => {
 });
 await page.waitForTimeout(7000);
 await page.screenshot({ path: path.join(out, '2-peak-overview.png') });
+// After the peak: the water falls and the SUV swaps to its Lux3D "after the flood" model.
+await page.evaluate(() => {
+  const { storm } = window.waterline;
+  storm.seek(storm.scenario.hours.length - 1);
+  document.querySelector('[data-view="focus"]').click();
+});
+await page.waitForTimeout(6000);
+await page.screenshot({ path: path.join(out, '3-after-flood.png') });
+// Escape: higher ground, a route, and the Lux3D walker.
+await page.evaluate(() => window.waterline.storm.seek(window.waterline.storm.scenario.depth.indexOf(Math.max(...window.waterline.storm.scenario.depth))));
+await page.evaluate(() => window.waterline.findHigherGround());
+await page.waitForFunction(() => document.querySelector('#safety')?.textContent.includes('min on foot') || document.querySelector('#safety')?.textContent.includes('No higher'), null, { timeout: 90_000 }).catch(() => {});
+await page.waitForTimeout(5000);
+await page.screenshot({ path: path.join(out, '4-escape-route.png') });
+await page.evaluate(() => window.waterline.followWalker(true));
+await page.waitForTimeout(6000);
+await page.screenshot({ path: path.join(out, '5-walker.png') });
+console.log(JSON.stringify({ safety: await page.evaluate(() => document.querySelector('#safety')?.textContent.slice(0, 200)), walker: await page.evaluate(() => Boolean(window.waterline.state.walker)), muddy: await page.evaluate(() => window.waterline.state.objects.map((o) => `${o.name}:${Boolean(o.muddy)}`)) }));
 console.log(JSON.stringify({ errors: errors.slice(0, 8), stats: await page.evaluate(() => { const s = window.waterline.state.areaStats; return s && { ha: Math.round(s.areaM2 / 1e4), max: s.maxDepth.toFixed(1), b: s.buildings, cut: s.roads?.cutKm.toFixed(1) }; }) }));
 await browser.close();

@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   gridPoints, cellAt, floodOnset, lowestCells, depthsAt, volumeAt, levelForVolume, floodStats,
-  patchHeights, fitPlane, detrend, rainStorage, responseShape, designStorm, normalise, sampleSeries, bandOf, surgeShape, riverShape,
+  patchHeights, fitPlane, detrend, openWaterMask, rainStorage, responseShape, designStorm, normalise, sampleSeries, bandOf, surgeShape, riverShape,
 } from '../public/sim.js';
 
 // A 5×5 valley: a channel down the middle column (height 0), banks rising to 4 m,
@@ -65,6 +65,14 @@ test('a sloping valley floor is detrended so one level floods it evenly', () => 
   assert.ok(Math.max(...floor) - Math.min(...floor) < 0.3, 'the valley floor is level after detrending');
   const steep = fitPlane(Float64Array.from({ length: m * m }, (_, k) => 0.2 * ((k % m) * 20)), m, 20);
   assert.equal(steep.a, 0.02, 'slope is capped');
+});
+
+test('a lagoon plateau is recognised as open water, a river channel is not', () => {
+  const lagoon = Float64Array.from({ length: 100 }, (_, k) => ((k % 10) < 3 ? 20.1 + (k % 2) * 0.1 : 22 + (k % 10) * 0.3));
+  const mask = openWaterMask(lagoon);
+  assert.ok(mask);
+  assert.equal(mask.reduce((a, b) => a + b, 0), 30);
+  assert.equal(openWaterMask(Float64Array.from({ length: 100 }, (_, k) => (k === 5 ? 0 : 10 + k * 0.1))), null);
 });
 
 test('missing heights are patched from neighbours', () => {

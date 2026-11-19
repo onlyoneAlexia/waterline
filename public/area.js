@@ -2,7 +2,7 @@
 // simulation from sim.js, draws the flooded area (realistic water up close, depth colours from
 // above), and counts the buildings, roads and facilities it reaches (OpenStreetMap data).
 import {
-  BANDS, bandOf, gridPoints, cellAt, patchHeights, floodOnset, lowestCells, floodStats, levelForVolume, fitPlane, detrend, medianFilter, localGround, lowestNear,
+  BANDS, bandOf, gridPoints, cellAt, patchHeights, floodOnset, lowestCells, floodStats, levelForVolume, fitPlane, detrend, medianFilter, localGround, lowestNear, openWaterMask,
 } from './sim.js';
 
 export const AREA_SIZE_M = 1800;
@@ -283,7 +283,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
 
   async function loadOsm(lat, lon, id) {
     try {
-      const response = await fetch(`/api/osm?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&radius=${OSM_RADIUS_M}`, { signal: AbortSignal.timeout(60_000) });
+      const response = await fetch(`/api/osm?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&radius=${OSM_RADIUS_M}`, { signal: AbortSignal.timeout(200_000) }); // the server may try three Overpass mirrors, then a smaller area
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
       if (id !== buildId) return null;
@@ -342,7 +342,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
         show: layers.facilities,
       }));
     }
-    return { buildings, roads, facilities, points: pointList, status: data.status, attribution: data.attribution };
+    return { buildings, roads, facilities, points: pointList, status: data.status, attribution: data.attribution, radius: data.radius, partial: Boolean(data.partial) };
   }
 
   // ---------- public API ----------
@@ -384,10 +384,14 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
     const patched = medianFilter(patchHeights(raw, grid.n), grid.n);
     // Flood maths runs on detrended heights (the valley's regional slope removed), so one water level
     // stands for a surface that slopes with the valley instead of a flat lake drowning everything downhill.
-    const plane = fitPlane(patched, grid.n, grid.cellM);
+    // Open water (sea, lagoon) is already water: leave it out, so rain and surge flood the land around it.
+    const water = openWaterMask(patched);
+    const land = water ? Float64Array.from(patched, (h, k) => (water[k] ? NaN : h)) : patched;
+    const plane = fitPlane(land, grid.n, grid.cellM);
     const heights = detrend(patched, grid.n, grid.cellM, plane);
+    if (water) water.forEach((w, k) => { if (w) heights[k] = Infinity; });
     const pinCell = cellAt(grid, lon, lat);
-    const pinTilt = patched[pinCell] - heights[pinCell];
+    const pinTilt = Number.isFinite(heights[pinCell]) ? patched[pinCell] - heights[pinCell] : 0;
     // Street level in the terrain model: the pin's own sample can sit on a building bump (4 m in Paiporta),
     // which would make "1 m at your spot" drown everything 4 m lower. Use the low ground around it instead.
     // Both models use the WGS84 ellipsoid, so the 3D city's street height is the best street level,
@@ -466,7 +470,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
       const row = (j) => [...area.raw.slice(j * n, j * n + n)].filter((_, i) => i % 15 === 0).map((v) => v.toFixed(1)).join(' ');
       return { plane: area.plane, rawP: [0, 0.1, 0.5, 0.9, 1].map((p) => pct(area.raw, p).toFixed(1)), flatP: [0, 0.1, 0.5, 0.9, 1].map((p) => pct(area.heights, p).toFixed(1)), terrainPin: area.terrainPin, pinCell: area.pinCell, rows: [0, 22, 45, 67, 89].map(row) };
     },
-    get info() { return area && { cellM: area.grid.cellM, sizeM: area.grid.sizeM, terrainPin: area.terrainPin, offset: area.offset, osm: area.osm && { buildings: area.osm.buildings.length, roads: area.osm.roads.length, facilities: area.osm.facilities.length, status: area.osm.status } }; },
+    get info() { return area && { cellM: area.grid.cellM, sizeM: area.grid.sizeM, terrainPin: area.terrainPin, offset: area.offset, osm: area.osm && { buildings: area.osm.buildings.length, roads: area.osm.roads.length, facilities: area.osm.facilities.length, status: area.osm.status, radius: area.osm.radius, partial: area.osm.partial } }; },
     /** Catchment for local rain: the whole simulated square. */
     get areaM2() { return AREA_SIZE_M * AREA_SIZE_M; },
   };

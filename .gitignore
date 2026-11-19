@@ -26,3 +26,4 @@ public/models/worlds/*
 !public/models/worlds/example-living-room.*
 .claude/
 test/snap/
+public/models/generated/exports/

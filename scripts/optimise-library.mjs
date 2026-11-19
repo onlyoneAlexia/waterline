@@ -65,7 +65,7 @@ export function repack(json, bin, replacements) {
   return Buffer.concat(parts);
 }
 
-async function encoder() {
+export async function encoder() {
   const browser = await chromium.launch({ channel: 'msedge', headless: true });
   const page = await browser.newPage();
   const encode = (bytes, mimeType, { maxSize, quality }) => page.evaluate(async ({ b64, mimeType, maxSize, quality }) => {
@@ -84,7 +84,7 @@ async function encoder() {
   return { encode, close: () => browser.close() };
 }
 
-async function optimise(file, codec) {
+export async function optimise(file, codec) {
   const original = await readFile(file);
   const { json, bin } = parseGlb(original);
   if (json.asset?.extras?.[MARKER]) return null;

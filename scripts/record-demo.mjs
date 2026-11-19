@@ -37,15 +37,15 @@ page.on('pageerror', (e) => console.log('pageerror', e.message));
 async function overlay() {
   await page.addStyleTag({ content: `
     #rec-caption { position: fixed; z-index: 99; left: 50%; top: 22px; transform: translateX(-50%); max-width: 1100px; padding: 14px 28px;
-      border-radius: 999px; background: rgba(61,35,24,.92); color: #fbe3bd; font: 500 24px/1.35 Poppins, sans-serif; text-align: center;
+      border-radius: 999px; background: rgba(8,17,31,.9); color: #e8f1f8; border: 1px solid rgba(255,196,77,.35); font: 500 24px/1.35 Poppins, sans-serif; text-align: center;
       box-shadow: 0 12px 30px rgba(0,0,0,.25); transition: opacity .3s; pointer-events: none; }
-    #rec-caption small { display: block; font-size: 16px; color: #f2cd92; }
+    #rec-caption small { display: block; font-size: 16px; color: #ffc44d; }
     #rec-cursor { position: fixed; z-index: 100; width: 26px; height: 26px; margin: -13px 0 0 -13px; border-radius: 50%;
-      background: rgba(255,255,255,.85); border: 3px solid #3d2318; pointer-events: none; transition: transform .12s; }
+      background: rgba(255,255,255,.85); border: 3px solid #ffc44d; pointer-events: none; transition: transform .12s; }
     #rec-cursor.down { transform: scale(.7); }
-    #rec-card { position: fixed; inset: 0; z-index: 98; display: grid; place-items: center; text-align: center; background: linear-gradient(180deg,#7fcdf2,#bfe7fa);
-      color: #3d2318; font: 700 64px/1.1 'Cinzel Decorative', serif; text-transform: uppercase; }
-    #rec-card p { margin: 18px 0 0; font: 500 26px/1.5 Poppins, sans-serif; text-transform: none; }` });
+    #rec-card { position: fixed; inset: 0; z-index: 98; display: grid; place-items: center; text-align: center; background: radial-gradient(60% 50% at 70% 35%, rgba(47,143,224,.3), transparent 70%), #08111f;
+      color: #e8f1f8; font: 700 72px/1.1 Poppins, sans-serif; letter-spacing: -.02em; }
+    #rec-card p { margin: 18px 0 0; font: 500 26px/1.5 Poppins, sans-serif; color: #b9c8d8; } #rec-card b { color: #ffc44d; }` });
   await page.evaluate(() => {
     if (document.querySelector('#rec-cursor')) return;
     const c = document.createElement('div'); c.id = 'rec-cursor'; document.body.append(c);
@@ -78,6 +78,16 @@ const settleTiles = () => page.evaluate(async () => {
 }).catch(() => {});
 
 try {
+  const statsLine = () => page.evaluate(() => {
+    const s = window.waterline.state.areaStats;
+    if (!s?.buildings) return '';
+    return `${s.buildings.wet.toLocaleString()} of ${s.buildings.total.toLocaleString()} buildings in water · ${s.roads.cutKm.toFixed(0)} km of road cut · ${s.facilities.length} services hit`;
+  });
+  const aerial = (metres, pitch = -60, seconds = 2.5) => page.evaluate(([m, p, d]) => new Promise((resolve) => {
+    const { viewer, pin } = window.waterline.state;
+    viewer.camera.flyTo({ destination: Cesium.Cartesian3.fromRadians(pin.lon, pin.lat - 0.00012, pin.height + m), orientation: { heading: 0, pitch: Cesium.Math.toRadians(p), roll: 0 }, duration: d, complete: resolve, cancel: resolve });
+  }), [metres, pitch, seconds]);
+
   // 1. Homepage. ?debug skips it and ?nodemo stops the demo starting behind it, so open it here.
   await page.goto(`${origin}/?debug&nodemo`);
   await page.evaluate(() => document.documentElement.classList.add('home-open'));
@@ -85,129 +95,168 @@ try {
   await overlay();
   await page.waitForFunction(() => !!window.waterline?.state?.viewer, null, { timeout: 60000 });
   await hold(1500);
-  // Replay the hero's rising water, waterline ring and label from the start of the take.
   await page.evaluate(() => document.querySelectorAll('.hero-water, .ring, .ring-ripple, .hero-tag').forEach((el) => { el.style.animation = 'none'; void el.offsetHeight; el.style.animation = ''; }));
   start();
-  await caption('Flood maps show a blue patch.', 'Waterline shows the water at your car’s windows, on your street.');
-  await hold(6000);
-  await caption('Built on Aholo Lux3D', 'Your photo or a few words → a true-scale 3D model → a real 3D city → rising water');
+  await caption('Flood maps show a blue patch. People underestimate it.', 'Waterline shows what the storm does to your street, before it comes.');
+  await hold(5500);
+  await caption('Live weather + real terrain + OpenStreetMap + Aholo Lux3D', 'A flood-impact simulator in a photorealistic 3D city');
   await page.locator('#home').evaluate((el) => el.scrollTo({ top: el.querySelector('.home-steps').offsetTop - 20, behavior: 'smooth' }));
   await hold(4500);
   await page.locator('#home').evaluate((el) => el.scrollTo({ top: 0, behavior: 'smooth' }));
-  await hold(1500);
+  await hold(1200);
   await caption('');
   await click(page.locator('#home-demo'));
-  await hold(1200);
+  await hold(1000);
   stop();
 
-  // 2. Kerrville demo (loading cut)
-  await waitDemo().catch(() => {});
+  // 2. Paiporta replay (loading cut): the recorded storm drives the water over the real terrain.
+  await page.waitForFunction(() => window.waterline.storm?.scenario?.id === 'event', null, { timeout: 150000 }).catch(() => {});
+  await page.evaluate(() => window.waterline.storm.pause());
   await settleTiles();
-  await page.evaluate(() => window.waterline.setDepth(0));
+  await page.evaluate(() => { window.waterline.storm.seek(0); });
   await hold(800);
   start();
-  await caption('Kerrville, Texas · 4 July 2025', 'The Guadalupe River rose about 8 m in 45 minutes. This is Louise Hays Park, on the river.');
+  await caption('Paiporta, Spain · 29 October 2024', 'Replaying the real storm: recorded hourly rainfall drives the water across 3.2 km² of terrain');
   await click(page.locator('#play'));
-  await hold(4500);
-  await caption('Every object here is an Aholo Lux3D model, at its real height', 'An SUV (1.8 m) and an adult (1.75 m), standing on the real ground of the 3D city');
   await hold(5000);
-  await caption('The panel reads out what the water is doing', 'SUV: up to the windows · adult: chest-deep');
-  await hold(4000);
+  await caption('The Family SUV and the person are Aholo Lux3D models, at their real height', 'The impact report tracks them: wheels in water → up to the windows → completely under');
+  await hold(5500);
   stop();
 
-  // 3. Make your own with Lux3D, live (generation wait cut)
+  // 3. From above: depth colours and the impact report at the peak.
+  await page.evaluate(() => window.waterline.storm.pause());
+  await page.evaluate(() => { const s = window.waterline.storm; const d = s.scenario.depth; s.seek(d.indexOf(Math.max(...d))); });
   start();
-  await caption('Your things: six Lux3D models are ready to use…');
-  await click(page.locator('.rail [data-go="things"]'));
-  await hold(3500);
-  await caption('…or describe your own', 'Aholo Lux3D text-to-3D, live in the app');
-  await click(page.locator('#tab-text'));
-  await hold(1200);
-  await click(page.locator('[data-example="a red pickup truck"]'));
-  await hold(1200);
-  await click(page.locator('#text-go'));
-  await page.waitForFunction(() => /queue|building/i.test(document.querySelector('#jobs')?.textContent ?? ''), null, { timeout: 60000 }).catch(() => {});
+  await caption('From above, the depth colours show where it goes', 'Every OpenStreetMap building, road and school is checked against the water');
+  await aerial(1100, -62, 3);
+  await settleTiles();
+  await hold(2500);
+  await caption('At the peak', await statsLine());
   await hold(5000);
   stop();
-  const genStart = Date.now();
-  await page.waitForFunction(() => !!window.waterline.state.pending || /Failed/.test(document.querySelector('#jobs')?.textContent ?? ''), null, { timeout: 8 * 60000 });
-  const genSeconds = Math.round((Date.now() - genStart) / 1000) + 5;
-  const placed = await page.evaluate(() => !!window.waterline.state.pending);
+
+  // 4. Drag through the storm.
   start();
-  await caption(`${Math.floor(genSeconds / 60)} min ${genSeconds % 60} s later (skipped): Lux3D’s model is ready`, 'Click the street to place it. “Auto size” reads “pickup” and makes it 1.8 m tall.');
+  await caption('Drag the timeline through the storm, hour by hour', 'Rain bars in blue, the water at your spot in yellow');
+  const tl = await page.locator('#timeline').boundingBox();
+  await moveTo(tl.x + tl.width * 0.3, tl.y + tl.height * 0.6);
+  await page.mouse.down();
+  for (let k = 0.3; k <= 0.62; k += 0.01) { await page.mouse.move(tl.x + tl.width * k, tl.y + tl.height * 0.6); await hold(120); }
+  for (let k = 0.62; k <= 0.98; k += 0.012) { await page.mouse.move(tl.x + tl.width * k, tl.y + tl.height * 0.6); await hold(90); }
+  await page.mouse.up();
+  await hold(1500);
+  stop();
+
+  // 5. What the water leaves behind (Lux3D material transfer).
+  start();
+  await click(page.locator('[data-view="focus"]'));
+  await caption('As the water drops: Lux3D material transfer shows the mud it leaves on your car', 'A mud-stained reference image (Lux3D multimodal-to-image) re-textures the same 3D model');
+  await hold(6500);
+  stop();
+
+  // 6. Make your own with Lux3D, live (generation wait cut).
+  start();
+  await caption('Make it yours: describe your own car', 'Aholo Lux3D text-to-3D, live in the app');
+  await click(page.locator('.rail [data-go="things"]'));
+  await hold(1500);
+  await click(page.locator('#tab-text'));
+  await hold(900);
+  await click(page.locator('[data-example="a red pickup truck"]'));
+  await hold(900);
+  await click(page.locator('#text-go'));
+  await page.waitForFunction(() => /queue|building/i.test(document.querySelector('#jobs')?.textContent ?? ''), null, { timeout: 60000 }).catch(() => {});
   await hold(3500);
+  stop();
+  const genStart = Date.now();
+  await page.waitForFunction(() => !!window.waterline.state.pending || /Failed/.test(document.querySelector('#jobs')?.textContent ?? ''), null, { timeout: 8 * 60000 }).catch(() => {});
+  const genSeconds = Math.round((Date.now() - genStart) / 1000) + 4;
+  const placed = await page.evaluate(() => !!window.waterline.state.pending);
+  await click(page.locator('[data-view="street"]'));
+  await settleTiles();
+  start();
+  await caption(`${Math.floor(genSeconds / 60)} min ${genSeconds % 60} s later (skipped): Lux3D’s pickup is ready`, '“Auto size” reads “pickup” and stands it 1.8 m tall. Click the street to place it.');
+  await hold(3000);
   if (placed) {
-    const map = await page.locator('#map canvas').first().boundingBox();
+    const map = await page.locator('#map .cesium-widget canvas').first().boundingBox();
     const before = await page.evaluate(() => window.waterline.state.objects.length);
-    await moveTo(map.x + map.width * 0.33, map.y + map.height * 0.58);
+    await moveTo(map.x + map.width * 0.42, map.y + map.height * 0.62);
     await hold(300);
     await page.mouse.down(); await hold(80); await page.mouse.up();
     await page.waitForFunction((n) => window.waterline.state.objects.length > n, before, { timeout: 15000 }).catch(() => {});
-    await hold(4500);
+    await hold(1500);
   }
-  stop();
-
-  // 4. Raise the water
-  start();
-  await caption('Drag the water: every object reports what happens to it');
-  await click(page.locator('.rail [data-go="water"]'));
-  const slider = await page.locator('#depth').boundingBox();
-  const at = (m) => slider.x + 14 + (slider.width - 28) * (m / 3);
-  await moveTo(at(1.2), slider.y + slider.height / 2);
-  await page.mouse.down();
-  for (let m = 1.2; m <= 2.05; m += 0.05) { await page.mouse.move(at(m), slider.y + slider.height / 2); await hold(140); }
-  await page.mouse.up();
-  await hold(3500);
-  await caption('Even 60 cm of moving water can sweep a car away', 'The markers on the slider show the top of each of your things');
-  await click(page.locator('.presets button[data-depth="0.6"]'));
-  await hold(4500);
-  stop();
-
-  // 5. Real risk
-  start();
-  await caption('Real risk: modelled river-flood depths for this exact spot', 'JRC / Copernicus global river flood maps');
-  await click(page.locator('.rail [data-go="risk"]'));
-  await hold(5000);
-  await page.evaluate(() => window.waterline.setDepth(1.2));
-  stop();
-
-  // 6. Higher ground (search cut)
-  start();
-  await caption('Then: where do I go?');
-  await click(page.locator('.rail [data-go="safety"]'));
-  await hold(1500);
-  await click(page.locator('#safe-go'));
-  await hold(1500);
-  stop();
-  await page.waitForFunction(() => !document.querySelector('#safe-go').disabled, null, { timeout: 90000 }).catch(() => {});
-  await settleTiles();
-  start();
-  await caption('The nearest higher ground, and a real walking route to it', 'Terrain search + OpenStreetMap route, with the water depth along the way');
+  await caption('Play the storm again: the report now tracks your pickup too');
+  await page.evaluate(() => { window.waterline.storm.seek(window.waterline.storm.scenario.startAt ?? 0); });
+  await click(page.locator('#play'));
   await hold(7000);
   stop();
 
-  // 7. Paiporta (loading cut)
+  // 7. Where do I go? Leave early: the route at the first 40 cm (search cut).
+  await page.evaluate(() => window.waterline.storm.pause());
+  await page.evaluate(() => { const s = window.waterline.storm; const i = s.scenario.depth.findIndex((d) => d >= 0.4); s.seek(Math.max(0, i)); });
   start();
-  await caption('Valencia, Spain · 29 October 2024');
-  await click(page.locator('.rail [data-go="spot"]'));
+  await caption('Where do I go?');
+  await click(page.locator('.rail [data-go="safety"]'));
   await hold(1200);
-  await click(page.locator('#scenes button').nth(1));
-  await hold(1000);
+  await click(page.locator('#safe-go'));
+  await hold(1200);
   stop();
-  await page.waitForFunction(() => document.querySelector('#scene-story')?.textContent.startsWith('Carrer'), null, { timeout: 120000 }).catch(() => {});
+  await page.waitForFunction(() => /min on foot|No higher/.test(document.querySelector('#safety')?.textContent ?? ''), null, { timeout: 90000 }).catch(() => {});
   await settleTiles();
-  await hold(4000);
   start();
-  await caption('Paiporta, near Valencia · 1.5 m in the street', 'People were trapped going to get their cars out of garages. Go early.');
-  await hold(6000);
+  await caption('The nearest ground 1 m above the flood, and a real walking route to it', 'Terrain search + OpenStreetMap route, with the water depth along the way');
+  await hold(5500);
+  await caption('A Lux3D person walks it: rigged and animated by Lux3D', 'Lux3D rigging + animation retargeting (shown sped up)');
+  await page.evaluate(() => window.waterline.followWalker(true));
+  await hold(7500);
+  await page.evaluate(() => window.waterline.followWalker(false));
   stop();
 
-  // 8. End card
+  // 8. Inside your home (Aholo World), loading cut.
+  start();
+  await caption('Then the same water comes inside', 'Aholo World turns one photo of a room into a 3D room');
+  await click(page.locator('.rail [data-go="inside"]'));
+  await hold(1200);
+  await click(page.locator('#room-example'));
+  stop();
+  await page.waitForFunction(() => document.querySelector('#room-loading')?.hidden !== false, null, { timeout: 90000 }).catch(() => {});
+  await page.evaluate(() => window.waterline.setDepth(0.8));
+  await hold(2500);
+  start();
+  await caption('0.8 m in the street → water over the sockets inside', 'Scaled to your ceiling height; the panel says when to go upstairs');
+  await hold(6000);
+  await click(page.locator('#room-close'));
+  await hold(800);
+  stop();
+
+  // 9. Anywhere: a cloudburst what-if over Lagos (loading cut).
+  start();
+  await caption('Anywhere in the world: search your street, then pick a storm', 'Live forecast · storm replay · heavy rain · river flood (JRC) · storm surge');
+  await click(page.locator('.rail [data-go="spot"]'));
+  await hold(2500);
+  stop();
+  await page.evaluate(() => window.waterline.goToPlace('Victoria Island, Lagos, Nigeria', Cesium.Cartographic.fromDegrees(3.4219, 6.4281)));
+  await page.evaluate(() => window.waterline.storm.areaReady);
+  await click(page.locator('.rail [data-go="water"]'));
+  await page.evaluate(() => { document.querySelector('[data-scenario="rain"]').click(); window.waterline.storm.pause(); });
+  await page.selectOption('#p-rain', '250').catch(() => {});
+  await page.evaluate(() => { window.waterline.storm.pause(); window.waterline.storm.seek(0); });
+  await aerial(1000, -60, 0);
+  await settleTiles();
+  start();
+  await caption('Victoria Island, Lagos · what if 250 mm of rain falls in 6 hours?', 'The live forecast, the river and the sea level are on the location card');
+  await click(page.locator('#play'));
+  await hold(9000);
+  await caption('Lagos', await statsLine());
+  await hold(3500);
+  stop();
+
+  // 10. End card
   start();
   await page.evaluate(() => {
-    document.querySelector('#rec-cursor')?.remove(); // no cursor on the end card
+    document.querySelector('#rec-cursor')?.remove();
     const card = document.createElement('div'); card.id = 'rec-card';
-    card.innerHTML = '<div>Waterline<p>See the water before it comes.<br>Aholo Lux3D · real 3D maps · real flood data<br><b>#Manycorehackathon</b></p></div>';
+    card.innerHTML = '<div>Waterline<p>See what the storm does to your street — before it comes.<br>Aholo Lux3D · Aholo World · Open-Meteo · OpenStreetMap · JRC<br><b>#Manycorehackathon</b></p></div>';
     document.body.append(card);
   });
   await caption('');

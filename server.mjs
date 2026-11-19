@@ -23,6 +23,7 @@ import { createLux3D, downloadGlb, Lux3DError } from './lib/lux3d.mjs';
 import { createFloodDepthService } from './lib/flood-depth.mjs';
 import { createWeatherService } from './lib/weather.mjs';
 import { createOsmService } from './lib/osm.mjs';
+import { createExtrasHandlers } from './lib/lux3d-extras-routes.mjs';
 import { DEFAULT_CACHE_DIR, DEFAULT_FIXTURES_DIR } from './lib/disk-cache.mjs';
 
 const ROUTING_URL = 'https://routing.openstreetmap.de/routed-foot/route/v1/foot';
@@ -52,6 +53,9 @@ const MIME = {
   '.wasm': 'application/wasm',
   '.woff2': 'font/woff2',
   '.spz': 'application/octet-stream',
+  '.usdz': 'model/vnd.usdz+zip',
+  '.stl': 'model/stl',
+  '.3mf': 'model/3mf',
 };
 
 const MAX_BODY_BYTES = 12 * 1024 * 1024;
@@ -101,6 +105,8 @@ export function createAppServer(env = process.env, {
   } catch (error) {
     console.warn(`[lux3d] ${error.message}; photo/text generation is disabled`);
   }
+  // Lux3D multi-format export (USDZ for AR, STL/3MF for printing) of any model the app serves.
+  const extras = lux ? createExtrasHandlers({ lux, generatedDir, fetchImpl }) : null;
 
   const tasks = new Map(); // taskId -> { name, createdAt }
   const inflight = new Map(); // taskId -> Promise of a status check
@@ -414,6 +420,10 @@ export function createAppServer(env = process.env, {
       if (url.pathname === '/api/weather' && req.method === 'GET') return await handleWeather(url, res);
       if (url.pathname === '/api/weather/event' && req.method === 'GET') return await handleWeatherEvent(url, res);
       if (url.pathname === '/api/osm' && req.method === 'GET') return await handleOsm(url, res);
+      if (url.pathname === '/api/export') {
+        if (!extras) return sendJson(res, 503, { error: 'Lux3D export is not configured on this server.' });
+        return await extras.handleExport(req, res, url, sendJson);
+      }
       if (url.pathname.startsWith('/api/')) return sendJson(res, 404, { error: 'Not found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'Method not allowed' });
       return await serveStatic(url, res);

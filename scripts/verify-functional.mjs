@@ -82,7 +82,7 @@ try {
   await page.locator('#tab-library').click();
   await page.locator('#library-list button').filter({ hasText: 'Small car' }).click();
   await page.waitForFunction(() => !!waterline.state.pending);
-  const canvas = page.locator('#map canvas').first();
+  const canvas = page.locator('#map .cesium-widget canvas').first();
   const bounds = await canvas.boundingBox();
   await page.mouse.click(bounds.x + bounds.width * .5, bounds.y + bounds.height * .58);
   await page.waitForFunction(() => waterline.state.objects.length === 2);

@@ -1,137 +1,284 @@
 # Waterline
 
-**See a flood against the things you own.** Snap a photo of your car, bike or front door. Aholo Lux3D turns it into a true-scale 3D model, and Waterline places it on your real street in a photorealistic 3D city. Then you raise the water.
+**See what a storm does to your street — before it comes.**
 
-Flood maps show risk as a blue patch, and people underestimate it. Waterline shows the water reaching *your* car's windows on *your* street.
+Waterline is a flood-impact simulator in a photorealistic 3D city. Pick a place and a storm (today's
+forecast, a replay of a real flood with its recorded rainfall, a river flood from the JRC model, or
+your own "what if"), and the water spreads across real terrain hour by hour. Buildings, roads,
+schools and clinics from OpenStreetMap light up as it reaches them, and **Aholo Lux3D** puts the
+things you own — your car, your front door, a person your height — into the water at true scale.
+Then it shows the way to higher ground.
 
-Built for the Manycore Aholo Global 3D AI Hackathon (2026).
+Built for the **Manycore Aholo Global 3D AI Hackathon 2026**.
 
-## How Lux3D is used
+![Paiporta, Spain, at the peak of the October 2024 storm replay: depth colours, flooded services and the impact report](docs/overview.jpg)
 
-| Step | Lux3D feature |
+> Flood maps show risk as a blue patch, and people underestimate it. Waterline shows the water at
+> *your* car's windows, on *your* street, and counts what else goes under with it.
+
+---
+
+## Contents
+
+- [What it does](#what-it-does)
+- [How Aholo is used](#how-aholo-is-used)
+- [How the simulation works](#how-the-simulation-works)
+- [Data sources](#data-sources)
+- [Quick start](#quick-start)
+- [Architecture](#architecture)
+- [Server API](#server-api)
+- [Project layout](#project-layout)
+- [Testing and verification](#testing-and-verification)
+- [Hackathon submission package](#hackathon-submission-package)
+- [Limits](#limits)
+- [Credits](#credits)
+
+## What it does
+
+| | |
 |---|---|
-| Photo of your object → 3D model | Image-to-3D (`G1-Turbo`, PBR materials, AI size prediction) |
-| "Describe it" → 3D model | Text-to-3D (photorealistic style) |
-| Real-world scale | You pick what it is (car 1.5 m, SUV 1.8 m, bus 3.2 m…). Photo models also come back in Lux3D's estimated metres (`aiPredictSize`), used for "Other". Text models come back scaled into a 10-unit box, so they always need a height. |
+| **Storm desk** | A map-first, weather-style interface: location card with live rain, gusts, river discharge and sea level; a layer rail (flood, depth colours, buildings, roads, services); a depth legend; and a timeline under the map with hourly rain bars and the water depth at your spot. |
+| **Five storm scenarios** | **Live forecast** (Open-Meteo hourly rain, yesterday to 3 days ahead) · **Replay the storm** (the recorded ERA5 rainfall of a real flood) · **Heavy rain** what-if (50–400 mm over 3–24 h) · **River flood** (JRC / Copernicus return periods at your spot) · **Storm surge** what-if. Or set the water by hand. |
+| **Area simulation** | 1.8 × 1.8 km of bare-earth terrain at 20 m resolution, flooded hour by hour. Realistic water at street level, depth colours from above. |
+| **Impact report** | Flooded area, deepest water, buildings in water and ground floors flooded, kilometres of road cut (≥ 30 cm, where cars float), and named schools, clinics, pharmacies, fire stations and substations with their depth. |
+| **Your things, true scale** | Snap a photo or type a description: **Lux3D** builds a 3D model in about two minutes, sized to its real height and placed on the street. The impact report tracks it: *wheels in water → up to the windows → completely under*. |
+| **After the flood** | When the water drops, the SUV swaps to a mud-stained version made with **Lux3D material transfer**. |
+| **A way out** | Searches the terrain for the nearest ground 1 m above the flood, gets a walking route (OSRM on OpenStreetMap), reports how deep the water on the way would be, and a **Lux3D-rigged person** walks the route. |
+| **Inside your home** | **Aholo World** turns one photo of a room into a 3D Gaussian-splat room, and the same flood comes in through the door. |
+| **Take it with you** | Export any object as **USDZ** for AR on a phone or **STL** for 3D printing (**Lux3D multi-format export**). |
+| **Real floods** | Kerrville, Texas (4 July 2025) and Paiporta, Spain (29 October 2024), with their recorded rainfall, ship as one-click replays. |
 
-The map is CesiumJS with Google Photorealistic 3D Tiles. The flood is a flat water level ("bathtub" model) measured from the street at your pin.
+<p>
+  <img src="docs/street.jpg" alt="Street-level replay in Paiporta with the Lux3D SUV and person" width="49%">
+  <img src="docs/escape.jpg" alt="Route to higher ground through the flooded streets" width="49%">
+</p>
 
-## Inside your home (Aholo World)
+## How Aholo is used
 
-The street shows the water outside. **Inside** shows it coming in. Aholo World turns one photo of a room (or a description) into a 3D room made of Gaussian splats. Waterline shows the room with three.js and Spark, scales it to the ceiling height you give (a room rebuilt from one photo has no true size of its own), and floods it with the same water level as the street, minus how far your floor sits above the street. Everything below the waterline is tinted, and a panel says what that depth means indoors (sockets, furniture, when to go upstairs).
+Every object in the water is made by Aholo, and Lux3D runs **live inside the app** (the server keeps
+the API key private, with per-visitor and daily limits). Nine Lux3D endpoints are used, plus Aholo
+World and the Asset service:
 
-- An example living room (built by Aholo World from a short description) ships with the app, so anyone can try it at once.
-- Building your own room takes about 10 minutes. If the page is closed, it keeps waiting for the room next time.
-- Server: `POST /api/world` (photo and/or description → `worldId`), `GET /api/world?id=` (status; the finished `.spz` is saved under `public/models/worlds/`).
+| Aholo service | Endpoint | Where it shows up in Waterline |
+|---|---|---|
+| Lux3D | `generate/img-to-3d` | Photo of your car, scooter or door → true-scale 3D model (live) |
+| Lux3D | `generate/text-to-3d` | "a red pickup truck" → 3D model (live); most of the Library |
+| Lux3D | `generate/multimodal-to-image` | Mud-stained reference image; A-pose reference for rigging |
+| Lux3D | `generate/material-transfer` | "After the flood" SUV, swapped in as the water drops |
+| Lux3D | `animations/rig` + `animations/retarget` | The person who walks the escape route (walk cycle) |
+| Lux3D | `part-split` | SUV split into body and four wheels |
+| Lux3D | `articulation-animation` | Front door found its hinge and opens |
+| Lux3D | `multi-format-export` | USDZ (AR) and STL (3D print) — live via `POST /api/export` |
+| Aholo World | `world/v1/generations` | A 3D room from one photo, flooded with the street's water |
+| Asset | `asset/v1/token` + upload | Photos and models sent to the services above |
 
-## Beyond the picture: real risk and a way out
+Provenance — task ids, prompts or source photos, timings, sizes and SHA-256 hashes — is recorded in
+[`public/models/library.json`](public/models/library.json) and
+[`public/models/extras/extras.json`](public/models/extras/extras.json).
+`npm run generate` adds Library models; `node scripts/lux3d-extras.mjs` regenerates the extras.
 
-- **Real flood risk.** When you set your spot, Waterline looks up modelled river-flood depths there (10% down to 0.2% chance each year) from the JRC / Copernicus *Global river flood hazard maps* v2.1, and lets you show them on your street. The app says plainly when the model shows nothing: it leaves out flash floods from rain and coastal floods, the kind that killed people in Kerrville, Texas (2025) and Valencia, Spain (2024).
-- **Get to higher ground.** For the current water level, Waterline searches bare-earth terrain (Cesium World Terrain) outward from your spot for the nearest ground at least 1 m above the water, gets a walking route there (OSRM on OpenStreetMap, via FOSSGIS), and tells you how far it is, how long it takes on foot, and how deep the water on the way would be. If there is no higher ground within 3 km, it says to go up to the upper floors of a strong building instead.
+Aholo does not offer a flood-simulation API, so the hydrology is Waterline's own (below), driven by
+public terrain, weather and map data. Aholo's role is the 3D content that makes the result personal.
 
-## Setup
+## How the simulation works
 
-You need Node.js 22.9 or newer. Run `npm ci` once. Cesium is installed and served locally; geotiff reads the flood maps.
+1. **Terrain grid.** 90 × 90 samples of Cesium World Terrain around your spot (1.8 km square, 20 m
+   cells), with gaps patched and a 3 × 3 median filter that removes building bumps the terrain model
+   carries in dense towns.
+2. **Sloping valleys.** A plane is fitted to the valley floor (iteratively, to the cells at or below
+   it, capped at 2 %) and removed, so one water level stands for a surface that slopes with the
+   valley — a *relative elevation model* — instead of a flat lake drowning everything downhill.
+3. **Connected flooding.** Water enters at the lowest ground (the river channel or shore) and at your
+   spot, and spreads to every cell it can reach without climbing above the water level. A
+   priority-flood pass computes, once, the level at which each cell joins the flood, so any level
+   renders instantly.
+4. **Scenarios set the level over time.**
+   - *Rain* (forecast, what-if): hourly rain × 0.7 runoff, minus 10 mm/h the drains carry, stored in
+     a leaky reservoir over the square; the volume is converted to a water level by binary search.
+   - *Replay*: the recorded rainfall drives a lagged rise-and-fall response, scaled to the depth
+     reported at the street in the real event.
+   - *River*: a 48-hour hydrograph peaking at the JRC modelled depth for the chosen return period.
+   - *Surge*: tide plus a surge bulge peaking at the chosen height.
+5. **Impacts.** Each OpenStreetMap building, road sample and service is matched to a grid cell; its
+   depth is read at the lowest ground beside it.
 
-**No-key demo:** run `npm start` and open http://localhost:3000/?mode=studio. Studio starts with the existing Lux3D-generated Family SUV, a detailed illustrative street, synthetic hillside and animated water. No map account or new generation credits are needed. Studio is not a reconstruction of a real location. When a Cesium token is configured, the root URL opens Real street by default; the mode picker always lets you choose.
+Street level comes from the 3D city itself (both models use the WGS84 ellipsoid), with a sanity check
+against the terrain. The maths is in [`public/sim.js`](public/sim.js) and covered by unit tests.
 
-For live maps and new generation, configure the optional services below:
+## Data sources
 
-1. **Lux3D API key**: https://labs.aholo.ai/api-keys
-2. **Cesium ion token**: sign up free at https://ion.cesium.com, copy a token from *Access Tokens*, and in *Asset Depot* add **Google Photorealistic 3D Tiles** to your assets.
-3. Copy `.env.example` to `.env` and paste both keys in.
-4. Run:
+| Data | Source | Notes |
+|---|---|---|
+| 3D city, terrain, place search | Google Photorealistic 3D Tiles, Cesium World Terrain, Google geocoder via Cesium ion | Needs a Cesium ion token |
+| Rain, wind (forecast) | Open-Meteo Forecast API | Cached 30 min |
+| Recorded storms | Open-Meteo Historical Weather API (ERA5 reanalysis) | Cached permanently |
+| River discharge | Open-Meteo Flood API (GloFAS) | Shown on the location card |
+| Sea level | Open-Meteo Marine API | Used to check whether a surge is plausible |
+| River flood depths | JRC / Copernicus *Global river flood hazard maps* v2.1 | Read from cloud GeoTIFFs with HTTP range requests |
+| Buildings, roads, services | OpenStreetMap via Overpass (three mirrors) | Cached 14 days |
+| Walking routes | FOSSGIS OSRM on OpenStreetMap | |
 
-   ```
-   npm start
-   ```
+Every live source is optional. The server caches responses on disk, fails over between Overpass
+mirrors, serves stale data when a service is down, and falls back to fixtures in
+[`data/fixtures/`](data/fixtures) for the demo places, so the replays work even offline.
+`npm run prewarm` refreshes the fixtures.
 
-   Open http://localhost:3000.
+## Quick start
 
-## Using it
+Requirements: **Node.js 22.9+**. Microsoft Edge is used by the browser checks and capture scripts.
 
-1. Start in Studio, or select **Real street** (needs map credentials) and type your street, town or postcode in **Your spot**, or press **Use my location**. The spot and depth gauge are set on the street there; click the map to fine-tune it.
-2. Optional: open **Inside** to see the water come into a room (the example room, or one built from your photo).
-3. Add objects: upload a photo, describe one, or pick from the Library. When a model is ready, click the map to place it. Adjust its height and direction in the list.
-4. Drag the slider or press **Play the flood**.
-5. **Orbit camera** for a video shot; **Copy share link** saves the scene in a URL. **Save scene/Open scene** round-trip a validated JSON file; **Save 3D image** exports a labelled PNG.
-6. Use **Street view**, **Overview** or **Focus object** to reframe the camera. **Cinema view** hides the panel for recording; press Esc to bring it back. The flood button pauses an active animation.
-
-The Studio street uses batched static geometry, pitched roofs, window/door details, front gardens, curbs, drains, crossings, lamps, soft shadows and locally bundled CC0 photo/normal textures from Poly Haven. Texture provenance and hashes are in `public/textures/sources.json`. Camera orbit and water motion use elapsed time, and the facts list is reused during animation to reduce UI churn. The street is an illustrative environment, not a fluid simulation or a claim of photorealistic reconstruction.
-
-## Ready-made Library models
-
-Generate models once and ship them with the app (good for the public demo and for anyone without credits):
-
+```bash
+npm ci
+cp .env.example .env      # add LUX3D_API_KEY and CESIUM_ION_TOKEN
+npm start                 # http://localhost:3000
 ```
-npm run generate -- --image photos/car.jpg --name "Family car" --height 1.5
-npm run generate -- --prompt "a red city bus" --name "City bus" --height 3.2
+
+| Key | Where | Needed for |
+|---|---|---|
+| `LUX3D_API_KEY` | https://labs.aholo.ai/api-keys | Making models, rooms and exports in the app |
+| `CESIUM_ION_TOKEN` | https://ion.cesium.com/tokens (add *Google Photorealistic 3D Tiles* in the Asset Depot) | The real 3D city and terrain |
+
+- **No keys?** `http://localhost:3000/?mode=studio` opens the offline Studio: an original illustrative
+  street with the Lux3D SUV and a rising water plane (no area simulation, no live data).
+- **With keys:** the homepage offers *Replay a real flood*, *Simulate my area* (search or use your
+  location) and the Studio. `?app&nodemo` skips the homepage; `?debug` exposes `window.waterline`.
+
+Optional settings in `.env`: `PORT`, `MAX_GENERATIONS_PER_DAY` (default 40),
+`MAX_GENERATIONS_PER_IP_PER_HOUR` (6), `TRUST_PROXY=1` behind a trusted proxy, `LUX3D_BASE_URL`.
+
+### Docker
+
+```bash
+docker build -t waterline .
+docker run -p 3000:3000 --env-file .env waterline
 ```
 
-Each run saves `public/models/library/<name>.glb` and adds it to `public/models/library.json` with its provenance: the Lux3D task id, the prompt or a copy of the source photo (in `public/models/sources/`), the file size and SHA-256. For a photo you didn't take, add `--source-url`, `--credit` and `--license`.
+Persist `.waterline/` and `public/models/generated/` to keep tasks, caches and new models across
+redeploys. Generation quotas are per process.
 
-Then run `npm run optimise`. Lux3D returns 2048 px PNG textures, which are most of each 9–17 MB file; this re-encodes them as JPEG without touching the geometry (the six shipped models went from 67 MB to 24 MB in total). The original downloads are kept in `.waterline/original-models/`, and `library.json` records both the original and the shipped SHA-256.
+## Architecture
 
-The shipped Library has six Lux3D models: Family SUV, Small car, Scooter, Adult person, Wheelie bin and Front door. The car and scooter were made from CC0 photos (credits in `THIRD_PARTY_NOTICES.txt`); the others came from text prompts.
+```mermaid
+flowchart LR
+  subgraph Browser
+    UI[Storm desk UI<br>storm.js · timeline.js] --> SIM[Simulation<br>sim.js · area.js]
+    UI --> APP[app.js<br>objects · escape · share]
+    APP --> CES[CesiumJS<br>3D Tiles · terrain]
+    SIM --> CES
+    APP --> ROOM[room.js<br>three.js + Spark]
+  end
+  subgraph Server [Node server · server.mjs]
+    API[/REST API/] --> LUX[lib/lux3d.mjs]
+    API --> WX[lib/weather.mjs]
+    API --> OSM[lib/osm.mjs]
+    API --> JRC[lib/flood-depth.mjs]
+    WX & OSM --> CACHE[(disk cache<br>+ fixtures)]
+  end
+  UI & APP --> API
+  LUX --> AHOLO[Aholo Lux3D · World · Asset]
+  WX --> OM[Open-Meteo]
+  OSM --> OP[Overpass / OSM]
+  JRC --> COP[JRC GeoTIFFs]
+```
+
+Plain JavaScript modules, no build step and no framework. CesiumJS and three.js/Spark are served
+locally. The server is a single `node:http` app with injectable dependencies for testing.
+
+## Server API
+
+| Method | Path | Purpose |
+|---|---|---|
+| GET | `/api/health` | Readiness |
+| GET | `/api/config` | Cesium token and whether generation is enabled |
+| POST | `/api/generate` | Lux3D image- or text-to-3D (`{image}` data URL or `{prompt}`) → `{taskId}` |
+| GET | `/api/task?id=` | Poll a Lux3D task; the GLB is saved under `public/models/generated/` |
+| POST / GET | `/api/world` | Aholo World room from a photo and/or description; poll with `?id=` |
+| POST / GET | `/api/export` | Lux3D multi-format export of a served model (`usdz`, `stl`, `3mf`); poll with `?id=` |
+| GET | `/api/weather?lat=&lon=` | Forecast rain and wind, river discharge, sea level |
+| GET | `/api/weather/event?lat=&lon=&start=&end=` | Recorded hourly rain and discharge (≤ 10 days) |
+| GET | `/api/osm?lat=&lon=&radius=` | Buildings, roads and services (200–1500 m) |
+| GET | `/api/flood-depth?lat=&lon=` | JRC modelled river-flood depths by return period |
+| GET | `/api/route?from=lon,lat&to=lon,lat` | Walking route (≤ 15 km) |
+
+Responses from the data routes carry a `status`: `live`, `cached`, `stale` or `fixture`.
 
 ## Project layout
 
 ```
-server.mjs              web server + private Lux3D proxy (key never reaches the browser)
-lib/lux3d.mjs           Lux3D OpenAPI client: upload, create task, poll, download
-lib/flood-depth.mjs     reads JRC flood-depth GeoTIFFs with HTTP range requests
-scripts/generate.mjs    CLI to add Library models
-public/app.js           map, water, models, sharing, place search
-public/room.js          "Inside your home": Aholo World room viewer (three.js + Spark, loaded on demand)
-public/vendor/          three.js and Spark, bundled locally (MIT)
-public/glb-measure.js   reads a GLB's bounding box to place it at true scale
-test/                   node --test suites (npm test)
+server.mjs                 web server, API routes, private Lux3D proxy
+lib/lux3d.mjs              Aholo client: upload, Lux3D tasks (3D, image, material, rig, parts, export…), World
+lib/lux3d-extras-routes.mjs  /api/export handlers (multi-format export)
+lib/weather.mjs            Open-Meteo forecast, archive, flood and marine
+lib/osm.mjs                Overpass query with mirror failover
+lib/disk-cache.mjs         TTL disk cache, stale fallback, fixtures
+lib/flood-depth.mjs        JRC flood-depth GeoTIFFs over HTTP range requests
+public/index.html          homepage and storm-desk shell
+public/theme.css           storm-desk theme (on top of style.css)
+public/app.js              map, objects, escape route, Lux3D extras, sharing, place search
+public/sim.js              flood simulation (pure functions, unit-tested)
+public/area.js             terrain sampling, area water and impact layers in Cesium
+public/storm.js            weather card, scenarios, timeline playback, impact report
+public/scenarios.js        scenario time series
+public/timeline.js         the timeline canvas
+public/room.js             Aholo World room viewer (three.js + Spark)
+public/models/             Lux3D Library, extras and Aholo World example room
+data/fixtures/             offline weather, storm and OSM data for the demo places
+scripts/                   generation, capture, verification and submission tools
+test/                      node --test suites
 ```
 
-## Limits (be honest in the demo)
+## Testing and verification
 
-- **Illustration, not a forecast.** The water is a level plane: it does not model flow, walls, drains or timing.
-- AI-generated models are approximate; set the real height for best results.
-- Rooms from one photo are AI reconstructions without a true scale; Waterline scales them to the ceiling height you set, so indoor depths are a guide.
-- Searching a neighbourhood (rather than a street address) lands on its middle, which can be a yard, a roof edge or a riverbank. Click your street to move the spot.
-- The global river model has ~90 m cells: it can miss a street by one cell or overstate depth near river channels, and it has no flash or coastal floods.
-- Higher-ground search uses bare-earth terrain (~30 m), so small embankments or walls may be missed. It is planning help, not an evacuation order.
+```bash
+npm test                  # unit and server tests, fully offline
+npm run verify:demo       # real Cesium in Edge, Studio flow, all external requests blocked
+node scripts/snap.mjs     # screenshots of a live replay (server must be running)
+```
 
-## Data and credits
+`npm test` covers the simulation maths, the weather/OSM data layer (failover, cache, fixtures,
+validation), the Lux3D client and export routes, and the server. `verify:demo` drives the real 3D
+engine offline: placement, undo, depth challenge, share links, scene files, PNG export and the mobile
+layout.
 
-- River flood depths: JRC / Copernicus Emergency Management Service, *Global river flood hazard maps* v2.1 (CC BY 4.0, © European Union).
-- Walking routes: FOSSGIS routing server (OSRM), data © OpenStreetMap contributors.
-- Moving-water facts: US National Weather Service, “Turn Around Don’t Drown”.
-- The public server caps new generations per day and per visitor (`MAX_GENERATIONS_PER_DAY`, `MAX_GENERATIONS_PER_IP_PER_HOUR`).
+## Hackathon submission package
 
-## Demo and exploration upgrades
+| Script | Output |
+|---|---|
+| `node --env-file-if-exists=.env scripts/capture-sim.mjs` | Simulator screenshots and Lux3D renders in `submission/report/` |
+| `npm run submission` | `submission/Waterline-project-report.pdf`, Lux3D evidence, checklist, X post draft, source archive |
+| `node --env-file-if-exists=.env scripts/record-demo.mjs` | The captioned demo video `submission/waterline-demo.webm` (one live Lux3D generation) |
+| `node scripts/webm-to-mp4.mjs submission/waterline-demo.webm submission/waterline-demo.mp4` | MP4 copy for upload forms |
 
-- **Try a demo** loads the Kerrville example, places the SUV and animates an illustrative flood.
-- Every Library object is a Lux3D model shown at its real height. Photo-made models show their source photo in the Library list. Depth detective offers every Library object with a known height.
-- Objects support Move, Duplicate and up to 30 undo steps, including removal, height and rotation edits. Press Esc to cancel placement or moving.
-- **Depth detective** compares your height prediction with a library object's top; it does not predict buoyancy or safety.
-- Water labels distinguish manual, shared, example and modelled depths. Missing dataset coverage is reported separately from zero modelled depth. Depths above 3 m are labelled as capped.
-- The mobile map stays visible above a separately scrolling control panel.
-- Browser verification: `node --env-file-if-exists=.env scripts/verify-browser.mjs` uses installed Microsoft Edge through Playwright. It does not request new paid models.
+None of the scripts register, publish, post or submit anything. Submissions go through the official
+portal at https://www.aholo.ai/hackathon.
 
-## Hackathon package and verification
+## Limits
 
-The official event is https://www.aholo.ai/hackathon and submissions go through its own **My Submission** portal, not Devpost. Deadline: **19 November 2026, 06:00 EST / 12:00 noon in Lagos**. Lux3D is required for core content or workflow. A PDF/PPT report and a working demo link or actual-app video are required; source and a public X post using `#Manycorehackathon` are bonus items.
+Waterline is a planning and awareness tool, **not a forecast or an official warning**.
 
-Run `npm test` for server/client logic checks and `npm run verify:demo` for the real Cesium browser flow using Microsoft Edge. The browser check blocks all external network requests, uses the existing Lux3D GLB, and covers animation, placement, undo, challenge, higher-ground example, share reload, JSON import/export, PNG export and mobile layout. It does not verify live map services or spend credits on generation.
+- The flood is a connected "bathtub" on a detrended terrain model. It does not model flow speed,
+  walls, drains or timing beyond the scenario curves.
+- Cesium World Terrain is ~30 m source data and carries buildings in some dense towns; Waterline
+  filters this, but street-scale depths are estimates.
+- Storm replays use ERA5 reanalysis, which smooths cloudbursts (Paiporta: 124 mm in the record
+  against 771 mm at the Turís gauge), so the replayed depth is scaled to the reported event.
+- The JRC river model has ~90 m cells and no flash or coastal floods. GloFAS discharge can snap to a
+  minor stream (at the Kerrville demo point it does).
+- OpenStreetMap coverage varies; Overpass can be slow (the first load of a new area can take up to
+  80 s before cached data or fixtures are used).
+- Lux3D sizes are estimates; the app shows the height it used and lets you correct it. The STL exports
+  are 80 mm miniatures. Rooms from one photo are scaled to the ceiling height you give.
+- Higher ground is planning help, not an evacuation order. Follow official warnings and never walk or
+  drive into floodwater.
 
-Building the submission package (all scripts use the installed Microsoft Edge, on the GPU where available):
+## Credits
 
-1. `node --env-file-if-exists=.env scripts/capture-report.mjs`: screenshots of the real app (homepage, Kerrville, Paiporta, Studio, phone) and renders of the Lux3D assets into `submission/report/`. Uses live map services; no new generation.
-2. `npm run submission`: builds `submission/Waterline-project-report.pdf` (a 12-page 16:9 deck), `lux3d-evidence.json` for every Library model, a checklist, an X post draft and the source archive.
-3. `node --env-file-if-exists=.env scripts/record-demo.mjs`: records the captioned demo video `submission/waterline-demo.webm` from the real app. It makes **one live Lux3D generation** and cuts loading waits (captions say where time was skipped). Needs Playwright's encoder: `npx playwright install ffmpeg`, with `PLAYWRIGHT_BROWSERS_PATH` set to `.playwright`.
+Aholo Lux3D, Aholo World and Asset services (Manycore) · CesiumJS (Apache-2.0) · Google
+Photorealistic 3D Tiles and Cesium World Terrain via Cesium ion · Open-Meteo (CC BY 4.0), ERA5 and
+GloFAS (Copernicus) · JRC / Copernicus EMS flood hazard maps (CC BY 4.0) · OpenStreetMap contributors
+(ODbL) via Overpass and FOSSGIS OSRM · three.js and Spark (MIT) · US National Weather Service
+moving-water facts · Poly Haven textures (CC0) · Poppins and other fonts (SIL OFL).
+Full list and review notes: [`THIRD_PARTY_NOTICES.txt`](THIRD_PARTY_NOTICES.txt).
 
-4. `node scripts/webm-to-mp4.mjs submission/waterline-demo.webm submission/waterline-demo.mp4`: an MP4 (H.264) copy for upload forms that need it, recorded by Edge's MediaRecorder and verified by playing it back.
-
-None of the scripts register, publish, post or submit anything. Confirm your team of 1–3 in the official portal, even if solo, and review third-party terms in `THIRD_PARTY_NOTICES.txt`. The Family SUV's original prompt was not recorded (it predates prompt logging); its task ID and file hashes are.
-
-## Hosting
-
-Deploy to a Node host using `npm ci --omit=dev` and `npm start`, or build the supplied Dockerfile. Set keys as host secrets; never upload `.env`. Studio works without keys. `/api/health` reports application and Studio-asset readiness. Set `TRUST_PROXY=1` only behind a trusted proxy that replaces forwarding headers. Persist `.waterline/tasks` and `public/models/generated` on disk to keep tasks and new models through redeploys. Daily/IP generation quotas are process-local; use a shared persistent quota store before scaling beyond one process.
-
-Real street mode still depends on external Cesium/Google, JRC and routing availability. These live services and Docker deployment are not claimed as verified by the offline browser checks. No public deployment or event submission is performed by these packaging scripts.
+Built with the help of Claude Code (Anthropic), an AI coding assistant, under the author's
+direction: concept, design references, decisions and user testing.

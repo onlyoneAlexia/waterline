@@ -48,6 +48,26 @@ Original asset pages, download URLs and file hashes are in public/textures/sourc
 These textures are bundled locally and do not require a network connection at runtime.
 Roof and cream-wall texture variants are original seeded procedural images.
 
+Lux3D extras (public/models/extras/), all generated with Aholo Lux3D; endpoints, task ids, timings,
+file sizes and SHA-256 hashes are in public/models/extras/extras.json:
+- adult-person-walk.glb — multimodal-to-image (A-pose reference) → image-to-3D → rig → animation retarget.
+- family-suv-flooded.glb — multimodal-to-image (mud-stained reference) → material transfer.
+- family-suv-parts.glb — part-split (part names and bounds added by scripts/lux3d-extras.mjs).
+- front-door-open.glb — articulation (hinge joint; the opening clip was authored from Lux3D's joint).
+- *.usdz / *.stl — multi-format export.
+
+Weather, river and sea data (live, cached in .waterline/cache, fixtures in data/fixtures/):
+- Open-Meteo Forecast, Historical Weather (ERA5), Flood (GloFAS) and Marine APIs, CC BY 4.0.
+  https://open-meteo.com/en/license
+  ERA5: Copernicus Climate Change Service (C3S). GloFAS: Copernicus Emergency Management Service.
+  Free tier for non-commercial use; a commercial deployment needs an Open-Meteo API plan.
+- Buildings, roads and services: OpenStreetMap via the Overpass API (overpass-api.de and mirrors),
+  data (c) OpenStreetMap contributors, ODbL 1.0. https://www.openstreetmap.org/copyright
+  The fixtures in data/fixtures/ are extracts of OpenStreetMap data under the same licence.
+
+Interface design: the storm-desk layout (map-first, layer rail, timeline, legend) follows common
+weather-map conventions; no code, images, logos or text from any weather site are used.
+
 Optional live data/services:
 - JRC / Copernicus Emergency Management Service, Global river flood hazard maps v2.1,
   CC BY 4.0, (c) European Union. https://data.jrc.ec.europa.eu/

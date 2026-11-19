@@ -103,6 +103,21 @@ export function medianFilter(heights, n) {
   return out;
 }
 
+/**
+ * Open water (sea, lagoon, a wide river) shows up in a terrain model as a large flat plateau at the
+ * lowest height. Returns a mask of those cells, or null when there is no such plateau (≥ minShare).
+ * Floodwater does not "fill" the sea: those cells are left out of the flood maths and drawing.
+ */
+export function openWaterMask(heights, { tolerance = 0.6, minShare = 0.03 } = {}) {
+  let min = Infinity;
+  for (const h of heights) if (Number.isFinite(h) && h < min) min = h;
+  if (!Number.isFinite(min)) return null;
+  const mask = new Uint8Array(heights.length);
+  let count = 0;
+  for (let k = 0; k < heights.length; k++) if (heights[k] - min < tolerance) { mask[k] = 1; count++; }
+  return count >= heights.length * minShare ? mask : null;
+}
+
 /** Index of the lowest cell within `radius` cells: the ground beside a building rather than its roof bump. */
 export function lowestNear(heights, n, cell, radius = 1) {
   const x0 = cell % n;
