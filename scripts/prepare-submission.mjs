@@ -68,6 +68,7 @@ const ENDPOINTS = [
 ];
 
 const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Waterline: project report</title><style>
+@font-face { font-family: 'Cinzel Decorative'; font-weight: 700; src: url('../public/fonts/cinzel-decorative-700.woff2'); }
 @font-face { font-family: 'Poppins'; font-weight: 400; src: url('../public/fonts/poppins-400.woff2'); }
 @font-face { font-family: 'Poppins'; font-weight: 500; src: url('../public/fonts/poppins-500.woff2'); }
 @font-face { font-family: 'Poppins'; font-weight: 600; src: url('../public/fonts/poppins-600.woff2'); }
@@ -75,57 +76,57 @@ const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>
 @page { size: 1280px 720px; margin: 0; }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { font: 14.5px/1.5 Poppins, sans-serif; color: #e8f1f8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font: 14.5px/1.5 Poppins, sans-serif; color: #3d2318; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 section { position: relative; width: 1280px; height: 720px; padding: 30px 50px 28px; overflow: hidden; break-after: page;
-  background: radial-gradient(55% 45% at 100% 0%, rgba(47,143,224,.22), transparent 70%), linear-gradient(180deg, #08111f, #0c1a2e); }
+  background: radial-gradient(55% 45% at 100% 0%, rgba(255,255,255,.6), transparent 70%), linear-gradient(180deg, #c3e8fa, #e8f6fd); }
 section:last-child { break-after: auto; }
-section.alt { background: radial-gradient(50% 45% at 0% 0%, rgba(255,196,77,.1), transparent 70%), linear-gradient(180deg, #0a1424, #0f1d33); }
+section.alt { background: radial-gradient(50% 45% at 0% 0%, rgba(255,255,255,.6), transparent 70%), linear-gradient(180deg, #fdf2df, #fbe3bd); }
 .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
 .logotype { font-weight: 700; font-size: 15px; letter-spacing: .34em; }
-.pill { padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #b9c8d8; font-size: 11.5px; font-weight: 500; }
-h1 { margin: 0 0 12px; font: 700 34px/1.12 Poppins; letter-spacing: -.02em; }
-h2 { margin: 0 0 5px; font: 600 11.5px Poppins; letter-spacing: .16em; text-transform: uppercase; color: #ffc44d; }
+.pill { padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,.8); border: 1px solid rgba(61,35,24,.1); color: #6b4a3a; font-size: 11.5px; font-weight: 500; }
+h1 { margin: 0 0 12px; font: 700 31px/1.14 'Cinzel Decorative', Georgia, serif; letter-spacing: -.01em; }
+h2 { margin: 0 0 5px; font: 600 11.5px Poppins; letter-spacing: .16em; text-transform: uppercase; color: #b8650d; }
 h3 { margin: 4px 0 3px; font: 600 15px/1.3 Poppins; }
 p { margin: 0 0 8px; } ul { margin: 0; padding-left: 17px; } li { margin: 0 0 5px; }
-b { color: #fff; }
-.lede { font-size: 17px; line-height: 1.5; color: #c9d6e3; }
-.kick { font: 600 12px Poppins; letter-spacing: .22em; text-transform: uppercase; color: #ffc44d; margin: 0 0 6px; }
-.muted { color: #8fa3b8; }
+b { color: #3d2318; }
+.lede { font-size: 17px; line-height: 1.5; color: #6b4a3a; }
+.kick { font: 600 12px Poppins; letter-spacing: .22em; text-transform: uppercase; color: #b8650d; margin: 0 0 6px; }
+.muted { color: #957563; }
 .small { font-size: 12px; }
 .grid { display: grid; gap: 18px; }
 .g2 { grid-template-columns: 1fr 1fr; } .g37 { grid-template-columns: 37fr 63fr; } .g45 { grid-template-columns: 42fr 58fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
-.shot { display: block; width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 14px 34px rgba(0,0,0,.45); }
+.shot { display: block; width: 100%; border-radius: 14px; border: 1px solid rgba(61,35,24,.1); box-shadow: 0 14px 30px rgba(13,79,116,.2); }
 .crop { object-fit: cover; object-position: 50% 50%; }
-.panel { background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 14px 16px; }
-.card { position: relative; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 10px 12px 12px; }
-.card p { font-size: 12.5px; line-height: 1.5; color: #b9c8d8; margin: 0; }
-.card .art { display: block; width: 100%; height: 200px; object-fit: contain; border-radius: 10px; background: radial-gradient(70% 70% at 50% 60%, #2a3f61, #121e33 85%); }
+.panel { background: rgba(255,255,255,.88); border: 1px solid rgba(61,35,24,.1); border-radius: 16px; padding: 14px 16px; }
+.card { position: relative; background: rgba(255,255,255,.88); border: 1px solid rgba(61,35,24,.1); border-radius: 16px; padding: 10px 12px 12px; }
+.card p { font-size: 12.5px; line-height: 1.5; color: #6b4a3a; margin: 0; }
+.card .art { display: block; width: 100%; height: 200px; object-fit: contain; border-radius: 10px; background: radial-gradient(70% 70% at 50% 60%, #ffffff, #d3effc 85%); }
 .card .art.map { object-fit: cover; }
-.zoom { position: relative; height: 200px; overflow: hidden; border-radius: 10px; background: #121e33; }
+.zoom { position: relative; height: 200px; overflow: hidden; border-radius: 10px; background: #e8f6fd; }
 .zoom img { position: absolute; width: 250%; }
 .step { display: inline-block; margin-top: 8px; padding: 2px 9px; border-radius: 999px; background: #ffc44d; color: #1a1206; font-size: 10.5px; font-weight: 600; }
-.stat { display: inline-block; margin: 0 7px 7px 0; padding: 7px 12px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); font-size: 12px; color: #b9c8d8; }
-.stat b { display: block; font-size: 20px; letter-spacing: -.02em; color: #fff; }
-.stat.hot b { color: #ff8a6a; }
+.stat { display: inline-block; margin: 0 7px 7px 0; padding: 7px 12px; border-radius: 12px; background: rgba(255,255,255,.88); border: 1px solid rgba(61,35,24,.1); font-size: 12px; color: #6b4a3a; }
+.stat b { display: block; font-size: 20px; letter-spacing: -.02em; color: #3d2318; }
+.stat.hot b { color: #c23a3a; }
 table { width: 100%; border-collapse: collapse; font-size: 12px; }
-td, th { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; vertical-align: top; }
-th { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #8fa3b8; font-weight: 600; }
-code { font-size: 11px; color: #9fd4ff; }
+td, th { padding: 5px 8px; border-bottom: 1px solid rgba(61,35,24,.1); text-align: left; vertical-align: top; }
+th { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #957563; font-weight: 600; }
+code { font-size: 11px; color: #0d4f74; }
 .flow { display: flex; align-items: stretch; gap: 7px; margin: 2px 0 10px; }
-.flow div { flex: 1; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 9px 11px; font-size: 12px; line-height: 1.4; color: #b9c8d8; }
+.flow div { flex: 1; background: rgba(255,255,255,.88); border: 1px solid rgba(61,35,24,.1); border-radius: 12px; padding: 9px 11px; font-size: 12px; line-height: 1.4; color: #6b4a3a; }
 .flow div b { display: block; font-size: 13px; margin-bottom: 2px; }
 .flow div.lux { background: linear-gradient(140deg, rgba(160,130,255,.18), rgba(79,179,255,.12)); border-color: rgba(170,150,255,.4); }
-.flow span { align-self: center; color: #ffc44d; font-weight: 700; }
+.flow span { align-self: center; color: #b8650d; font-weight: 700; }
 .timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
-.timeline .day { background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09); border-radius: 14px; padding: 11px 12px; font-size: 11.5px; line-height: 1.45; color: #b9c8d8; }
-.timeline .day b.date { display: inline-block; margin-bottom: 5px; padding: 1px 9px; border-radius: 999px; background: #2f8fe0; color: #fff; font-size: 10.5px; }
+.timeline .day { background: rgba(255,255,255,.88); border: 1px solid rgba(61,35,24,.1); border-radius: 14px; padding: 11px 12px; font-size: 11.5px; line-height: 1.45; color: #6b4a3a; }
+.timeline .day b.date { display: inline-block; margin-bottom: 5px; padding: 1px 9px; border-radius: 999px; background: #2f8fe0; color: #ffffff; font-size: 10.5px; }
 .timeline .day.now b.date { background: #ffc44d; color: #1a1206; }
-figure { margin: 0; } figcaption { font-size: 11px; color: #8fa3b8; margin-top: 4px; }
+figure { margin: 0; } figcaption { font-size: 11px; color: #957563; margin-top: 4px; }
 .renders { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
-.renders img { width: 100%; height: 150px; object-fit: contain; border-radius: 12px; background: radial-gradient(70% 70% at 50% 60%, #2a3f61, #121e33 85%); }
-.foot { position: absolute; left: 50px; right: 50px; bottom: 12px; font-size: 10px; color: #6f8399; }
-.cover h1 { font-size: 52px; line-height: 1.05; margin: 4px 0 14px; }
-.quote { font-size: 15px; color: #ffc44d; border-left: 3px solid #ffc44d; padding-left: 12px; margin: 10px 0; }
+.renders img { width: 100%; height: 150px; object-fit: contain; border-radius: 12px; background: radial-gradient(70% 70% at 50% 60%, #ffffff, #d3effc 85%); }
+.foot { position: absolute; left: 50px; right: 50px; bottom: 12px; font-size: 10px; color: #957563; }
+.cover h1 { font-size: 46px; line-height: 1.08; margin: 4px 0 14px; }
+.quote { font-size: 15px; color: #b8650d; border-left: 3px solid #e8a33a; padding-left: 12px; margin: 10px 0; }
 </style></head><body>
 
 ${slide('Project report', '', `
@@ -294,14 +295,14 @@ ${slide('Development process', 'Six days, built and rebuilt by testing.', `
   <div class="day"><b class="date">16 Nov</b><br><b>Lux3D everywhere.</b> Six Library models; lighter textures; Auto size after a live test. User test: “it doesn’t seem functional” → the demo starts itself.</div>
   <div class="day"><b class="date">17 Nov</b><br><b>Finishing v1.</b> Homepage, captioned demo video and report captured from the running app.</div>
   <div class="day"><b class="date">18 Nov</b><br><b>Anywhere, then inside.</b> “I can’t put in my location” → search and Use my location. Aholo World rooms.</div>
-  <div class="day now"><b class="date">19 Nov</b><br><b>From a picture to a simulator.</b> Terrain flood model, live weather and storm replays, OpenStreetMap impacts, a storm-desk UI, and seven more Lux3D capabilities.</div>
+  <div class="day now"><b class="date">19 Nov</b><br><b>From a picture to a simulator.</b> Terrain flood model, live weather and storm replays, OpenStreetMap impacts, a storm-desk UI, and seven more Lux3D capabilities; then the sky-and-cream look restored and a homepage whose flooded car shatters as you scroll.</div>
 </div>
 <div class="panel small" style="margin-top:14px"><b>Biggest lesson of the last day:</b> a flat “bathtub” on sloping ground drowned all of Paiporta 11 m deep, and the terrain model carried buildings 4 m above the street. Detrending the valley, filtering building bumps and reading depth beside each building brought it to the scale of the real event — checked against both replays before anything was drawn.</div>
 <div class="grid g4" style="margin-top:14px; gap:12px">
   <figure>${img('report/ui-v1.jpg', 'Interface v1', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v1 · a long sidebar form</figcaption></figure>
   <figure>${img('report/ui-v2.jpg', 'Interface v2', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v2 · dark, map-first, live impact panel</figcaption></figure>
   <figure>${img('report/app-things.jpg', 'Interface v3', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v3 · sky and cream, one space per function</figcaption></figure>
-  <figure>${img('report/sim-paiporta-overview.jpg', 'Interface v4', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v4 · the storm desk: a simulator, not an illustration</figcaption></figure>
+  <figure>${img('report/sim-paiporta-overview.jpg', 'Interface v4', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v4 · the storm simulator, back in sky and cream</figcaption></figure>
 </div>`, 'alt')}
 
 ${slide('Build and tools', 'How it is built, and with what.', `

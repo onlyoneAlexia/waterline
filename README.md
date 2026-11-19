@@ -37,13 +37,14 @@ Built for the **Manycore Aholo Global 3D AI Hackathon 2026**.
 
 | | |
 |---|---|
-| **Storm desk** | A map-first, weather-style interface: location card with live rain, gusts, river discharge and sea level; a layer rail (flood, depth colours, buildings, roads, services); a depth legend; and a timeline under the map with hourly rain bars and the water depth at your spot. |
+| **Storm desk** | A map-first, weather-style interface in the sky, cream and cocoa look: location card with live rain, gusts, river discharge and sea level; a layer rail (flood, depth colours, buildings, roads, services); a depth legend; and a timeline under the map with hourly rain bars and the water depth at your spot. |
 | **Five storm scenarios** | **Live forecast** (Open-Meteo hourly rain, yesterday to 3 days ahead) · **Replay the storm** (the recorded ERA5 rainfall of a real flood) · **Heavy rain** what-if (50–400 mm over 3–24 h) · **River flood** (JRC / Copernicus return periods at your spot) · **Storm surge** what-if. Or set the water by hand. |
 | **Area simulation** | 1.8 × 1.8 km of bare-earth terrain at 20 m resolution, flooded hour by hour. Realistic water at street level, depth colours from above. |
 | **Impact report** | Flooded area, deepest water, buildings in water and ground floors flooded, kilometres of road cut (≥ 30 cm, where cars float), and named schools, clinics, pharmacies, fire stations and substations with their depth. |
 | **Your things, true scale** | Snap a photo or type a description: **Lux3D** builds a 3D model in about two minutes, sized to its real height and placed on the street. The impact report tracks it: *wheels in water → up to the windows → completely under*. |
 | **After the flood** | When the water drops, the SUV swaps to a mud-stained version made with **Lux3D material transfer**. |
 | **A way out** | Searches the terrain for the nearest ground 1 m above the flood, gets a walking route (OSRM on OpenStreetMap), reports how deep the water on the way would be, and a **Lux3D-rigged person** walks the route. |
+| **Homepage** | One giant line of type and a flooded Lux3D SUV that shatters into glass shards as you scroll (`public/shatter.js`), then the tour. |
 | **Inside your home** | **Aholo World** turns one photo of a room into a 3D Gaussian-splat room, and the same flood comes in through the door. |
 | **Take it with you** | Export a placed object as **USDZ** for AR on a phone, live (**Lux3D multi-format export**); USDZ and **STL** (3D printing) files ship for the SUV and the front door. |
 | **Real floods** | Kerrville, Texas (4 July 2025) and Paiporta, Spain (29 October 2024), with their recorded rainfall, ship as one-click replays. |
@@ -213,7 +214,8 @@ lib/osm.mjs                Overpass query with mirror failover
 lib/disk-cache.mjs         TTL disk cache, stale fallback, fixtures
 lib/flood-depth.mjs        JRC flood-depth GeoTIFFs over HTTP range requests
 public/index.html          homepage and storm-desk shell
-public/theme.css           storm-desk theme (on top of style.css)
+public/theme.css           simulator components in the sky/cream look (on top of style.css)
+public/home.css            homepage layout; public/shatter.js the scroll-shatter hero
 public/app.js              map, objects, escape route, Lux3D extras, sharing, place search
 public/sim.js              flood simulation (pure functions, unit-tested)
 public/area.js             terrain sampling, area water and impact layers in Cesium
