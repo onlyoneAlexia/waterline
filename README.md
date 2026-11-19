@@ -121,8 +121,14 @@ against the terrain. The maths is in [`public/sim.js`](public/sim.js) and covere
 
 Every live source is optional. The server caches responses on disk, fails over between Overpass
 mirrors, serves stale data when a service is down, and falls back to fixtures in
-[`data/fixtures/`](data/fixtures) for the demo places, so the replays work even offline.
+[`data/fixtures/`](data/fixtures) for the demo places, so the replays work even offline. The demo
+places always use their OpenStreetMap snapshot, so their numbers match the report.
 `npm run prewarm` refreshes the fixtures.
+
+Free Open-Meteo and the public Overpass servers limit or refuse busy shared hosting addresses. So
+when the server can't get an answer, the page asks them directly from the visitor's browser (both
+allow cross-origin requests). The visitor's spot is then sent to Open-Meteo and Overpass as well as
+to this server.
 
 ## Quick start
 
