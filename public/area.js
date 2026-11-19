@@ -1,6 +1,7 @@
 // Waterline area flood: samples bare-earth terrain around your spot, runs the connected-bathtub
 // simulation from sim.js, draws the flooded area (realistic water up close, depth colours from
 // above), and counts the buildings, roads and facilities it reaches (OpenStreetMap data).
+import { raceWithDirect, fetchOsmDirect } from './overpass.js';
 import {
   BANDS, bandOf, gridPoints, cellAt, patchHeights, floodOnset, lowestCells, floodStats, levelForVolume, fitPlane, detrend, medianFilter, localGround, lowestNear, openWaterMask,
 } from './sim.js';
@@ -283,9 +284,17 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
 
   async function loadOsm(lat, lon, id) {
     try {
-      const response = await fetch(`/api/osm?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&radius=${OSM_RADIUS_M}`, { signal: AbortSignal.timeout(200_000) }); // the server may try three Overpass mirrors, then a smaller area
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      // Our server first (cache, saved demo snapshots). If it fails or is slow, the browser asks
+      // Overpass itself; some Overpass servers refuse or stall shared cloud addresses.
+      const data = await raceWithDirect(
+        async () => {
+          const response = await fetch(`/api/osm?lat=${lat.toFixed(6)}&lon=${lon.toFixed(6)}&radius=${OSM_RADIUS_M}`, { signal: AbortSignal.timeout(200_000) }); // the server may try three Overpass mirrors, then a smaller area
+          const body = await response.json();
+          if (!response.ok) throw new Error(body.error || `HTTP ${response.status}`);
+          return body;
+        },
+        () => fetchOsmDirect(Number(lat.toFixed(6)), Number(lon.toFixed(6)), OSM_RADIUS_M),
+      );
       if (id !== buildId) return null;
       return data;
     } catch (error) {
