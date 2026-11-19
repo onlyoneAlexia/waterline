@@ -870,7 +870,7 @@ function followWalker(on) {
     // Ease the heading so corners in the route don't jerk the camera.
     heading = heading == null ? p.heading : heading + Math.atan2(Math.sin(p.heading - heading), Math.cos(p.heading - heading)) * 0.06;
     const centre = Cesium.Cartesian3.fromRadians(p.lon, p.lat, p.h + 1.2);
-    viewer.camera.lookAt(centre, new Cesium.HeadingPitchRange(heading, rad(-24), 26));
+    viewer.camera.lookAt(centre, new Cesium.HeadingPitchRange(heading, rad(-40), 38)); // high enough to clear narrow streets
   });
   return true;
 }

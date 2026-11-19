@@ -45,6 +45,8 @@ const img = (src, alt, cls = '') => `<img class="${cls}" src="${src}" alt="${esc
 const num = (n) => (Number.isFinite(n) ? n.toLocaleString('en-GB') : '–');
 let pageNo = 0;
 const slide = (kicker, title, body, cls = '') => `<section class="${cls}"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">${++pageNo} · ${kicker}</span></div>${title ? `<h1>${title}</h1>` : ''}${body}</section>`;
+// A close crop of a full-app screenshot (the map, not the panels), for small cards.
+const zoom = (src, alt, at) => `<div class="zoom"><img src="${src}" alt="${esc(alt)}" style="${at}"></div>`;
 const card = (step, title, text, picture) => `<div class="card">${picture ?? ''}<span class="step">${step}</span><h3>${title}</h3><p>${text}</p></div>`;
 const P = stats.paiporta ?? {};
 const K = stats.kerrville ?? {};
@@ -98,6 +100,8 @@ b { color: #fff; }
 .card p { font-size: 12.5px; line-height: 1.5; color: #b9c8d8; margin: 0; }
 .card .art { display: block; width: 100%; height: 200px; object-fit: contain; border-radius: 10px; background: radial-gradient(70% 70% at 50% 60%, #2a3f61, #121e33 85%); }
 .card .art.map { object-fit: cover; }
+.zoom { position: relative; height: 200px; overflow: hidden; border-radius: 10px; background: #121e33; }
+.zoom img { position: absolute; width: 250%; }
 .step { display: inline-block; margin-top: 8px; padding: 2px 9px; border-radius: 999px; background: #ffc44d; color: #1a1206; font-size: 10.5px; font-weight: 600; }
 .stat { display: inline-block; margin: 0 7px 7px 0; padding: 7px 12px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); font-size: 12px; color: #b9c8d8; }
 .stat b { display: block; font-size: 20px; letter-spacing: -.02em; color: #fff; }
@@ -151,10 +155,10 @@ ${slide('The problem', 'Flood maps show a blue patch.<br>People underestimate it
 
 ${slide('How it works', 'A storm desk for your street.', `
 <div class="grid g4">
-  ${card('01 · Storm', 'Pick a place and a storm', 'Search any street or use your location. Then: today’s forecast, a replay of a real flood with its recorded rainfall, a JRC river flood, a cloudburst or a storm surge.', img('report/sim-lagos.jpg', 'Lagos what-if', 'art map'))}
-  ${card('02 · Simulate', 'Watch the area flood', 'Water spreads over 1.8 × 1.8 km of real terrain, hour by hour, on a weather-style timeline you can play or drag.', img('report/sim-kerrville.jpg', 'Kerrville river corridor at the peak', 'art map'))}
-  ${card('03 · Lux3D', 'Make it personal', 'Snap or describe your car, door or scooter. Lux3D builds it in about two minutes and Waterline stands it at true scale on your street.', img('report/sim-aftermath.jpg', 'Lux3D SUV after the flood', 'art map'))}
-  ${card('04 · Escape', 'Find a way out', 'The nearest ground 1 m above the flood, a real walking route, the water depth along it — and a Lux3D person who walks it.', img('report/sim-escape.jpg', 'Route to higher ground', 'art map'))}
+  ${card('01 · Storm', 'Pick a place and a storm', 'Search any street or use your location. Then: today’s forecast, a replay of a real flood with its recorded rainfall, a JRC river flood, a cloudburst or a storm surge.', zoom('report/sim-houston.jpg', 'Houston cloudburst what-if', 'left:-60%; top:-12%'))}
+  ${card('02 · Simulate', 'Watch the area flood', 'Water spreads over 1.8 × 1.8 km of real terrain, hour by hour, on a weather-style timeline you can play or drag.', zoom('report/sim-kerrville.jpg', 'Kerrville river corridor at the peak', 'left:-110%; top:-2%'))}
+  ${card('03 · Lux3D', 'Make it personal', 'Snap or describe your car, door or scooter. Lux3D builds it in about two minutes and Waterline stands it at true scale on your street.', zoom('report/sim-aftermath.jpg', 'Lux3D SUV after the flood', 'left:-125%; top:-30%'))}
+  ${card('04 · Escape', 'Find a way out', 'The nearest ground 1 m above the flood, a real walking route, the water depth along it — and a Lux3D person who walks it.', zoom('report/sim-escape.jpg', 'Route to higher ground', 'left:-115%; top:-12%'))}
 </div>
 <p class="small muted" style="margin-top:12px">The impact report counts what goes under: buildings in water, ground floors flooded, kilometres of road cut, and named schools, clinics and substations with their depth. Inside your home, Aholo World shows the same water coming through the door.</p>`)}
 
@@ -186,7 +190,7 @@ ${slide('Live data, robust by design', 'Every number comes from open data —<br
     </table>
     <div class="panel small" style="margin-top:10px"><h2>Robustness</h2><p style="margin:0">The server caches every response on disk (30 min forecasts → 14 days of map data), fails over between Overpass mirrors, serves stale data when a service is down, and falls back to fixtures for the demo places — so the replays run offline. Every response says whether it is <i>live, cached, stale</i> or a <i>saved copy</i>, and the location card shows it.</p></div>
   </div>
-  ${img('report/sim-lagos.jpg', 'Lagos with the live location card', 'shot')}
+  ${img('report/sim-houston.jpg', 'Houston with the live location card', 'shot')}
 </div>`, 'alt')}
 
 ${slide('Real floods, replayed', 'Two real storms, replayed<br>over the real terrain.', `
@@ -325,7 +329,7 @@ ${slide('Limits and next steps', 'Honest about what it is, and is not.', `
 <div class="grid g2">
   <div class="panel small"><h2>Limits</h2><ul>
     <li>A connected “bathtub” on a detrended terrain model: no flow speed, walls or drains beyond the scenario curves. A planning tool, not a forecast.</li>
-    <li>Cesium World Terrain is ~30 m data and carries buildings in dense towns; depths at street scale are estimates.</li>
+    <li>Cesium World Terrain is ~30 m data and carries buildings in dense towns; depths at street scale are estimates. In Lagos it runs ~5 m above the 3D city’s streets, so Waterline falls back to the terrain’s own low ground there.</li>
     <li>ERA5 smooths cloudbursts; replays are scaled to the reported depth. JRC covers river floods only (~90 m cells).</li>
     <li>OpenStreetMap coverage varies; Overpass can be slow, so caches and fixtures back it up.</li>
     <li>AI sizes are estimates the app shows and lets you correct. Higher ground is planning help, not an evacuation order.</li>

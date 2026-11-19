@@ -1,21 +1,24 @@
 {
   "name": "waterline",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "See a flood against the things you own: Lux3D turns a photo into a true-scale 3D model on your real street, then the water rises.",
+  "description": "Flood-impact simulator: live weather, real terrain and OpenStreetMap in a photorealistic 3D city, with Aholo Lux3D models of the things you own at true scale.",
   "type": "module",
   "engines": {
     "node": ">=22.9"
   },
   "scripts": {
     "start": "node --env-file-if-exists=.env server.mjs",
+    "test": "node --test",
     "generate": "node --env-file-if-exists=.env scripts/generate.mjs",
+    "extras": "node --env-file-if-exists=.env scripts/lux3d-extras.mjs",
     "optimise": "node scripts/optimise-library.mjs",
     "thumbs": "node scripts/render-thumbnails.mjs",
     "prewarm": "node scripts/prewarm-data.mjs",
-    "test": "node --test",
     "verify:interface": "node scripts/verify-interface.mjs",
     "verify:demo": "node scripts/verify-functional.mjs --no-video",
+    "capture": "node --env-file-if-exists=.env scripts/capture-sim.mjs",
+    "record": "node --env-file-if-exists=.env scripts/record-demo.mjs",
     "submission": "node scripts/prepare-submission.mjs"
   },
   "dependencies": {

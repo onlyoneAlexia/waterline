@@ -174,7 +174,8 @@ try {
   await click(page.locator('[data-view="street"]'));
   await settleTiles();
   start();
-  await caption(`${Math.floor(genSeconds / 60)} min ${genSeconds % 60} s later (skipped): Lux3D’s pickup is ready`, '“Auto size” reads “pickup” and stands it 1.8 m tall. Click the street to place it.');
+  if (placed) await caption(`${Math.floor(genSeconds / 60)} min ${genSeconds % 60} s later (skipped): Lux3D’s pickup is ready`, '“Auto size” reads “pickup” and stands it 1.8 m tall. Click the street to place it.');
+  else await caption('Lux3D is still busy, so here are the Library models it made earlier', 'Family SUV, small car, scooter, person, bin and front door');
   await hold(3000);
   if (placed) {
     const map = await page.locator('#map .cesium-widget canvas').first().boundingBox();
@@ -250,6 +251,8 @@ try {
   await caption('Meyerland, Houston, on Brays Bayou · what if 400 mm of rain falls in 6 hours?', 'Hurricane Harvey (2017) dropped more than 1,000 mm on parts of Texas. Today’s live forecast is on the card.');
   await click(page.locator('#play'));
   await hold(9500);
+  await page.evaluate(() => { const s = window.waterline.storm; s.pause(); const d = s.scenario.depth; s.seek(d.indexOf(Math.max(...d))); });
+  await hold(600);
   const houston = await statsLine();
   if (houston) { await caption('Meyerland, Houston', houston); await hold(3500); }
   stop();

@@ -244,10 +244,13 @@ layout.
 
 | Script | Output |
 |---|---|
-| `node --env-file-if-exists=.env scripts/capture-sim.mjs` | Simulator screenshots and Lux3D renders in `submission/report/` |
+| `npm run capture` | Simulator screenshots, measured impact numbers (`sim-stats.json`) and Lux3D renders in `submission/report/` |
 | `npm run submission` | `submission/Waterline-project-report.pdf`, Lux3D evidence, checklist, X post draft, source archive |
-| `node --env-file-if-exists=.env scripts/record-demo.mjs` | The captioned demo video `submission/waterline-demo.webm` (one live Lux3D generation) |
+| `npm run record` | The captioned launch video `submission/waterline-demo.webm` (one live Lux3D generation; waits are cut and captioned) |
 | `node scripts/webm-to-mp4.mjs submission/waterline-demo.webm submission/waterline-demo.mp4` | MP4 copy for upload forms |
+
+Other scripts: `npm run generate` (add a Library model), `npm run extras` (regenerate the Lux3D extras),
+`npm run prewarm` (refresh the offline fixtures for Kerrville, Paiporta, Houston and Lagos).
 
 None of the scripts register, publish, post or submit anything. Submissions go through the official
 portal at https://www.aholo.ai/hackathon.
