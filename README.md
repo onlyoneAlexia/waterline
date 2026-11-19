@@ -11,6 +11,9 @@ Then it shows the way to higher ground.
 
 Built for the **Manycore Aholo Global 3D AI Hackathon 2026**.
 
+**Live demo: https://waterline-ndor.onrender.com** — free hosting, so after 15 quiet minutes the
+first visit takes about a minute to wake it. Making new Lux3D models there is capped at 20 a day.
+
 ![Paiporta, Spain, at the peak of the October 2024 storm replay: depth colours, flooded services and the impact report](docs/overview.jpg)
 
 > Flood maps show risk as a blue patch, and people underestimate it. Waterline shows the water at
@@ -154,6 +157,8 @@ Optional settings in `.env`: `PORT`, `MAX_GENERATIONS_PER_DAY` (default 40),
 `MAX_GENERATIONS_PER_IP_PER_HOUR` (6), `TRUST_PROXY=1` behind a trusted proxy, `LUX3D_BASE_URL`.
 
 ### Deploy on Render (one click)
+
+The live demo at https://waterline-ndor.onrender.com runs this way.
 
 [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/onlyoneAlexia/waterline)
 
