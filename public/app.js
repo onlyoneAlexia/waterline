@@ -1,5 +1,7 @@
-// Waterline front end: CesiumJS globe + Lux3D models + a rising "bathtub" flood level.
+// Waterline front end: CesiumJS globe + Lux3D models + a terrain flood simulation driven by weather scenarios.
 import { measureGlb } from './glb-measure.js';
+import { createArea } from './area.js';
+import { createStorm } from './storm.js';
 import { createStudio, studioHeight, pickStudioGround, STUDIO } from './studio.js';
 import { pickGround } from './ground-pick.js';
 import { validateScene } from './scene.js';
@@ -44,6 +46,11 @@ const SCENES = [
     depth: 1.2,
     view: { heading: 45, pitch: -12, range: 20 },
     objects: [{ id: 'family-suv', ahead: 0, right: -3, turn: 90 }, { id: 'adult-person', ahead: 0, right: 1.5, turn: 0 }],
+    // Recorded rainfall for the replay (ERA5 via Open-Meteo); the window is in local time.
+    event: {
+      title: '3–5 July 2025, Guadalupe River', start: '2025-07-02', end: '2025-07-06', window: ['2025-07-03T06:00', '2025-07-05T06:00'],
+      gauge: 'Kerr County gauges caught more than 250 mm (10 in) in a few hours', lagH: 2, outflowPerH: 0.12,
+    },
     story: 'River Trail, Louise Hays Park, beside the Guadalupe River. On 4 July 2025 the river at Kerrville rose about '
       + '8 m (26 ft) in 45 minutes, and more than 100 people died in Kerr County. Shown: an illustrative 1.2 m, up to an SUV’s windows.',
   },
@@ -57,6 +64,10 @@ const SCENES = [
     // Google's 3D city melts at street level in narrow streets, so look down the street from above the roofs.
     view: { heading: 120, pitch: -38, range: 52 },
     objects: [{ id: 'family-suv', ahead: 6, right: 1.2, turn: 0 }, { id: 'adult-person', ahead: 3, right: -1.6, turn: 0 }],
+    event: {
+      title: '29 October 2024, Valencia DANA', start: '2024-10-27', end: '2024-10-31', window: ['2024-10-29T00:00', '2024-10-30T12:00'],
+      gauge: 'the Turís gauge upstream recorded 771 mm in 24 hours and 185 mm in one hour', lagH: 3, outflowPerH: 0.1,
+    },
     story: 'Carrer Constitució, Paiporta, near Valencia. On 29 October 2024 a flash flood swept through the town, and '
       + '230 people died across Spain. Some were trapped going to get their cars out of garages. Shown: an illustrative 1.5 m.',
   },
@@ -261,6 +272,8 @@ function createWater(viewer) {
         elapsedSeconds: 0,
         amplitude: 1.25,
         specularIntensity: 0.8,
+        fadeStart: 0.55,
+        fadeEnd: 0.98,
       },
       source: `
 czm_material czm_getMaterial(czm_materialInput materialInput) {
@@ -276,7 +289,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
   // Fade out towards the edges (from ~650 m), so the square never shows from above and the
   // flat "bathtub" level reads as a local illustration rather than a city-wide prediction.
   float fromCentre = length(materialInput.st - 0.5) * 2.0;
-  m.alpha = baseColor.a * (1.0 - smoothstep(0.55, 0.98, fromCentre));
+  m.alpha = baseColor.a * (1.0 - smoothstep(fadeStart, fadeEnd, fromCentre));
   m.specular = specularIntensity;
   m.shininess = 64.0;
   return m;
@@ -299,6 +312,7 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
   viewer.scene.primitives.add(primitive);
   const waterStarted = performance.now();
   viewer.scene.preRender.addEventListener(() => { material.uniforms.elapsedSeconds = (performance.now() - waterStarted) / 1000; });
+  state.waterMaterial = material;
   return primitive;
 }
 
@@ -308,9 +322,16 @@ function updateWater() {
     state.water.show = false;
     return;
   }
+  // With the area simulation running, this plane only covers your street (fading out by ~260 m), sitting
+  // just under the area water: the terrain model can carry buildings, so the street itself may read dry there.
+  const local = Boolean(state.area?.ready);
+  if (state.waterMaterial) {
+    state.waterMaterial.uniforms.fadeStart = local ? 0.07 : 0.55;
+    state.waterMaterial.uniforms.fadeEnd = local ? 0.22 : 0.98;
+  }
   const { lon, lat, height } = state.pin;
   state.water.modelMatrix = Cesium.Transforms.eastNorthUpToFixedFrame(
-    Cesium.Cartesian3.fromRadians(lon, lat, height + state.depth),
+    Cesium.Cartesian3.fromRadians(lon, lat, height + state.depth - (local ? 0.03 : 0)),
   );
   state.water.show = true;
 }
@@ -378,6 +399,8 @@ function setPin(carto) {
   $('#map-guidance').textContent = 'Your spot is set. Adjust the water to explore.';
   drawGauge();
   setLocalMidday(carto.longitude);
+  state.areaStats = null;
+  state.storm?.onPin(state.pin);
   updateWater();
   renderImpact();
   clearSafety();
@@ -1097,7 +1120,8 @@ function renderImpact() {
   const R = 6_378_137;
   const near = (o) => Math.hypot((o.lon - state.pin.lon) * R * Math.cos(state.pin.lat), (o.lat - state.pin.lat) * R) < 3000;
   const objects = state.pin ? state.objects.filter(near) : [];
-  box.hidden = !objects.length;
+  box.hidden = !objects.length && !state.areaStats;
+  $('#impact-things-title').hidden = !objects.length;
   const key = objects.map((o) => `${o.id}:${o.name}`).join('|');
   if (list.dataset.key !== key) {
     list.dataset.key = key;
@@ -1167,7 +1191,7 @@ function renderFacts() {
   [...list.children].forEach((node, i) => node.classList.toggle('reached', state.depth >= FACTS[i].depth));
 }
 
-function setDepth(value, source = 'Manual illustration - not a forecast') {
+function setDepth(value, source = 'Manual illustration - not a forecast', { fromArea = false } = {}) {
   state.depthSource = source;
   $('#depth-source').textContent = source + (value > MAX_DEPTH_M ? ' - display capped at 3 m' : '');
   state.depth = Math.min(MAX_DEPTH_M, Math.max(0, value));
@@ -1181,6 +1205,7 @@ function setDepth(value, source = 'Manual illustration - not a forecast') {
     button.setAttribute('aria-pressed', String(Math.abs(Number(button.dataset.depth) - state.depth) < 0.005));
   });
   updateWater();
+  if (!fromArea && state.area?.ready) state.area.showDepth(state.depth);
   renderFacts();
   syncRoomWater();
   if (state.safety && Math.abs(state.safety.depth - state.depth) > 0.01) {
@@ -1444,6 +1469,7 @@ async function openScene(scene) {
   const ground = scene.ground ?? await groundHeightAt(scene.lon, scene.lat);
   const pin = Cesium.Cartographic.fromDegrees(scene.lon, scene.lat, ground);
   setPin(pin);
+  state.storm?.setPlace(scene.button.split(' · ')[0]);
 
   // Park the Lux3D SUV and an adult near the gauge, each on the 3D city's own ground there.
   // Objects from any example scene (here or in the other city) are cleared first.
@@ -1469,7 +1495,10 @@ async function openScene(scene) {
   await flyAround(Cesium.Cartesian3.fromRadians(focus.longitude, focus.latitude, ground + 1), scene.view, 2.2);
   story.textContent = scene.story;
   await waitForTiles(4000);
-  await playFlood(scene.depth, 'Example scene - illustrative depth, not measured event depth');
+  // Replay the recorded storm over the simulated area; fall back to a plain rising level.
+  if (state.storm) showSpace('water');
+  const replayed = state.storm ? await state.storm.playEvent(scene) : false;
+  if (!replayed) await playFlood(scene.depth, 'Example scene - illustrative depth, not measured event depth');
   toast('Now press “Find higher ground” to see where to go.', 6000);
 }
 
@@ -1806,9 +1835,10 @@ async function goToPlace(name, centre, note = '') {
   $('#scene-story').hidden = true;
   setDepth(0);
   setPin(spot);
+  state.storm?.setPlace(short);
   $('#pin-status').textContent = `Your spot: ${short}. Not quite your street? Click it on the map to move the spot.`;
   $('#place-status').textContent = note;
-  toast('Spot set. Next: add your things, then raise the water.', 7000);
+  toast('Spot set. Next: choose a storm in Simulate.', 7000);
   await flyAround(Cesium.Cartesian3.fromRadians(spot.longitude, spot.latitude, spot.height + 1), { heading: 20, pitch: -24, range: 70 }, 1.6);
 }
 
@@ -2046,15 +2076,21 @@ function wireUi() {
 
   $('#depth').addEventListener('input', (event) => {
     stopPlaying();
+    state.storm?.setManual();
     setDepth(Number(event.target.value));
   });
   document.querySelectorAll('.presets button').forEach((button) => {
     button.addEventListener('click', () => {
       stopPlaying();
+      state.storm?.setManual();
       setDepth(Number(button.dataset.depth));
     });
   });
-  $('#play').addEventListener('click', () => state.playRaf ? stopPlaying() : playFlood());
+  // With a storm chosen, Play runs the storm's timeline; otherwise it raises the water at your spot.
+  $('#play').addEventListener('click', () => {
+    if (state.storm?.active) return state.storm.playing ? state.storm.pause() : state.storm.play();
+    return state.playRaf ? stopPlaying() : playFlood();
+  });
   $('#scenes').replaceChildren(...SCENES.map((scene) => {
     // "Kerrville, Texas · July 2025" → place on top, date underneath.
     const [place, when] = scene.button.split(' · ');
@@ -2137,6 +2173,19 @@ async function init() {
   }
   else await loadWorld(viewer);
   state.water = createWater(viewer);
+  // The area simulation needs real terrain, so it runs in Real street mode only.
+  if (state.mode === 'street') {
+    try {
+      state.area = createArea({ Cesium, viewer, sampleHeights, onStats: (stats) => state.storm?.onStats(stats) });
+    } catch (error) {
+      console.warn('Area simulation unavailable.', error);
+    }
+  }
+  try {
+    state.storm = createStorm({ Cesium, state, setDepth, stopPlaying, toast, el, refreshImpact: renderImpact });
+  } catch (error) {
+    console.warn('Storm desk unavailable.', error);
+  }
   await loadLibrary();
   $('#world-status').textContent = state.mode === 'studio' ? 'Ready · illustrative terrain, no live hazard data.' : state.worldKind === 'photorealistic' ? 'Real street · photorealistic city, modelled river data.' : 'Real street · terrain fallback, modelled river data.';
   $('#map-mode-label').textContent = state.mode === 'studio' ? 'STUDIO · ILLUSTRATIVE STREET' : 'REAL STREET · LIVE MAP';
@@ -2167,6 +2216,7 @@ async function init() {
   if (new URLSearchParams(location.search).has('debug')) {
     window.waterline = {
       state, undoObjects, renderRisk, removeObject, setPending, copyShareLink, restoreFromHash, setPin, setDepth, loadTemplate, placeObject, playFlood, findHigherGround, openScene, SCENES, groundHeightAt, sceneData, goToPlace, searchPlaces,
+      get storm() { return state.storm; }, get area() { return state.area; },
       setHeightSampler: (fn) => { heightSampler = fn; },
     };
   }

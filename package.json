@@ -12,6 +12,7 @@
     "generate": "node --env-file-if-exists=.env scripts/generate.mjs",
     "optimise": "node scripts/optimise-library.mjs",
     "thumbs": "node scripts/render-thumbnails.mjs",
+    "prewarm": "node scripts/prewarm-data.mjs",
     "test": "node --test",
     "verify:interface": "node scripts/verify-interface.mjs",
     "verify:demo": "node scripts/verify-functional.mjs --no-video",

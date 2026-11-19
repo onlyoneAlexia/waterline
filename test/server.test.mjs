@@ -36,7 +36,7 @@ test('config reports the Cesium token and that generation is off without a Lux3D
 test('serves the app page and the library', async () => {
   const page = await fetch(`${base}/`);
   assert.equal(page.status, 200);
-  assert.match(await page.text(), /<title>Waterline<\/title>/);
+  assert.match(await page.text(), /<title>Waterline[^<]*<\/title>/);
   const library = await fetch(`${base}/models/library.json`);
   assert.equal(library.status, 200);
   assert.ok(Array.isArray(await library.json()));

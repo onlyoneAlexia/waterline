@@ -24,3 +24,5 @@ test/*.png
 # Rooms people build with Aholo World (only the example room ships)
 public/models/worlds/*
 !public/models/worlds/example-living-room.*
+.claude/
+test/snap/

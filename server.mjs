@@ -7,6 +7,10 @@
 //   GET  /api/world?id=...  -> { state, progress?, url?, upAxis?, error? }
 //   GET  /api/flood-depth?lat=..&lon=..  -> modelled river-flood depths (JRC / Copernicus)
 //   GET  /api/route?from=lon,lat&to=lon,lat -> walking route (FOSSGIS OSRM, OpenStreetMap)
+//   GET  /api/weather?lat=..&lon=..      -> hourly rain/wind forecast, river discharge, sea level (Open-Meteo)
+//   GET  /api/weather/event?lat=..&lon=..&start=YYYY-MM-DD&end=YYYY-MM-DD -> same, for a past event (ERA5 archive)
+//   GET  /api/osm?lat=..&lon=..&radius=.. -> buildings, roads, critical facilities (OpenStreetMap via Overpass)
+//   (weather and osm answers carry status: live | cached | stale | fixture; see lib/disk-cache.mjs)
 //
 // Finished models are saved under public/models/generated/ so they keep working
 // after Lux3D's download links expire.
@@ -17,6 +21,9 @@ import path from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import { createLux3D, downloadGlb, Lux3DError } from './lib/lux3d.mjs';
 import { createFloodDepthService } from './lib/flood-depth.mjs';
+import { createWeatherService } from './lib/weather.mjs';
+import { createOsmService } from './lib/osm.mjs';
+import { DEFAULT_CACHE_DIR, DEFAULT_FIXTURES_DIR } from './lib/disk-cache.mjs';
 
 const ROUTING_URL = 'https://routing.openstreetmap.de/routed-foot/route/v1/foot';
 const MAX_ROUTE_METRES = 15_000;
@@ -78,7 +85,12 @@ function memo(limit = 500) {
   };
 }
 
-export function createAppServer(env = process.env, { floodDepth = createFloodDepthService(), fetchImpl = fetch, luxClient, downloadModel = downloadGlb, generatedDir = GENERATED_DIR, tasksDir = TASKS_DIR, worldsDir = WORLDS_DIR } = {}) {
+export function createAppServer(env = process.env, {
+  floodDepth = createFloodDepthService(), fetchImpl = fetch, luxClient, downloadModel = downloadGlb, generatedDir = GENERATED_DIR, tasksDir = TASKS_DIR, worldsDir = WORLDS_DIR,
+  dataFetchImpl = fetchImpl, cacheDir = DEFAULT_CACHE_DIR, fixturesDir = DEFAULT_FIXTURES_DIR,
+  weather = createWeatherService({ fetchImpl: dataFetchImpl, cacheDir, fixturesDir }),
+  osm = createOsmService({ fetchImpl: dataFetchImpl, cacheDir, fixturesDir }),
+} = {}) {
   const maxPerDay = Number(env.MAX_GENERATIONS_PER_DAY ?? 40);
   const maxPerIpPerHour = Number(env.MAX_GENERATIONS_PER_IP_PER_HOUR ?? 6);
   const trustProxy = env.TRUST_PROXY === '1';
@@ -327,6 +339,41 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
     return sendJson(res, 200, route);
   }
 
+  // ---------- Flood-impact data: rain, wind, rivers, sea level, OpenStreetMap ----------
+  // The services cache on disk and fall back to stale cache, then committed fixtures;
+  // when nothing is available they throw { status: 502 } with a friendly message.
+
+  function readLatLon(url) {
+    if (!['lat', 'lon'].every((key) => url.searchParams.get(key)?.trim())) return null;
+    const lat = Number(url.searchParams.get('lat'));
+    const lon = Number(url.searchParams.get('lon'));
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || Math.abs(lat) > 90 || Math.abs(lon) > 180) return null;
+    return { lat: Number(lat.toFixed(6)), lon: Number(lon.toFixed(6)) };
+  }
+
+  async function handleWeather(url, res) {
+    const at = readLatLon(url);
+    if (!at) return sendJson(res, 400, { error: 'lat and lon are required' });
+    return sendJson(res, 200, await weather.forecast(at.lat, at.lon));
+  }
+
+  async function handleWeatherEvent(url, res) {
+    const at = readLatLon(url);
+    if (!at) return sendJson(res, 400, { error: 'lat and lon are required' });
+    const start = url.searchParams.get('start') ?? '';
+    const end = url.searchParams.get('end') ?? '';
+    if (!start || !end) return sendJson(res, 400, { error: 'start and end are required (YYYY-MM-DD)' });
+    return sendJson(res, 200, await weather.event(at.lat, at.lon, start, end));
+  }
+
+  async function handleOsm(url, res) {
+    const at = readLatLon(url);
+    if (!at) return sendJson(res, 400, { error: 'lat and lon are required' });
+    const radius = url.searchParams.get('radius');
+    if (radius !== null && radius.trim() !== '' && !Number.isFinite(Number(radius))) return sendJson(res, 400, { error: 'radius must be a number of metres' });
+    return sendJson(res, 200, await osm.around(at.lat, at.lon, radius?.trim() || undefined));
+  }
+
   async function serveStatic(url, res) {
     let pathname;
     try {
@@ -364,6 +411,9 @@ export function createAppServer(env = process.env, { floodDepth = createFloodDep
       if (url.pathname === '/api/world' && req.method === 'GET') return await handleWorld(url, res);
       if (url.pathname === '/api/flood-depth' && req.method === 'GET') return await handleFloodDepth(url, res);
       if (url.pathname === '/api/route' && req.method === 'GET') return await handleRoute(url, res);
+      if (url.pathname === '/api/weather' && req.method === 'GET') return await handleWeather(url, res);
+      if (url.pathname === '/api/weather/event' && req.method === 'GET') return await handleWeatherEvent(url, res);
+      if (url.pathname === '/api/osm' && req.method === 'GET') return await handleOsm(url, res);
       if (url.pathname.startsWith('/api/')) return sendJson(res, 404, { error: 'Not found' });
       if (req.method !== 'GET' && req.method !== 'HEAD') return sendJson(res, 405, { error: 'Method not allowed' });
       return await serveStatic(url, res);
