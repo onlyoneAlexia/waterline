@@ -1,0 +1,203 @@
+{
+  "paiporta": {
+    "scenario": "Replay · 29 October 2024, Valencia DANA",
+    "source": "Storm replay · ERA5 rainfall (Open-Meteo), depth scaled to the reported event",
+    "depthAtSpot": 1.5,
+    "rainMm": 124,
+    "areaKm2": 2.39,
+    "maxDepth": 7.2,
+    "buildings": {
+      "total": 2082,
+      "wet": 1163,
+      "deep": 694,
+      "byBand": [
+        87,
+        123,
+        259,
+        219,
+        475
+      ]
+    },
+    "roadsCutKm": 31.5,
+    "roadsCut": [
+      "Carretera de Picanya-Paiporta-Sedaví",
+      "Avinguda de la Independència",
+      "Carrer Josep Capuz",
+      "Carrer de Montcada",
+      "Passeig de la Primavera"
+    ],
+    "services": {
+      "hit": 20,
+      "total": 25,
+      "top": [
+        {
+          "kind": "substation",
+          "name": null,
+          "depth": 6.2
+        },
+        {
+          "kind": "substation",
+          "name": null,
+          "depth": 5.4
+        },
+        {
+          "kind": "substation",
+          "name": null,
+          "depth": 5.4
+        },
+        {
+          "kind": "substation",
+          "name": null,
+          "depth": 5.3
+        }
+      ]
+    },
+    "osm": {
+      "buildings": 2082,
+      "roads": 561,
+      "facilities": 25,
+      "status": "cached",
+      "radius": 900,
+      "partial": false
+    }
+  },
+  "escape": "Higher ground: 140 m, about 2 min on foot",
+  "kerrville": {
+    "scenario": "Replay · 3–5 July 2025, Guadalupe River",
+    "source": "Storm replay · ERA5 rainfall (Open-Meteo), depth scaled to the reported event",
+    "depthAtSpot": 1.2,
+    "rainMm": 89,
+    "areaKm2": 0.42,
+    "maxDepth": 4.1,
+    "buildings": {
+      "total": 323,
+      "wet": 2,
+      "deep": 1,
+      "byBand": [
+        1,
+        0,
+        0,
+        1,
+        0
+      ]
+    },
+    "roadsCutKm": 1.8,
+    "roadsCut": [
+      "Louise Hays Park Road",
+      "Francisco Lemos Street",
+      "Sidney Baker Street South",
+      "Buena Vista Drive",
+      "Chaparral Drive"
+    ],
+    "services": {
+      "hit": 1,
+      "total": 16,
+      "top": [
+        {
+          "kind": "shelter",
+          "name": null,
+          "depth": 0.2
+        }
+      ]
+    },
+    "osm": {
+      "buildings": 323,
+      "roads": 488,
+      "facilities": 16,
+      "status": "cached",
+      "radius": 900,
+      "partial": false
+    }
+  },
+  "lagos": {
+    "scenario": "250 mm in 6 h",
+    "source": "What-if storm · 250 mm in 6 h, local runoff model",
+    "depthAtSpot": 0,
+    "rainMm": 250,
+    "areaKm2": 0.04,
+    "maxDepth": 4.5,
+    "buildings": {
+      "total": 790,
+      "wet": 5,
+      "deep": 3,
+      "byBand": [
+        0,
+        0,
+        2,
+        2,
+        1
+      ]
+    },
+    "roadsCutKm": 0.7,
+    "roadsCut": [
+      "Ahmadu Bello Way",
+      "Kofo Abayomi Road"
+    ],
+    "services": {
+      "hit": 0,
+      "total": 4,
+      "top": []
+    },
+    "osm": {
+      "buildings": 790,
+      "roads": 296,
+      "facilities": 4,
+      "status": "cached",
+      "radius": 900,
+      "partial": false
+    }
+  },
+  "capturedAt": "2026-11-19T04:42:03.221Z",
+  "houston": {
+    "scenario": "400 mm in 6 h",
+    "source": "What-if storm · 400 mm in 6 h, local runoff model",
+    "depthAtSpot": 0.96,
+    "rainMm": 400,
+    "areaKm2": 1.64,
+    "maxDepth": 6.4,
+    "buildings": {
+      "total": 987,
+      "wet": 745,
+      "deep": 113,
+      "byBand": [
+        61,
+        86,
+        485,
+        112,
+        1
+      ]
+    },
+    "roadsCutKm": 28.7,
+    "roadsCut": [
+      "Beechnut Street",
+      "Holly Street",
+      "West Loop South Frontage Road",
+      "Holt Street",
+      "Maple Street"
+    ],
+    "services": {
+      "hit": 2,
+      "total": 5,
+      "top": [
+        {
+          "kind": "school",
+          "name": "Horn Elementary School",
+          "depth": 1.1
+        },
+        {
+          "kind": "pharmacy",
+          "name": "H-E-B Pharmacy",
+          "depth": 0.8
+        }
+      ]
+    },
+    "osm": {
+      "buildings": 987,
+      "roads": 594,
+      "facilities": 5,
+      "status": "fixture",
+      "radius": 900,
+      "partial": false
+    }
+  }
+}

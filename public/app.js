@@ -843,7 +843,7 @@ function updateAftermath() {
   }
 }
 
-const WALK_SPEED_SHOWN = 9; // m/s on screen: about 7× walking pace, with the walk cycle sped up to match
+const WALK_SPEED_SHOWN = 4; // m/s on screen: about 3× walking pace, with the walk cycle sped up to match
 const WALK_HEADING_OFFSET = Math.PI; // the rigged model faces −Y in Cesium's frame
 
 function stopWalker() {
@@ -851,6 +851,7 @@ function stopWalker() {
   if (state.walker) state.viewer.entities.remove(state.walker);
   state.walker = null;
   state.walkerAt = null;
+  state.walkerRestart = null;
   state.viewer.clock.multiplier = 1;
 }
 
@@ -863,14 +864,18 @@ function followWalker(on) {
   if (!on || !state.walkerAt) return false;
   if (state.orbitOff) toggleOrbit();
   markView(null);
+  state.walkerRestart?.(); // start the walk again from your spot, so following shows all of it
   let heading = null;
+  let ground = null;
   state.followOff = viewer.scene.preRender.addEventListener(() => {
     if (!state.walkerAt) return;
     const p = state.walkerAt();
     // Ease the heading so corners in the route don't jerk the camera.
     heading = heading == null ? p.heading : heading + Math.atan2(Math.sin(p.heading - heading), Math.cos(p.heading - heading)) * 0.06;
-    const centre = Cesium.Cartesian3.fromRadians(p.lon, p.lat, p.h + 1.2);
-    viewer.camera.lookAt(centre, new Cesium.HeadingPitchRange(heading, rad(-40), 38)); // high enough to clear narrow streets
+    // The walker's heights already follow the 3D city; smooth them so steps and kerbs don't shake the camera.
+    ground = ground == null ? p.h : ground + (p.h - ground) * 0.15;
+    const centre = Cesium.Cartesian3.fromRadians(p.lon, p.lat, ground + 1.2);
+    viewer.camera.lookAt(centre, new Cesium.HeadingPitchRange(heading, rad(-58), 18)); // close and steep enough to see into narrow streets
   });
   return true;
 }
@@ -883,6 +888,22 @@ async function startWalker(path) {
   try { template = await loadTemplate({ name: 'Adult person (walking)', url: state.extras.walk, realHeight: 1.75 }); } catch { return; }
   const R = 6_378_137;
   const pts = path.map((p) => ({ lon: p.longitude, lat: p.latitude, h: Number.isFinite(p.height) ? p.height : state.pin.height }));
+  // Stand the walker on the 3D city itself (streets, bridge decks): the tileset has collision off, so
+  // Cesium can't clamp models to it. Sample its surface along the route once instead.
+  if (photorealisticTiles()) {
+    const samples = pts.map((p) => Cesium.Cartographic.fromRadians(p.lon, p.lat));
+    try {
+      await within(state.viewer.scene.sampleHeightMostDetailed(samples, [...state.safetyEntities, ...state.objects.map((o) => o.entity)]), 15_000);
+      // Follow the surface continuously from your street: kerbs, slopes and bridge decks pass, while a
+      // sudden jump (a roof or tree canopy over the street) keeps the last good height.
+      let previous = state.pin.height;
+      samples.forEach((s, i) => {
+        if (Number.isFinite(s.height) && Math.abs(s.height - previous) < 2.5) previous = s.height;
+        pts[i].h = previous;
+      });
+    } catch { /* keep the terrain heights */ }
+    if (!state.extras?.walk) return;
+  }
   const cum = [0];
   for (let i = 1; i < pts.length; i++) {
     const dx = (pts[i].lon - pts[i - 1].lon) * R * Math.cos(pts[i].lat);
@@ -890,7 +911,8 @@ async function startWalker(path) {
     cum.push(cum[i - 1] + Math.hypot(dx, dy));
   }
   const total = cum.at(-1);
-  const started = performance.now();
+  let started = performance.now();
+  state.walkerRestart = () => { started = performance.now(); };
   const at = () => {
     const d = Math.min(total, ((performance.now() - started) / 1000) * WALK_SPEED_SHOWN);
     let i = 1;
@@ -905,7 +927,7 @@ async function startWalker(path) {
   const lift = -template.bounds.min[1] * scale; // metres from the model's origin down to its feet
   const position = new Cesium.CallbackPositionProperty((time, result) => {
     const p = at();
-    return Cesium.Cartesian3.fromRadians(p.lon, p.lat, lift, Cesium.Ellipsoid.WGS84, result);
+    return Cesium.Cartesian3.fromRadians(p.lon, p.lat, p.h + lift, Cesium.Ellipsoid.WGS84, result);
   }, false);
   const orientation = new Cesium.CallbackProperty(() => {
     const p = at();
@@ -915,8 +937,8 @@ async function startWalker(path) {
     name: 'Walking to higher ground',
     position,
     orientation,
-    // The rigged model is centred on its hips, so stand it on the ground by lifting it half its height.
-    model: { uri: state.extras.walk, scale, minimumPixelSize: 48, heightReference: Cesium.HeightReference.RELATIVE_TO_GROUND, runAnimations: true },
+    // The rigged model is centred on its hips, so `lift` (half its height) stands it on the ground.
+    model: { uri: state.extras.walk, scale, minimumPixelSize: 48, runAnimations: true },
   });
   // The walk cycle plays on the scene clock: speed it up to match the shown pace (the sun barely moves).
   state.viewer.clock.multiplier = WALK_SPEED_SHOWN / 1.3;

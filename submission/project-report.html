@@ -1,272 +1,278 @@
 <!doctype html><html lang="en"><head><meta charset="utf-8"><title>Waterline: project report</title><style>
-@font-face { font-family: 'Cinzel Decorative'; font-weight: 700; src: url('../public/fonts/cinzel-decorative-700.woff2'); }
 @font-face { font-family: 'Poppins'; font-weight: 400; src: url('../public/fonts/poppins-400.woff2'); }
 @font-face { font-family: 'Poppins'; font-weight: 500; src: url('../public/fonts/poppins-500.woff2'); }
 @font-face { font-family: 'Poppins'; font-weight: 600; src: url('../public/fonts/poppins-600.woff2'); }
-@font-face { font-family: 'Allura'; src: url('../public/fonts/allura-400.woff2'); }
+@font-face { font-family: 'Poppins'; font-weight: 700; src: url('../public/fonts/poppins-700.woff2'); }
 @page { size: 1280px 720px; margin: 0; }
 * { box-sizing: border-box; }
 html, body { margin: 0; }
-body { font: 15px/1.5 Poppins, sans-serif; color: #3d2318; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-section { position: relative; width: 1280px; height: 720px; padding: 34px 54px 30px; overflow: hidden; break-after: page;
-  background: radial-gradient(70% 60% at 100% 0%, rgba(255,255,255,.6), transparent 70%), linear-gradient(180deg, #bfe6fa, #e4f4fd 62%, #fdf2df); }
+body { font: 14.5px/1.5 Poppins, sans-serif; color: #e8f1f8; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+section { position: relative; width: 1280px; height: 720px; padding: 30px 50px 28px; overflow: hidden; break-after: page;
+  background: radial-gradient(55% 45% at 100% 0%, rgba(47,143,224,.22), transparent 70%), linear-gradient(180deg, #08111f, #0c1a2e); }
 section:last-child { break-after: auto; }
-section.cream { background: radial-gradient(60% 50% at 0% 0%, rgba(255,255,255,.7), transparent 70%), linear-gradient(180deg, #fbe6c4, #fdf2df); }
-.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.logotype { font-weight: 500; font-size: 18px; letter-spacing: .38em; }
-.pill { padding: 5px 14px; border-radius: 999px; background: rgba(46,64,74,.8); color: #fff; font-size: 12px; font-weight: 500; }
-h1 { margin: 0 0 14px; font: 700 40px/1.05 'Cinzel Decorative', serif; text-transform: uppercase; letter-spacing: -.5px; }
-h2 { margin: 0 0 6px; font: 600 13px Poppins; letter-spacing: 1.4px; text-transform: uppercase; color: #0d4f74; }
-h3 { margin: 4px 0 4px; font: 600 16px/1.3 Poppins; }
-p { margin: 0 0 9px; } ul { margin: 0; padding-left: 18px; } li { margin: 0 0 6px; }
-.lede { font-size: 18px; line-height: 1.5; color: #5a3a2c; }
-.script { font: 40px/1 Allura, cursive; color: #6b4a3a; margin: 0 0 4px; }
-.muted { color: #8a6c5c; }
-.small { font-size: 12.5px; }
-.grid { display: grid; gap: 22px; }
-.g2 { grid-template-columns: 1fr 1fr; } .g37 { grid-template-columns: 37fr 63fr; } .g45 { grid-template-columns: 44fr 56fr; } .g3 { grid-template-columns: repeat(3, 1fr); }
-.shot { display: block; width: 100%; border-radius: 16px; box-shadow: 0 12px 30px rgba(13,79,116,.18); background: #fff; }
-.shot.h { height: 100%; object-fit: cover; object-position: left top; }
-.panel { background: rgba(255,255,255,.82); border-radius: 18px; padding: 16px 18px; box-shadow: 0 8px 20px rgba(13,79,116,.1); }
-.card { position: relative; background: rgba(255,255,255,.85); border-radius: 20px; padding: 12px 14px 14px; box-shadow: 0 8px 20px rgba(13,79,116,.1); }
-.card p { font-size: 13px; line-height: 1.5; color: #5a3a2c; margin: 0; }
-.card .art { display: block; width: 100%; height: 250px; object-fit: contain; border-radius: 12px; background: radial-gradient(70% 70% at 50% 60%, #fff, #d5f0fc 85%); }
-.card .art.map { object-fit: cover; object-position: 78% 45%; }
-.card .art.cream { background: radial-gradient(70% 70% at 50% 60%, #fff, #fbe3bd 85%); }
-.step { display: inline-block; margin-top: 8px; padding: 2px 10px; border-radius: 999px; background: #fbe3bd; font-size: 11px; font-weight: 600; }
-.pair { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-.pair img { width: 100%; height: 170px; object-fit: contain; border-radius: 12px; background: radial-gradient(70% 70% at 50% 60%, #fff, #d5f0fc 85%); }
-.pair img.photo { object-fit: cover; }
-.arrow { font-weight: 600; color: #0d4f74; }
-.big { font: 600 44px/1 Poppins; letter-spacing: -1.5px; }
-table { width: 100%; border-collapse: collapse; font-size: 12.5px; }
-td, th { padding: 4px 8px; border-bottom: 1px solid rgba(61,35,24,.1); text-align: left; vertical-align: middle; }
-th { font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: #8a6c5c; font-weight: 600; }
-.thumb { width: 52px; height: 38px; object-fit: contain; border-radius: 8px; background: radial-gradient(#fff, #d5f0fc); }
-.flow { display: flex; align-items: stretch; gap: 8px; margin: 2px 0 10px; }
-.flow div { flex: 1; background: #fff; border-radius: 14px; padding: 10px 12px; font-size: 12.5px; line-height: 1.4; box-shadow: 0 6px 14px rgba(13,79,116,.08); }
-.flow div b { display: block; font-size: 13.5px; margin-bottom: 2px; }
-.flow div.lux { background: linear-gradient(140deg, #efe8ff, #dff3ff); border: 1.5px solid #c9b8ff; }
-.flow span { align-self: center; color: #0d4f74; font-weight: 700; }
-.timeline { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
-.timeline .day { background: rgba(255,255,255,.85); border-radius: 18px; padding: 14px 16px; font-size: 12.5px; line-height: 1.45; }
-.timeline .day b.date { display: inline-block; margin-bottom: 6px; padding: 2px 10px; border-radius: 999px; background: #0d4f74; color: #fff; font-size: 11px; }
-.ui3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 14px; }
-.ui3 figure { margin: 0; } .ui3 img { width: 100%; height: 170px; object-fit: cover; object-position: left top; border-radius: 12px; box-shadow: 0 8px 18px rgba(13,79,116,.15); }
-figcaption { font-size: 11.5px; color: #6b4a3a; margin-top: 4px; }
-.cover h1 { font-size: 64px; margin: 6px 0 16px; }
-.stat { display: inline-block; margin: 0 8px 8px 0; padding: 8px 14px; border-radius: 14px; background: #fff; font-size: 13px; box-shadow: 0 6px 14px rgba(13,79,116,.08); }
-.stat b { display: block; font-size: 22px; letter-spacing: -.5px; }
-.hero-art { position: relative; height: 560px; border-radius: 28px; overflow: hidden; background: linear-gradient(180deg, #8fd3f4, #c8ebfb); box-shadow: 0 16px 40px rgba(13,79,116,.2); }
-.hero-art .car { position: absolute; left: 0; top: 17%; width: 100%; height: 68%; object-fit: contain; z-index: 2; filter: drop-shadow(0 22px 26px rgba(13,79,116,.25)); }
-.hero-art .water { position: absolute; left: 0; right: 0; top: 55%; bottom: 0; z-index: 3; background: linear-gradient(180deg, rgba(47,159,219,.55), rgba(13,79,116,.75));
-  -webkit-mask-image: linear-gradient(180deg, #000 60%, rgba(0,0,0,.85)); }
-.hero-art .line { position: absolute; left: 0; right: 0; top: 55%; height: 3px; z-index: 4; background: rgba(255,255,255,.85); }
-.hero-art .tag { position: absolute; z-index: 5; right: 5%; top: 47%; padding: 8px 18px; border-radius: 999px; background: #fff; font-weight: 600; font-size: 15px; box-shadow: 0 6px 16px rgba(13,79,116,.15); }
-.hero-art .sky { position: absolute; left: 7%; top: 7%; z-index: 5; font: 34px/1.1 Allura, cursive; color: #3d2318; }
-.hero-art .cloud { position: absolute; z-index: 1; width: 220px; height: 70px; border-radius: 70px; background: #fff; opacity: .7; filter: blur(8px); }
-.card .big, .big { font: 600 46px/1.05 Poppins; letter-spacing: -1.5px; color: #3d2318; }
-.strip { position: absolute; left: 54px; right: 54px; bottom: 70px; display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; }
-.strip img { width: 100%; height: 120px; object-fit: contain; border-radius: 16px; background: radial-gradient(70% 70% at 50% 60%, #fff, #d5f0fc 85%); }
-.foot { position: absolute; left: 54px; right: 54px; bottom: 16px; font-size: 10.5px; color: #8a6c5c; }
+section.alt { background: radial-gradient(50% 45% at 0% 0%, rgba(255,196,77,.1), transparent 70%), linear-gradient(180deg, #0a1424, #0f1d33); }
+.top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.logotype { font-weight: 700; font-size: 15px; letter-spacing: .34em; }
+.pill { padding: 4px 12px; border-radius: 999px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); color: #b9c8d8; font-size: 11.5px; font-weight: 500; }
+h1 { margin: 0 0 12px; font: 700 34px/1.12 Poppins; letter-spacing: -.02em; }
+h2 { margin: 0 0 5px; font: 600 11.5px Poppins; letter-spacing: .16em; text-transform: uppercase; color: #ffc44d; }
+h3 { margin: 4px 0 3px; font: 600 15px/1.3 Poppins; }
+p { margin: 0 0 8px; } ul { margin: 0; padding-left: 17px; } li { margin: 0 0 5px; }
+b { color: #fff; }
+.lede { font-size: 17px; line-height: 1.5; color: #c9d6e3; }
+.kick { font: 600 12px Poppins; letter-spacing: .22em; text-transform: uppercase; color: #ffc44d; margin: 0 0 6px; }
+.muted { color: #8fa3b8; }
+.small { font-size: 12px; }
+.grid { display: grid; gap: 18px; }
+.g2 { grid-template-columns: 1fr 1fr; } .g37 { grid-template-columns: 37fr 63fr; } .g45 { grid-template-columns: 42fr 58fr; } .g3 { grid-template-columns: repeat(3, 1fr); } .g4 { grid-template-columns: repeat(4, 1fr); }
+.shot { display: block; width: 100%; border-radius: 14px; border: 1px solid rgba(255,255,255,.1); box-shadow: 0 14px 34px rgba(0,0,0,.45); }
+.crop { object-fit: cover; object-position: 50% 50%; }
+.panel { background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 14px 16px; }
+.card { position: relative; background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09); border-radius: 16px; padding: 10px 12px 12px; }
+.card p { font-size: 12.5px; line-height: 1.5; color: #b9c8d8; margin: 0; }
+.card .art { display: block; width: 100%; height: 200px; object-fit: contain; border-radius: 10px; background: radial-gradient(70% 70% at 50% 60%, #2a3f61, #121e33 85%); }
+.card .art.map { object-fit: cover; }
+.zoom { position: relative; height: 200px; overflow: hidden; border-radius: 10px; background: #121e33; }
+.zoom img { position: absolute; width: 250%; }
+.step { display: inline-block; margin-top: 8px; padding: 2px 9px; border-radius: 999px; background: #ffc44d; color: #1a1206; font-size: 10.5px; font-weight: 600; }
+.stat { display: inline-block; margin: 0 7px 7px 0; padding: 7px 12px; border-radius: 12px; background: rgba(255,255,255,.06); border: 1px solid rgba(255,255,255,.1); font-size: 12px; color: #b9c8d8; }
+.stat b { display: block; font-size: 20px; letter-spacing: -.02em; color: #fff; }
+.stat.hot b { color: #ff8a6a; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+td, th { padding: 5px 8px; border-bottom: 1px solid rgba(255,255,255,.08); text-align: left; vertical-align: top; }
+th { font-size: 10.5px; letter-spacing: .1em; text-transform: uppercase; color: #8fa3b8; font-weight: 600; }
+code { font-size: 11px; color: #9fd4ff; }
+.flow { display: flex; align-items: stretch; gap: 7px; margin: 2px 0 10px; }
+.flow div { flex: 1; background: rgba(255,255,255,.05); border: 1px solid rgba(255,255,255,.09); border-radius: 12px; padding: 9px 11px; font-size: 12px; line-height: 1.4; color: #b9c8d8; }
+.flow div b { display: block; font-size: 13px; margin-bottom: 2px; }
+.flow div.lux { background: linear-gradient(140deg, rgba(160,130,255,.18), rgba(79,179,255,.12)); border-color: rgba(170,150,255,.4); }
+.flow span { align-self: center; color: #ffc44d; font-weight: 700; }
+.timeline { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; }
+.timeline .day { background: rgba(255,255,255,.045); border: 1px solid rgba(255,255,255,.09); border-radius: 14px; padding: 11px 12px; font-size: 11.5px; line-height: 1.45; color: #b9c8d8; }
+.timeline .day b.date { display: inline-block; margin-bottom: 5px; padding: 1px 9px; border-radius: 999px; background: #2f8fe0; color: #fff; font-size: 10.5px; }
+.timeline .day.now b.date { background: #ffc44d; color: #1a1206; }
+figure { margin: 0; } figcaption { font-size: 11px; color: #8fa3b8; margin-top: 4px; }
+.renders { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.renders img { width: 100%; height: 150px; object-fit: contain; border-radius: 12px; background: radial-gradient(70% 70% at 50% 60%, #2a3f61, #121e33 85%); }
+.foot { position: absolute; left: 50px; right: 50px; bottom: 12px; font-size: 10px; color: #6f8399; }
+.cover h1 { font-size: 52px; line-height: 1.05; margin: 4px 0 14px; }
+.quote { font-size: 15px; color: #ffc44d; border-left: 3px solid #ffc44d; padding-left: 12px; margin: 10px 0; }
 </style></head><body>
 
-<section class="cover"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">1 · Project report</span></div><h1></h1>
-<div class="grid g45" style="height:600px">
-  <div style="padding-top:20px">
-    <p class="script">before the water comes…</p>
-    <h1 style="font-size:54px;margin:4px 0 14px">See the water.<br>Understand the impact.</h1>
-    <p class="lede">A flood map shows a blue patch. <b>Waterline</b> shows the water at <i>your</i> car’s windows, on <i>your</i> street.</p>
-    <p class="lede">Visitors snap or describe the things they own, <b>Aholo Lux3D</b> turns them into 3D models, and Waterline stands them at true scale in a photorealistic 3D city. Then the water rises, beside real flood data and a walking route to higher ground.</p>
-    <div style="margin-top:14px;display:flex;gap:8px"><span class="stat"><b>6</b>Lux3D Library models</span><span class="stat"><b>~2 min</b>photo or words → 3D</span><span class="stat"><b>2 cities</b>real flood stories</span></div>
+<section class="cover"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">1 · Project report</span></div>
+<div class="grid g45" style="height:610px; align-items:center">
+  <div>
+    <p class="kick">Flood impact simulator</p>
+    <h1>See what the storm does to your street — before it comes.</h1>
+    <p class="lede">Pick a place and a storm. Water spreads across real terrain hour by hour, buildings, roads and schools light up as it reaches them, and <b>Aholo Lux3D</b> puts the things you own into the water at true scale. Then Waterline shows the way to higher ground.</p>
+    <div style="margin-top:12px"><span class="stat"><b>11</b>Aholo endpoints used</span><span class="stat"><b>3.2 km²</b>terrain simulated at 20 m</span><span class="stat"><b>5</b>storm scenarios</span><span class="stat"><b>2</b>real floods replayed</span></div>
   </div>
-  <div class="hero-art"><span class="cloud" style="left:8%;top:12%"></span><span class="cloud" style="right:6%;top:20%;width:160px"></span>
-    <span class="sky">your car, your street…</span>
-    <img class="car" src="../public/img/hero-family-suv.png" alt="Lux3D Family SUV"><div class="water"></div><div class="line"></div>
-    <span class="tag">Water at 1.2 m · up to the windows</span></div>
+  <img class="shot" src="report/sim-paiporta-overview.jpg" alt="Paiporta at the peak of the October 2024 storm replay">
 </div>
-<p class="foot">Waterline · Manycore Aholo Global 3D AI Hackathon 2026 · Illustration, not a forecast.</p></section>
+<p class="foot">Waterline · Manycore Aholo Global 3D AI Hackathon 2026 · A simulation for planning and awareness, not an official warning.</p></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">2 · The problem</span></div><h1>1.2 metres means nothing<br>until you see it.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">2 · The problem</span></div><h1>Flood maps show a blue patch.<br>People underestimate it.</h1>
 <div class="grid g37">
   <div>
-    <p class="lede">Flood warnings speak in metres and return periods. People think in cars, doors and their own height, and they underestimate moving water.</p>
+    <p class="lede">Warnings speak in millimetres, return periods and metres. People think in cars, doors, streets and their own height — and they underestimate moving water.</p>
     <div class="panel small" style="margin:10px 0">
       <p><b>15 cm</b> of moving water can knock an adult over. <b>30 cm</b> floats most cars. <b>60 cm</b> sweeps away SUVs. <span class="muted">(US National Weather Service)</span></p>
-      <p><b>Kerrville, Texas, 4 July 2025:</b> the Guadalupe rose about 8 m (26 ft) in 45 minutes; more than 100 people died in Kerr County.</p>
-      <p style="margin:0"><b>Valencia, Spain, 29 October 2024:</b> about 230 died across Spain. In Paiporta, people were trapped going to get their cars out of garages.</p>
+      <p><b>Kerrville, Texas, 4 July 2025:</b> the Guadalupe rose about 8 m in 45 minutes; more than 100 people died in Kerr County.</p>
+      <p style="margin:0"><b>Valencia, Spain, 29 October 2024:</b> about 230 died. In Paiporta, people were trapped going to get their cars out of garages.</p>
     </div>
-    <p>Waterline puts that number next to something you recognise, so the danger lands <b>before</b> the water does.</p>
+    <p class="quote">Waterline turns a forecast into a picture of your street — with your own things in the water — so the danger lands before the water does.</p>
   </div>
-  <img class="shot" src="report/app-studio-lineup.jpg" alt="Six Lux3D objects in 0.9 m of water with live impact statuses">
-</div>
-<p class="foot">Every object in the picture is an Aholo Lux3D model at its real height, in 0.9 m of water. The panel reads it out: the small car is up to its windows, the adult waist-deep, the bin 84% under.</p></section>
-
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">3 · How it works</span></div><h1>Snap it. Place it.<br>Raise the water.</h1>
-<div class="grid g3">
-  <div class="card"><img class="art" src="report/asset-pickup.png" alt="Lux3D pickup truck"><span class="step">01 · Lux3D</span><h3>Snap it or describe it</h3><p>Upload a photo of your car, scooter or door, or type “a red pickup truck”. Aholo Lux3D builds a textured 3D model in about two minutes, live inside the app.</p></div>
-  <div class="card"><img class="art map" src="report/app-describe.jpg" alt="Typed pickup placed on a real street"><span class="step">02 · True scale</span><h3>Put it on your street</h3><p>Type your street, town or postcode, anywhere in the world, or press Use my location. Waterline finds street level in Google’s photorealistic 3D city, and the model stands at its real height on the real ground.</p></div>
-  <div class="card"><img class="art map" src="report/app-escape.jpg" alt="Walking route to higher ground"><span class="step">03 · Impact</span><h3>Raise the water</h3><p>Play the flood and watch it reach the wheels, the windows, your waist. Then check modelled river-flood depths for that spot and find the walking route to higher ground.</p></div>
-</div>
-<p class="foot">Works in two modes: Real street (live 3D city and data) and Studio (an original illustrative street that needs no map account, for instant demos).</p></section>
-
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">4 · Aholo Lux3D at the core</span></div><h1>Every object in the flood<br>is made by Lux3D.</h1>
-<div class="flow">
-  <div><b>Photo or words</b>Visitor uploads a photo or types a description</div><span>→</span>
-  <div class="lux"><b>Aholo Lux3D</b>Image-to-3D or Text-to-3D · G1-Turbo · PBR materials · AI size prediction · 60k-face budget</div><span>→</span>
-  <div><b>Measure</b>Waterline reads the GLB’s mesh bounds and node transforms</div><span>→</span>
-  <div><b>Real height</b>Your choice → your words (“pickup” = 1.8 m) → Lux3D’s estimate if it is in metres → ask</div><span>→</span>
-  <div><b>On your street</b>Base on the real ground of the 3D city; water depth measured per object</div>
-</div>
-<div class="grid" style="grid-template-columns: 58fr 42fr">
-  <div class="panel" style="padding:8px 14px"><table><tr><th></th><th>Library model</th><th>Prompt or source</th></tr><tr><td><img class="thumb" src="../public/models/thumbs/family-suv.png" alt=""></td><td style="white-space:nowrap"><b>Family SUV</b><br><span class="muted">Text → 3D · 1.8 m · task 7448746</span></td><td class="muted">Text prompt (first model, before prompts were recorded)</td></tr><tr><td><img class="thumb" src="../public/models/thumbs/small-car.png" alt=""></td><td style="white-space:nowrap"><b>Small car</b><br><span class="muted">Photo → 3D · 1.5 m · task 8032019</span></td><td class="muted">CC0 photo by nicifor28 (Flickr)</td></tr><tr><td><img class="thumb" src="../public/models/thumbs/scooter.png" alt=""></td><td style="white-space:nowrap"><b>Scooter</b><br><span class="muted">Photo → 3D · 1.15 m · task 8032024</span></td><td class="muted">CC0 photo by Nilo Velez (WordPress Photo Directory)</td></tr><tr><td><img class="thumb" src="../public/models/thumbs/adult-person.png" alt=""></td><td style="white-space:nowrap"><b>Adult person</b><br><span class="muted">Text → 3D · 1.75 m · task 8032015</span></td><td class="muted">“a full-body adult person standing upright in a relaxed neutral pose, arms at…</td></tr><tr><td><img class="thumb" src="../public/models/thumbs/wheelie-bin.png" alt=""></td><td style="white-space:nowrap"><b>Wheelie bin</b><br><span class="muted">Text → 3D · 1.07 m · task 8032018</span></td><td class="muted">“a green plastic wheelie bin for household rubbish, upright, lid closed, two…</td></tr><tr><td><img class="thumb" src="../public/models/thumbs/front-door.png" alt=""></td><td style="white-space:nowrap"><b>Front door</b><br><span class="muted">Text → 3D · 2.3 m · task 8032119</span></td><td class="muted">“a single closed wooden front door of a house, painted dark blue, set in a wh…</td></tr></table></div>
-  <div class="panel small">
-    <h2>The subject, not decoration</h2>
-    <p>The water is always measured against a Lux3D model. The Library ships 2 models made from CC0 photos and 4 from text, each with its task ID, prompt or photo credit, and SHA-256 recorded in <code>library.json</code>.</p>
-    <h2>Live, inside the app</h2>
-    <p>Visitors make their own models in about two minutes. A small Node server keeps the Lux3D API key off the browser: it uploads photos through Aholo’s asset service, creates the task, polls it and downloads the GLB, with per-visitor hourly and daily limits.</p>
-    <h2>Sized for the real world</h2>
-    <p style="margin:0">Each model is measured from its own mesh and stood on the real ground of the 3D city, so “1.2 m of water” lands exactly where it would on your car.</p>
-  </div>
+  <img class="shot" src="report/sim-paiporta-street.jpg" alt="Street-level replay in Paiporta">
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">5 · Asset iterations · 1</span></div><h1>What each Lux3D model<br>taught us.</h1>
-<div class="grid g3">
-  <div class="card"><div class="pair"><img class="" src="report/asset-picnic-table.png" alt="First Lux3D test: a picnic table"><img class="" src="report/asset-suv.png" alt="Family SUV"></div>
-    <span class="step">14 Nov · first contact</span><h3>Scale is not given, it must be decided</h3>
-    <p>The first photo test (a picnic table) came back in estimated metres; the first text model, the Family SUV, came back in a 10-unit box. So every model is scaled to a real height, and the user’s choice always wins.</p></div>
-  <div class="card"><div class="pair"><img class="" src="report/asset-suv.png" alt="Family SUV, about 280,000 triangles"><img class="" src="report/asset-small-car.png" alt="Small car with a 60,000-face budget"></div>
-    <span class="step">14 Nov · weight</span><h3>280k → about 60k triangles</h3>
-    <p>Lux3D’s default gave the SUV about 280,000 triangles (17 MB), too heavy for a street of objects. With <code>faceCount: 60000</code> every later model lands at 55,000–67,000 triangles with the same silhouette.</p></div>
-  <div class="card"><div class="pair"><img class="photo" src="report/front-door-v1-source.jpg" alt="CC0 photo of a front door"><img class="" src="report/asset-door-v1-back.png" alt="Photo-made door, back view"></div>
-    <div class="pair" style="margin-top:6px"><img class="" src="report/asset-door-v1.png" alt="Photo-made door, front view"><img class="" src="report/asset-door-v2.png" alt="Text-made door that replaced it"></div>
-    <span class="step">16 Nov · rejected</span><h3>Door v1 → door v2</h3>
-    <p>From a photo, the door became a one-sided slab with a grimy back. Rebuilt from text (“a single closed wooden front door… white frame, stone doorstep”), it is clean from every side.</p></div>
-</div></section>
-
-<section class="cream"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">6 · Asset iterations · 2</span></div><h1>Sizing, nonsense<br>and weight.</h1>
-<div class="grid g3">
-  <div class="card"><div class="pair"><img class="photo" src="../public/models/sources/small-car.jpg" alt="CC0 photo of a die-cast Toyota Yaris"><img class="" src="report/asset-small-car.png" alt="Lux3D small car"></div>
-    <span class="step">16 Nov · a toy?</span><h3>A car Lux3D sized at 15 cm</h3>
-    <p>The CC0 photo was of a die-cast model, and Lux3D’s size prediction correctly called it 15 cm. Good for Lux3D, wrong for a flood. Library models carry a human-checked height (1.5 m).</p></div>
-  <div class="card"><div class="pair"><img class="" src="report/asset-pickup.png" alt="Lux3D result for “a red pickup truck”"><img class="" src="report/asset-camera.png" alt="Lux3D result for “asdfghjkl”: a camera"></div>
-    <span class="step">16 Nov · live test</span><h3>“a red pickup truck” and “asdfghjkl”</h3>
-    <p>The truck came back in a 12-unit box (it would have stood 4.8 m tall); the nonsense became a 17 cm camera. Hence <b>Auto size</b>: your words first, then Lux3D’s metres when they look real, otherwise ask, plus tappable example ideas.</p></div>
-  <div class="card"><p class="big" style="margin:8px 0 2px">69.7 → 24.2 MB</p><p class="muted" style="margin-bottom:8px">all six Library models</p>
-    <span class="step">16 Nov · web delivery</span><h3>Same geometry, lighter textures</h3>
-    <p>2048 px PNG textures were most of each file. A build step re-encodes them as JPEG without touching the mesh; the original Lux3D downloads and both SHA-256 hashes are kept. Library thumbnails and the homepage hero are rendered from the models themselves.</p></div>
-</div></section>
-
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">7 · Real streets, real data</span></div><h1>Your street. Real<br>flood data.</h1>
-<div class="grid g2">
-  <div><img class="shot" src="report/app-kerrville.jpg" alt="Kerrville demo on the real 3D city"><p class="small muted" style="margin-top:6px">Kerrville, Texas: Louise Hays Park on the Guadalupe. The Lux3D SUV is “up to the windows”, the adult chest-deep.</p></div>
-  <div><img class="shot" src="report/app-risk.jpg" alt="Modelled river-flood depths"><p class="small muted" style="margin-top:6px">Modelled river-flood depths for the spot, from 10%-a-year to 0.2%-a-year floods. Each can be shown on the street.</p></div>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">3 · How it works</span></div><h1>A storm desk for your street.</h1>
+<div class="grid g4">
+  <div class="card"><div class="zoom"><img src="report/sim-houston.jpg" alt="Houston cloudburst what-if" style="left:-60%; top:-12%"></div><span class="step">01 · Storm</span><h3>Pick a place and a storm</h3><p>Search any street or use your location. Then: today’s forecast, a replay of a real flood with its recorded rainfall, a JRC river flood, a cloudburst or a storm surge.</p></div>
+  <div class="card"><div class="zoom"><img src="report/sim-kerrville.jpg" alt="Kerrville river corridor at the peak" style="left:-110%; top:-2%"></div><span class="step">02 · Simulate</span><h3>Watch the area flood</h3><p>Water spreads over 1.8 × 1.8 km of real terrain, hour by hour, on a weather-style timeline you can play or drag.</p></div>
+  <div class="card"><div class="zoom"><img src="report/sim-aftermath.jpg" alt="Lux3D SUV after the flood" style="left:-125%; top:-30%"></div><span class="step">03 · Lux3D</span><h3>Make it personal</h3><p>Snap or describe your car, door or scooter. Lux3D builds it in about two minutes and Waterline stands it at true scale on your street.</p></div>
+  <div class="card"><div class="zoom"><img src="report/sim-escape.jpg" alt="Route to higher ground" style="left:-115%; top:-12%"></div><span class="step">04 · Escape</span><h3>Find a way out</h3><p>The nearest ground 1 m above the flood, a real walking route, the water depth along it — and a Lux3D person who walks it.</p></div>
 </div>
-<div class="panel small" style="margin-top:12px"><b>Under the hood:</b> CesiumJS with Google Photorealistic 3D Tiles and Google place search (Cesium ion) or the browser’s location · the spot is moved off roofs and treetops to the street automatically · ground height sampled from the 3D city at every object · JRC / Copernicus <i>Global river flood hazard maps</i> v2.1 read directly from cloud GeoTIFFs with HTTP range requests · honest gaps: where the model shows 0 m, the app says that does <b>not</b> mean safe (it omits flash and coastal floods, the kind that struck Kerrville and Valencia).</div></section>
+<p class="small muted" style="margin-top:12px">The impact report counts what goes under: buildings in water, ground floors flooded, kilometres of road cut, and named schools, clinics and substations with their depth. Inside your home, Aholo World shows the same water coming through the door.</p></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">8 · A way out</span></div><h1>Then it shows<br>the way to higher ground.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">4 · The simulation</span></div><h1>Real terrain, a sloping valley,<br>water that has to get there.</h1>
 <div class="grid g37">
-  <div>
-    <p class="lede">Seeing the water is half the job. Waterline then answers “where do I go?”</p>
-    <ul>
-      <li>Searches the terrain (Cesium World Terrain) ring by ring for the nearest ground at least 1 m above this flood, ignoring roof-sized bumps.</li>
-      <li>Gets a real walking route there (OSRM on OpenStreetMap, via FOSSGIS).</li>
-      <li>Reports distance, minutes on foot, and how deep the water on the way would be: <i>“the route goes through up to 1.2 m of water, so leave before the water arrives.”</i></li>
-      <li>Ends with plain advice: go early; never go back for your car or into underground garages; if cut off, go to the highest floor.</li>
-    </ul>
+  <div class="panel small">
+    <h2>Terrain</h2><p>90 × 90 samples of Cesium World Terrain (20 m cells), gaps patched, a 3×3 median filter to remove buildings baked into the terrain model.</p>
+    <h2>Sloping valleys</h2><p>A plane fitted to the valley floor is removed (a relative elevation model), so one water level follows the valley’s slope instead of drowning everything downhill. Open water (sea, lagoon) is detected and left out.</p>
+    <h2>Connected flooding</h2><p>A priority flood from the river channel or shore and from your spot gives every cell the level at which water reaches it — so any level, at any hour, renders instantly.</p>
+    <h2>Storms over time</h2><p style="margin:0">Rain: runoff beyond what the drains carry, in a leaky reservoir, turned into a level by binary search. Replays: recorded rainfall drives a lagged rise and fall. River: a hydrograph to the JRC depth. Surge: tide + surge.</p>
   </div>
-  <img class="shot" src="report/app-escape.jpg" alt="Higher ground route in Kerrville">
+  <div><img class="shot" src="report/sim-paiporta-overview.jpg" alt="Depth colours at the peak in Paiporta">
+    <p class="small muted" style="margin-top:8px">Paiporta at the peak of the replay: depth colours from ankle-deep (pale) to over head height (violet); red roads are cut, services carry their depth. 2.39 km² flooded · 1,163 of 2,082 buildings in water · 694 ground floors flooded · 31.5 km of road cut · 20 of 25 services in water.</p></div>
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">9 · Aholo World · inside your home</span></div><h1>Then it shows the water<br>coming inside.</h1>
+<section class="alt"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">5 · Live data, robust by design</span></div><h1>Every number comes from open data —<br>and keeps working when a service doesn’t.</h1>
+<div class="grid g45">
+  <div>
+    <table>
+      <tr><th>Data</th><th>Source</th></tr>
+      <tr><td><b>Rain, wind</b> (forecast)</td><td>Open-Meteo Forecast API, hourly</td></tr>
+      <tr><td><b>Recorded storms</b></td><td>Open-Meteo Historical Weather (ERA5 reanalysis)</td></tr>
+      <tr><td><b>River discharge</b></td><td>Open-Meteo Flood API (GloFAS)</td></tr>
+      <tr><td><b>Sea level</b></td><td>Open-Meteo Marine API</td></tr>
+      <tr><td><b>River flood depths</b></td><td>JRC / Copernicus global flood hazard maps v2.1 (GeoTIFF range requests)</td></tr>
+      <tr><td><b>Buildings, roads, services</b></td><td>OpenStreetMap via Overpass (three mirrors)</td></tr>
+      <tr><td><b>3D city, terrain, search</b></td><td>Google Photorealistic 3D Tiles, Cesium World Terrain (Cesium ion)</td></tr>
+      <tr><td><b>Walking routes</b></td><td>FOSSGIS OSRM on OpenStreetMap</td></tr>
+    </table>
+    <div class="panel small" style="margin-top:10px"><h2>Robustness</h2><p style="margin:0">The server caches every response on disk (30 min forecasts → 14 days of map data), fails over between Overpass mirrors, serves stale data when a service is down, and falls back to fixtures for the demo places — so the replays run offline. Every response says whether it is <i>live, cached, stale</i> or a <i>saved copy</i>, and the location card shows it.</p></div>
+  </div>
+  <img class="shot" src="report/sim-houston.jpg" alt="Houston with the live location card">
+</div></section>
+
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">6 · Real floods, replayed</span></div><h1>Two real storms, replayed<br>over the real terrain.</h1>
+<div class="grid g2">
+  <figure><img class="shot" src="report/sim-paiporta-overview.jpg" alt="Paiporta replay at the peak"><figcaption><b>Paiporta, Spain · 29 Oct 2024.</b> 2.39 km² flooded · 1,163 of 2,082 buildings in water · 694 ground floors flooded · 31.5 km of road cut · 20 of 25 services in water. Water at the street peaks at the reported 1.5 m.</figcaption></figure>
+  <figure><img class="shot" src="report/sim-kerrville.jpg" alt="Kerrville replay at the peak"><figcaption><b>Kerrville, Texas · 4 Jul 2025.</b> 0.42 km² flooded · 2 of 323 buildings in water · 1 ground floors flooded · 1.8 km of road cut · 1 of 16 services in water. The flood stays in the Guadalupe’s corridor; named riverside roads are cut.</figcaption></figure>
+</div>
+<div class="panel small" style="margin-top:12px"><b>Honest about the data:</b> the reanalysis record smooths cloudbursts — 124 mm at Paiporta in ERA5 against 771 mm at the Turís gauge upstream — so a replay follows the recorded storm’s timing and is scaled to the depth reported in the street. The app says so on screen.</div></section>
+
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">7 · Aholo at the core</span></div><h1>11 Aholo endpoints. Every object<br>in the water is made by Aholo.</h1>
+<div class="grid" style="grid-template-columns: 64fr 36fr">
+  <div class="panel" style="padding:8px 12px"><table>
+    <tr><th>Lux3D</th><th>Where it shows up in Waterline</th><th>Task ids</th></tr>
+    <tr><td style="white-space:nowrap"><b>Image-to-3D</b><br><code>generate/img-to-3d</code></td><td>Your photo → a true-scale model, live in the app; the scooter and small car; the walking person</td><td class="muted" style="font-size:10.5px">8032019, 8032024, 8385075</td></tr><tr><td style="white-space:nowrap"><b>Text-to-3D</b><br><code>generate/text-to-3d</code></td><td>“a red pickup truck” → model, live; the SUV, door, bin and person</td><td class="muted" style="font-size:10.5px">7448746, 8032015, 8032018, 8032119</td></tr><tr><td style="white-space:nowrap"><b>Multimodal-to-image</b><br><code>generate/multimodal-to-image</code></td><td>Mud-stained SUV reference; A-pose reference so the person could be rigged</td><td class="muted" style="font-size:10.5px">8384560, 8385044</td></tr><tr><td style="white-space:nowrap"><b>Material transfer</b><br><code>generate/material-transfer</code></td><td>The SUV “after the flood”, swapped in as the water drops</td><td class="muted" style="font-size:10.5px">8384646</td></tr><tr><td style="white-space:nowrap"><b>Rig + retarget</b><br><code>animations/rig · animations/retarget</code></td><td>The person who walks the escape route (walk cycle, in place)</td><td class="muted" style="font-size:10.5px">8385131, 8385236</td></tr><tr><td style="white-space:nowrap"><b>Part-split</b><br><code>part-split</code></td><td>SUV → body + four wheels (which parts are under water)</td><td class="muted" style="font-size:10.5px">8384643</td></tr><tr><td style="white-space:nowrap"><b>Articulation</b><br><code>articulation-animation</code></td><td>The front door’s hinge, so it can swing open</td><td class="muted" style="font-size:10.5px">8385490</td></tr><tr><td style="white-space:nowrap"><b>Multi-format export</b><br><code>multi-format-export</code></td><td>USDZ for AR on a phone, STL for 3D printing; live via /api/export</td><td class="muted" style="font-size:10.5px">8384603, 8384647</td></tr>
+    <tr><td><b>Aholo World</b><br><code>world/v1/generations</code></td><td>A 3D room from one photo, flooded with the street’s water</td><td class="muted" style="font-size:10.5px">example room shipped</td></tr>
+    <tr><td><b>Asset</b><br><code>asset/v1/token · upload</code></td><td>Photos and models sent to the services above (multipart for 5 MB+)</td><td></td></tr>
+  </table></div>
+  <div class="panel small">
+    <h2>Live, inside the app</h2><p>Visitors make their own models (photo or words, about two minutes), rooms and AR exports. A small Node server keeps the API key off the browser, with per-visitor hourly and daily limits.</p>
+    <h2>Measured, not decorative</h2><p>The water is always measured against a Lux3D model at its real height. 6 Library models (2 from CC0 photos, 4 from text) and 10 extras made in 14 Lux3D tasks, each with task ids, prompts and SHA-256 in <code>library.json</code> and <code>extras.json</code>.</p>
+    <h2>Why no Aholo “simulation API”?</h2><p style="margin:0">Aholo has none; the hydrology is Waterline’s own, driven by public data. Aholo makes the result personal.</p>
+  </div>
+</div></section>
+
+<section class="alt"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">8 · Lux3D, beyond 3D models</span></div><h1>Mud, a walk, parts and a hinge —<br>all made with Lux3D.</h1>
+<div class="renders">
+  <figure><img class="" src="report/asset-suv.png" alt="Lux3D Family SUV"><figcaption>Family SUV (text-to-3D)</figcaption></figure>
+  <figure><img class="" src="report/asset-suv-flooded.png" alt="Lux3D material transfer: the SUV after the flood"><figcaption>After the flood: multimodal-to-image → material transfer</figcaption></figure>
+  <figure><img class="" src="report/asset-suv-parts.png" alt="Lux3D part-split SUV"><figcaption>Part-split: body + four wheels</figcaption></figure>
+  <figure><img class="" src="report/asset-walker.png" alt="Lux3D rigged walking person"><figcaption>Rigged and retargeted to a walk cycle</figcaption></figure>
+</div>
+<div class="grid g3" style="margin-top:12px">
+  <div class="panel small"><h2>What the water leaves</h2><p style="margin:0">A mud-stained reference image of the SUV (multimodal-to-image), then material transfer onto the same mesh. In the replay, once the water has reached the car and starts to fall, the muddy model swaps in.</p></div>
+  <div class="panel small"><h2>A rig that said no</h2><p style="margin:0">Rigging refused the Library person: <i>arms down against the body, not a T- or A-pose</i>. So Lux3D made an A-pose image of the same person, image-to-3D built it, then rig and retarget gave it a walk — four tasks, about 3 minutes.</p></div>
+  <div class="panel small"><h2>Take it home</h2><p style="margin:0">Multi-format export gives USDZ for AR Quick Look and STL for printing (80 mm miniatures). Any placed object can be exported live from the app.</p></div>
+</div>
+<div class="grid g2" style="margin-top:12px; gap:12px">
+  <figure><img class="shot crop" style="height:150px; object-position: 70% 55%" src="report/sim-aftermath.jpg" alt="The mud-stained SUV in the app after the water drops"><figcaption>In the app: the water drops to 0.48 m and the Lux3D “after the flood” SUV swaps in.</figcaption></figure>
+  <figure><img class="shot crop" style="height:150px; object-position: 0 40%" src="report/sim-lux3d.jpg" alt="The Lux3D space in the app"><figcaption>The Lux3D space: Library, photo and text generation, and the extras with downloads.</figcaption></figure>
+</div></section>
+
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">9 · Lux3D lessons</span></div><h1>What each Lux3D model taught us.</h1>
+<div class="grid g3">
+  <div class="card"><div class="renders" style="grid-template-columns:1fr 1fr"><img class="" src="report/asset-picnic-table.png" alt="First Lux3D test: a picnic table"><img class="" src="report/asset-suv.png" alt="Family SUV"></div>
+    <span class="step">14 Nov · scale</span><h3>Scale must be decided</h3>
+    <p>The first photo model came back in estimated metres, the first text model in a 10-unit box. Every model is scaled to a real height: your choice → your words (“pickup” = 1.8 m) → Lux3D’s metres when they look real.</p></div>
+  <div class="card"><div class="renders" style="grid-template-columns:1fr 1fr"><img class="" src="report/asset-pickup.png" alt="Lux3D: a red pickup truck"><img class="" src="report/asset-camera.png" alt="Lux3D: asdfghjkl became a camera"></div>
+    <span class="step">16 Nov · live test</span><h3>“a red pickup truck” and “asdfghjkl”</h3>
+    <p>The truck came back 4.8 m tall in a 12-unit box; the nonsense became a 17 cm camera. Hence Auto size and tappable example ideas.</p></div>
+  <div class="card"><div class="renders" style="grid-template-columns:1fr 1fr"><img class="" src="report/asset-door-v1.png" alt="Photo-made door"><img class="" src="report/asset-door-v2.png" alt="Text-made door"></div>
+    <span class="step">16 Nov · rejected</span><h3>Door v1 → v2, and 280k → 60k faces</h3>
+    <p>From a photo, the door became a one-sided slab; rebuilt from text it is clean from every side. A 60,000-face budget keeps a street of objects light.</p></div>
+</div></section>
+
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">10 · A way out</span></div><h1>Then it shows the way<br>to higher ground.</h1>
+<div class="grid g2">
+  <div><img class="shot" src="report/sim-escape.jpg" alt="Route to higher ground in Paiporta"><p class="small muted" style="margin-top:6px">Higher ground: 140 m, about 2 min on foot, found at the first 40 cm of the rising water: leave early.</p></div>
+  <div>
+    <ul>
+      <li>Searches Cesium World Terrain ring by ring for the nearest ground at least 1 m above the flood, ignoring roof-sized bumps.</li>
+      <li>Gets a real walking route there (OSRM on OpenStreetMap) and reports distance, minutes on foot and the water depth along the way.</li>
+      <li>A Lux3D person — rigged and animated by Lux3D — walks the route, with a chase camera.</li>
+      <li>Plain advice: go early; never go back for your car or into underground garages; if cut off, go to the highest floor.</li>
+    </ul>
+    <img class="shot crop" style="height:230px;margin-top:10px" src="report/sim-walker.jpg" alt="The Lux3D walker on the route">
+  </div>
+</div></section>
+
+<section class="alt"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">11 · Aholo World · inside your home</span></div><h1>Then the water comes inside.</h1>
 <div class="flow">
   <div><b>One photo</b>of a room, or a description</div><span>→</span>
   <div class="lux"><b>Aholo World</b>builds the room in 3D as Gaussian splats (SPZ), in about 10 minutes</div><span>→</span>
-  <div><b>Scale</b>to the ceiling height you give (a room from one photo has no true size)</div><span>→</span>
+  <div><b>Scale</b>to the ceiling height you give (one photo has no true size)</div><span>→</span>
   <div><b>Same flood</b>the street’s water, minus how far your floor sits above the street</div>
 </div>
-<div class="grid" style="grid-template-columns: 40fr 60fr">
+<div class="grid" style="grid-template-columns: 36fr 64fr">
   <div class="panel small">
-    <p style="margin-top:0">The street shows the water outside. <b>Inside</b> shows it coming in: everything below the waterline turns muddy, and the panel says what that depth means indoors (sockets at about 30 cm, furniture, when to go upstairs).</p>
+    <p style="margin-top:0">Everything below the waterline turns muddy, and the panel says what that depth means indoors: sockets at about 30 cm, furniture, when to go upstairs.</p>
     <p>An example living room ships with the app; your own room keeps building even if you close the page. Shown with three.js and Spark.</p>
-    <p style="margin:0"><b>Iterations:</b> a 2:1 panorama crop failed in 7 s; an ordinary 4:3 photo built a room in about 8 minutes, so the app now always sends an ordinary photo about 1280 px across. The example room: 4.1 MB, about 250,000 splats.</p>
+    <p style="margin:0"><b>Iterations:</b> a panorama crop failed in 7 s; an ordinary 4:3 photo built a room in about 8 minutes, so the app now always sends an ordinary photo about 1280 px across.</p>
   </div>
-  <div class="grid g2" style="gap:10px; align-content:start">
-    <figure style="margin:0"><img class="shot" src="report/app-room-dry.jpg" alt="Aholo World room before the flood"><figcaption class="small muted">Dry</figcaption></figure>
-    <figure style="margin:0"><img class="shot" src="report/app-room.jpg" alt="The same room with 0.4 m of water inside"><figcaption class="small muted">0.6 m in the street → 0.4 m inside</figcaption></figure>
+  <img class="shot" src="report/sim-room.jpg" alt="Aholo World room with water coming in">
+</div></section>
+
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">12 · Design</span></div><h1>A weather desk, not a form.</h1>
+<div class="grid" style="grid-template-columns: 62fr 38fr">
+  <div><img class="shot crop" style="height:300px; object-position: 50% 0" src="report/sim-home.jpg" alt="Homepage">
+    <img class="shot crop" style="height:250px; margin-top:12px; object-position: 50% 100%" src="report/sim-paiporta-street.jpg" alt="The storm desk">
+  </div>
+  <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; align-items:start">
+    <img class="shot" src="report/sim-phone.jpg" alt="Phone layout">
+    <div class="panel small"><h2>Conventions people know</h2><p>Map first; a location card; a layer rail; a depth legend; a timeline with hourly rain bars and play. Original design and code — no assets from any weather site.</p><h2>Readable data</h2><p style="margin:0">Tabular numbers, red for what is cut or under, honest status for every source.</p></div>
   </div>
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">10 · Fun and engagement</span></div><h1>Play with it,<br>and it plays back.</h1>
-<div class="grid g45">
-  <div>
-    <div class="panel small">
-      <h2>Live impact</h2><p>As the water rises, every object reports what is happening to it: <i>wheels in water → can float → up to the windows</i>; a person goes <i>ankle-deep → waist-deep → over their head</i>, with blue-amber-red bars.</p>
-      <h2>Aim the water</h2><p>The water slider carries a marker at the top of each object, so you can drag the flood to “just over the car”.</p>
-      <h2>Depth detective</h2><p>Guess the depth that covers an object, then watch the flood play to the answer.</p>
-      <h2 style="margin-top:8px">One space per job</h2><p style="margin:0">A homepage, then eight focused spaces (Spot, Things, Water, Risk, Escape, Inside, Guess, Share) with big type, share links, saved scenes, 3D image export and a cinema mode for recording.</p>
-    </div>
-  </div>
-  <div class="grid" style="grid-template-columns: 3fr 1.05fr; gap:14px"><img class="shot" src="report/app-water.jpg" alt="Water space with facts and the water dock"><img class="shot" src="report/app-phone.jpg" alt="Phone layout"></div>
-</div></section>
-
-<section class="cream"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">11 · Development process</span></div><h1>Five days, built<br>and rebuilt by testing.</h1>
+<section class="alt"><div class="top"><span class="logotype">WATERLINE</span><span class="pill">13 · Development process</span></div><h1>Six days, built and rebuilt by testing.</h1>
 <div class="timeline">
-  <div class="day"><b class="date">14 November</b><br><b>Idea → working core.</b> Chose floods over other map ideas. Built the Lux3D client (upload, create, poll, download), the real 3D street with a “bathtub” water level and moving-water facts. Asked “does a picture help anyone?” and added real JRC flood depths and the higher-ground finder.</div>
-  <div class="day"><b class="date">15 November</b><br><b>A demo that always works.</b> Studio street needing no map account; Depth detective; move, duplicate, undo; share links, scene files and image export; an automated browser test suite.</div>
-  <div class="day"><b class="date">16 November</b><br><b>Lux3D everywhere, then real users.</b> Rebuilt the Library as six Lux3D models; lighter textures. User test: “it doesn’t seem functional”, so the demo now starts itself, framed at street level. Live “Describe” test led to Auto size. The interface was redesigned twice: a homepage and one space per function.</div>
-  <div class="day"><b class="date">17 November</b><br><b>Finishing.</b> A “waterline” ring that rises with the water around the homepage car; the homepage appears instantly while the 3D engine loads behind it; the app behind the homepage is keyboard-safe; this report and the captioned demo video, all captured from the running app.</div>
-  <div class="day"><b class="date">18 November</b><br><b>Your street, anywhere; then inside.</b> User test: “I can’t put in my location”. Now a search box and Use my location set the spot at street level by themselves (tested in Houston, London, Lagos, Abuja, Buenos Aires, Mendoza). Then Aholo World: the water inside a room.</div>
+  <div class="day"><b class="date">14 Nov</b><br><b>Working core.</b> Lux3D client (upload, create, poll, download); a real 3D street with a rising water level; real JRC flood depths and a higher-ground finder.</div>
+  <div class="day"><b class="date">15 Nov</b><br><b>A demo that always works.</b> Studio street without a map account; depth challenge; move, duplicate, undo; share links; a browser test suite.</div>
+  <div class="day"><b class="date">16 Nov</b><br><b>Lux3D everywhere.</b> Six Library models; lighter textures; Auto size after a live test. User test: “it doesn’t seem functional” → the demo starts itself.</div>
+  <div class="day"><b class="date">17 Nov</b><br><b>Finishing v1.</b> Homepage, captioned demo video and report captured from the running app.</div>
+  <div class="day"><b class="date">18 Nov</b><br><b>Anywhere, then inside.</b> “I can’t put in my location” → search and Use my location. Aholo World rooms.</div>
+  <div class="day now"><b class="date">19 Nov</b><br><b>From a picture to a simulator.</b> Terrain flood model, live weather and storm replays, OpenStreetMap impacts, a storm-desk UI, and seven more Lux3D capabilities.</div>
 </div>
-<div class="ui3">
-  <figure><img class="" src="report/ui-v1.jpg" alt="Interface version 1"><figcaption>v1 · a long sidebar form</figcaption></figure>
-  <figure><img class="" src="report/ui-v2.jpg" alt="Interface version 2"><figcaption>v2 · dark, map-first, live impact panel</figcaption></figure>
-  <figure><img class="" src="report/app-things.jpg" alt="Interface version 3"><figcaption>v3 · sky and cream, big type, one space per function</figcaption></figure>
+<div class="panel small" style="margin-top:14px"><b>Biggest lesson of the last day:</b> a flat “bathtub” on sloping ground drowned all of Paiporta 11 m deep, and the terrain model carried buildings 4 m above the street. Detrending the valley, filtering building bumps and reading depth beside each building brought it to the scale of the real event — checked against both replays before anything was drawn.</div>
+<div class="grid g4" style="margin-top:14px; gap:12px">
+  <figure><img class="shot crop" style="height:150px; object-position: 0 0" src="report/ui-v1.jpg" alt="Interface v1"><figcaption>v1 · a long sidebar form</figcaption></figure>
+  <figure><img class="shot crop" style="height:150px; object-position: 0 0" src="report/ui-v2.jpg" alt="Interface v2"><figcaption>v2 · dark, map-first, live impact panel</figcaption></figure>
+  <figure><img class="shot crop" style="height:150px; object-position: 0 0" src="report/app-things.jpg" alt="Interface v3"><figcaption>v3 · sky and cream, one space per function</figcaption></figure>
+  <figure><img class="shot crop" style="height:150px; object-position: 0 0" src="report/sim-paiporta-overview.jpg" alt="Interface v4"><figcaption>v4 · the storm desk: a simulator, not an illustration</figcaption></figure>
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">12 · Build and tools</span></div><h1>How it is built,<br>and with what.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">14 · Build and tools</span></div><h1>How it is built, and with what.</h1>
 <div class="grid g37">
   <div class="panel small">
     <h2>Architecture</h2>
-    <p>Browser: CesiumJS 1.145 and plain JavaScript, served locally. Server: a zero-framework Node app that proxies Lux3D (key stays server-side, with quotas), JRC data and routing.</p>
+    <p>Browser: CesiumJS 1.145 and plain JavaScript modules, no build step. Server: a zero-framework Node app that proxies Aholo (key server-side, with quotas), weather, OpenStreetMap, JRC data and routing, with a disk cache and fixtures.</p>
     <h2>Quality</h2>
-    <p style="margin:0">37 automated unit tests and five browser checks: the full Studio flow offline, the interface at three screen sizes, the live map, your own street (search, location, live Lux3D models placed) and the Aholo World room. Every screenshot in this report is of the running app; the asset pictures are renders of the actual Lux3D files.</p>
+    <p style="margin:0">80 automated tests (simulation maths, data layer failover, Lux3D client and export routes, server) and browser checks in Microsoft Edge, including a full offline run of the 3D engine with every external request blocked. Every screenshot here is of the running app; asset pictures are renders of the actual Lux3D files.</p>
   </div>
-  <div class="panel" style="padding:10px 16px"><table>
+  <div class="panel" style="padding:8px 14px"><table>
     <tr><th>Tool</th><th>Used for</th></tr>
-    <tr><td><b>Aholo Lux3D API</b></td><td>Image-to-3D and Text-to-3D for every 3D object, including live generation in the app</td></tr>
-    <tr><td><b>Aholo World API</b></td><td>3D rooms (Gaussian splats) from a photo or a description, for “Inside your home”</td></tr>
-    <tr><td>CesiumJS · Cesium ion</td><td>Google Photorealistic 3D Tiles, Cesium World Terrain, Google place search</td></tr>
-    <tr><td>three.js · Spark (MIT)</td><td>Showing Aholo World rooms in the browser</td></tr>
-    <tr><td>JRC / Copernicus EMS (CC BY 4.0)</td><td>Global river flood hazard maps v2.1, read with geotiff.js</td></tr>
-    <tr><td>FOSSGIS OSRM · OpenStreetMap</td><td>Walking routes to higher ground</td></tr>
-    <tr><td>US National Weather Service</td><td>Moving-water safety facts</td></tr>
-    <tr><td>Poly Haven (CC0) · CC0 photos</td><td>Studio street textures · source photos for two Lux3D models</td></tr>
-    <tr><td>Google model-viewer · Playwright + Microsoft Edge</td><td>Rendering thumbnails · automated tests, screenshots and this PDF</td></tr>
-    <tr><td>Cinzel Decorative · Poppins · Allura (OFL)</td><td>Typography</td></tr>
+    <tr><td><b>Aholo Lux3D API</b></td><td>3D models (image/text), multimodal-to-image, material transfer, rigging + retargeting, part-split, articulation, multi-format export</td></tr>
+    <tr><td><b>Aholo World API</b> · Asset</td><td>3D rooms (Gaussian splats) from a photo · uploads</td></tr>
+    <tr><td>CesiumJS · Cesium ion</td><td>Google Photorealistic 3D Tiles, Cesium World Terrain, place search</td></tr>
+    <tr><td>Open-Meteo (ERA5, GloFAS, Marine)</td><td>Forecasts, recorded storms, river discharge, sea level</td></tr>
+    <tr><td>OpenStreetMap · Overpass · OSRM</td><td>Buildings, roads, services; walking routes</td></tr>
+    <tr><td>JRC / Copernicus EMS</td><td>Global river flood hazard maps v2.1 (geotiff.js)</td></tr>
+    <tr><td>three.js · Spark (MIT)</td><td>Showing Aholo World rooms</td></tr>
+    <tr><td>Playwright + Microsoft Edge · model-viewer</td><td>Tests, screenshots, this PDF, the demo video · renders</td></tr>
     <tr><td><b>Claude Code (Anthropic)</b>, an AI coding assistant</td><td>Wrote most of the code and tests and drafted this report, under the participant’s direction: concept, design references, decisions and user testing</td></tr>
   </table></div>
 </div></section>
 
-<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">13 · Limits and next steps</span></div><h1>Honest about what<br>it is, and is not.</h1>
+<section class=""><div class="top"><span class="logotype">WATERLINE</span><span class="pill">15 · Limits and next steps</span></div><h1>Honest about what it is, and is not.</h1>
 <div class="grid g2">
   <div class="panel small"><h2>Limits</h2><ul>
-    <li>The water is a flat level from your spot (a “bathtub” model): no flow, walls, drains or timing. It is a planning illustration, not a forecast.</li>
-    <li>The JRC model has ~90 m cells and covers river floods only: no flash or coastal floods.</li>
-    <li>Google’s 3D city blurs at street level in narrow streets; the camera frames from above the roofs there.</li>
-    <li>AI sizes are estimates: the app shows the height it used and lets you correct it. Rooms from one photo are scaled to the ceiling height you give.</li>
-    <li>Higher ground is planning help, not an evacuation order. Follow official warnings; never enter floodwater.</li>
+    <li>A connected “bathtub” on a detrended terrain model: no flow speed, walls or drains beyond the scenario curves. A planning tool, not a forecast.</li>
+    <li>Cesium World Terrain is ~30 m data and carries buildings in dense towns; depths at street scale are estimates. In Lagos it runs ~5 m above the 3D city’s streets, so Waterline falls back to the terrain’s own low ground there.</li>
+    <li>ERA5 smooths cloudbursts; replays are scaled to the reported depth. JRC covers river floods only (~90 m cells).</li>
+    <li>OpenStreetMap coverage varies; Overpass can be slow, so caches and fixtures back it up.</li>
+    <li>AI sizes are estimates the app shows and lets you correct. Higher ground is planning help, not an evacuation order.</li>
   </ul></div>
   <div class="panel small"><h2>Next</h2><ul>
-    <li><b>More of Lux3D:</b> retopology for lighter models, multi-format export for AR so you can see the water line in your own driveway.</li>
-    <li><b>Aholo World reconstruction:</b> a phone video of your ground floor for a true-scale room, instead of one photo.</li>
-    <li><b>SpatialLM:</b> find the doors, sockets and furniture in that room, so the water reads out “over the sofa”.</li>
-    <li>Community flood marks: “the water reached here in 2024”.</li>
-    <li>Official local warnings beside the illustration.</li>
-    <li>More languages, starting with Spanish.</li>
-  </ul>
-  <p class="script" style="margin-top:22px">see the water before it comes</p></div>
+    <li><b>Official warnings</b> (national weather services) beside the simulation, and push alerts for your saved street.</li>
+    <li><b>Aholo World reconstruction:</b> a phone video of your ground floor for a true-scale room; <b>SpatialUnderstanding</b> to find the sockets and sofa, so the water reads “over the sofa”.</li>
+    <li><b>Lux3D part-split in the report:</b> “wheels under, engine bay next”.</li>
+    <li>Community flood marks (“the water reached here in 2024”) and more languages.</li>
+    <li>A shallow-water solver on the GPU for flow and timing.</li>
+  </ul></div>
 </div>
-<div class="strip"><img src="../public/models/thumbs/family-suv.png" alt="Family SUV"><img src="../public/models/thumbs/small-car.png" alt="Small car"><img src="../public/models/thumbs/scooter.png" alt="Scooter"><img src="../public/models/thumbs/adult-person.png" alt="Adult person"><img src="../public/models/thumbs/wheelie-bin.png" alt="Wheelie bin"><img src="../public/models/thumbs/front-door.png" alt="Front door"></div>
-<p class="foot">Credits: Aholo Lux3D · CesiumJS (Apache-2.0) · Google Photorealistic 3D Tiles via Cesium ion · JRC / Copernicus EMS (CC BY 4.0) · OSRM / © OpenStreetMap contributors · US NWS · Poly Haven (CC0) · fonts under SIL OFL. Full list in THIRD_PARTY_NOTICES.txt.</p></section>
+<p class="foot">Credits: Aholo Lux3D, World and Asset (Manycore) · CesiumJS (Apache-2.0) · Google Photorealistic 3D Tiles via Cesium ion · Open-Meteo (CC BY 4.0), ERA5 and GloFAS (Copernicus) · JRC / Copernicus EMS (CC BY 4.0) · © OpenStreetMap contributors (ODbL) · US NWS · Poly Haven (CC0) · Poppins (SIL OFL). Full list in THIRD_PARTY_NOTICES.txt.</p></section>
 </body></html>

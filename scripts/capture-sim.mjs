@@ -125,7 +125,7 @@ try {
     await settle(page, 4000);
     if (want('sim-aftermath')) await shot(page, 'sim-aftermath');
     // Leave early: the route at the first 40 cm of the rising water.
-    await page.evaluate(() => { const s = window.waterline.storm; const i = s.scenario.depth.findIndex((d) => d >= 0.4); s.seek(Math.max(0, i)); });
+    await page.evaluate(() => { const s = window.waterline.storm; const i = s.scenario.depth.findIndex((d) => d >= 0.06); s.seek(Math.max(0, i)); });
     await page.evaluate(() => window.waterline.findHigherGround());
     await page.waitForFunction(() => /min on foot|No higher/.test(document.querySelector('#safety')?.textContent ?? ''), null, { timeout: 90_000 }).catch(() => {});
     await page.locator('.rail [data-go="safety"]').click();
@@ -133,7 +133,7 @@ try {
     if (want('sim-escape')) await shot(page, 'sim-escape');
     stats.escape = await page.evaluate(() => document.querySelector('#safety .safety-title')?.textContent ?? null);
     await page.evaluate(() => window.waterline.followWalker(true));
-    await page.waitForTimeout(5500);
+    await page.waitForTimeout(3500);
     if (want('sim-walker')) await shot(page, 'sim-walker');
     await page.evaluate(() => window.waterline.followWalker(false));
     await page.locator('.rail [data-go="things"]').click();
@@ -143,7 +143,7 @@ try {
     if (want('sim-room')) {
       await page.locator('.rail [data-go="inside"]').click();
       await page.locator('#room-example').click();
-      await page.waitForFunction(() => document.querySelector('#room-loading')?.hidden !== false, null, { timeout: 90_000 }).catch(() => {});
+      await page.waitForFunction(() => (document.querySelector('#room-loading')?.textContent ?? '') === '', null, { timeout: 90_000 }).catch(() => {});
       await page.evaluate(() => { window.waterline.storm.pause(); window.waterline.setDepth(0.8); });
       await page.waitForTimeout(3000);
       await shot(page, 'sim-room');

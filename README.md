@@ -45,7 +45,7 @@ Built for the **Manycore Aholo Global 3D AI Hackathon 2026**.
 | **After the flood** | When the water drops, the SUV swaps to a mud-stained version made with **Lux3D material transfer**. |
 | **A way out** | Searches the terrain for the nearest ground 1 m above the flood, gets a walking route (OSRM on OpenStreetMap), reports how deep the water on the way would be, and a **Lux3D-rigged person** walks the route. |
 | **Inside your home** | **Aholo World** turns one photo of a room into a 3D Gaussian-splat room, and the same flood comes in through the door. |
-| **Take it with you** | Export any object as **USDZ** for AR on a phone or **STL** for 3D printing (**Lux3D multi-format export**). |
+| **Take it with you** | Export a placed object as **USDZ** for AR on a phone, live (**Lux3D multi-format export**); USDZ and **STL** (3D printing) files ship for the SUV and the front door. |
 | **Real floods** | Kerrville, Texas (4 July 2025) and Paiporta, Spain (29 October 2024), with their recorded rainfall, ship as one-click replays. |
 
 <p>

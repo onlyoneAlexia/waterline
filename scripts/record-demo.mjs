@@ -194,7 +194,7 @@ try {
 
   // 7. Where do I go? Leave early: the route at the first 40 cm (search cut).
   await page.evaluate(() => window.waterline.storm.pause());
-  await page.evaluate(() => { const s = window.waterline.storm; const i = s.scenario.depth.findIndex((d) => d >= 0.4); s.seek(Math.max(0, i)); });
+  await page.evaluate(() => { const s = window.waterline.storm; const i = s.scenario.depth.findIndex((d) => d >= 0.06); s.seek(Math.max(0, i)); });
   start();
   await caption('Where do I go?');
   await click(page.locator('.rail [data-go="safety"]'));
@@ -220,7 +220,7 @@ try {
   await hold(1200);
   await click(page.locator('#room-example'));
   stop();
-  await page.waitForFunction(() => document.querySelector('#room-loading')?.hidden !== false, null, { timeout: 90000 }).catch(() => {});
+  await page.waitForFunction(() => (document.querySelector('#room-loading')?.textContent ?? '') === '', null, { timeout: 90000 }).catch(() => {});
   await page.evaluate(() => window.waterline.setDepth(0.8));
   await hold(2500);
   start();
