@@ -165,6 +165,38 @@ test('falls back to a nearby fixture (keeping its radius), otherwise throws 502'
   await assert.rejects(service.around(LAT + 0.05, LON), (error) => error.status === 502 && /OpenStreetMap/.test(error.message));
 });
 
+async function until(check, ms = 3000) {
+  const end = Date.now() + ms;
+  while (!(await check())) {
+    if (Date.now() > end) throw new Error('timed out waiting');
+    await new Promise((resolve) => setTimeout(resolve, 10));
+  }
+}
+
+test('a demo spot on a cold cache answers from its saved copy at once and fills the cache behind it', async () => {
+  const where = await dirs();
+  const parsed = parseOverpass(overpassBody());
+  await writeFile(path.join(where.fixturesDir, 'demo-osm.json'), JSON.stringify({
+    fixture: { kind: 'osm', place: 'demo', lat: LAT, lon: LON, radius: 900, createdAt: '2026-11-19T00:00:00Z' },
+    body: { ...parsed, radius: 900, fetchedAt: '2026-11-19T00:00:00.000Z', status: 'live', attribution: '© OpenStreetMap contributors (ODbL)' },
+  }));
+  let calls = 0;
+  let release;
+  const gate = new Promise((resolve) => { release = resolve; });
+  const fetchImpl = async () => { calls += 1; await gate; return json(overpassBody()); };
+  const service = createOsmService({ fetchImpl, ...where, now: () => T0 });
+  const first = await service.around(LAT, LON, 900); // Overpass is still "busy" (gated)
+  assert.equal(first.status, 'fixture');
+  await until(() => calls === 1); // the cache is filled in the background
+  release();
+  // Until the background load lands, the saved copy keeps answering; then the cache takes over.
+  await until(async () => (await service.around(LAT, LON, 900)).status === 'cached');
+  assert.equal(calls, 1);
+  // Further than 100 m from the saved copy: the normal live path, no shortcut.
+  const away = await service.around(LAT, LON - 0.01, 900);
+  assert.equal(away.status, 'live');
+});
+
 test('the committed demo fixtures are served when everything upstream is down', async () => {
   const { createWeatherService } = await import('../lib/weather.mjs');
   const PLACES = {
