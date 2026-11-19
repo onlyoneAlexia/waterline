@@ -36,7 +36,10 @@ try {
   const downloads = [];
   page.on('download', (d) => downloads.push(d));
   await page.evaluate(async (cues) => {
-    const video = Object.assign(document.createElement('video'), { src: '/in.webm', muted: true, playsInline: true, preload: 'auto' });
+    // Load the whole video into memory first, so playback never waits for the disk or the network.
+    const blobUrl = URL.createObjectURL(await (await fetch('/in.webm')).blob());
+    const video = Object.assign(document.createElement('video'), { src: blobUrl, muted: true, playsInline: true, preload: 'auto' });
+    let stalls = 0; video.addEventListener('waiting', () => stalls++);
     document.body.append(video);
     await new Promise((resolve) => video.addEventListener('canplaythrough', resolve, { once: true }));
     const ctx = new AudioContext({ sampleRate: 48000 });
@@ -46,10 +49,11 @@ try {
     voice.gain.value = 1.4;
     const dest = ctx.createMediaStreamDestination();
     voice.connect(dest);
+    // A constant, inaudible tone keeps the recorded audio track continuous, so it cannot slip against the picture.
+    const hum = ctx.createOscillator(); const hush = ctx.createGain(); hush.gain.value = 0.0005; hum.frequency.value = 40; hum.connect(hush).connect(dest); hum.start();
     const stream = new MediaStream([...video.captureStream(25).getVideoTracks(), ...dest.stream.getAudioTracks()]);
     const kinds = [
       ['out.mp4', 'video/mp4;codecs=avc1.640028,mp4a.40.2', 'video/mp4'],
-      ['out.webm', 'video/webm;codecs=vp9,opus', 'video/webm'],
     ].filter(([, mime]) => MediaRecorder.isTypeSupported(mime));
     console.log('recording', kinds.map((k) => k[1]).join(' + '));
     const recorders = kinds.map(([name, mimeType, type]) => {
@@ -62,16 +66,21 @@ try {
       };
       return recorder;
     });
-    video.addEventListener('playing', () => {
-      // Line the voice up with the picture: the clip for a caption starts when that caption appears.
-      const base = ctx.currentTime - video.currentTime;
+    // Start each clip when the picture reaches its caption (the picture can stall; the audio clock does not).
+    const started = new Set();
+    const tick = () => {
       cues.forEach((cue, i) => {
+        if (started.has(i) || video.currentTime < cue.at) return;
+        started.add(i);
         const source = ctx.createBufferSource();
         source.buffer = clips[i];
         source.connect(voice);
-        source.start(base + cue.at);
+        source.start();
       });
-    }, { once: true });
+    };
+    const timer = setInterval(tick, 20);
+    video.addEventListener('timeupdate', tick);
+    video.addEventListener('ended', () => { clearInterval(timer); console.log('stalls', stalls); }, { once: true });
     video.addEventListener('ended', () => setTimeout(() => recorders.forEach((r) => r.stop()), 400), { once: true });
     recorders.forEach((r) => r.start(1000));
     await video.play();
@@ -95,10 +104,10 @@ try {
     return { duration, width: video.videoWidth, height: video.videoHeight, audioSeconds: audio.duration, audioRms: Math.sqrt(sum / (data.length / 10)) };
   });
   console.log(JSON.stringify(check));
-  if (!(check.duration > 60) || !check.width || !(check.audioRms > 0.005)) throw new Error('The voiced MP4 did not verify.');
+  if (!(check.duration > 60 && check.duration < 215) || !check.width || !(check.audioRms > 0.005)) throw new Error('The voiced MP4 did not verify (length or sound).');
   await fs.copyFile(tmp.mp4, path.resolve('submission/waterline-demo.mp4'));
   if (downloads.some((d) => d.suggestedFilename() === 'out.webm')) await fs.copyFile(tmp.webm, path.resolve('submission/waterline-demo.webm'));
-  for (const f of ['submission/waterline-demo.mp4', 'submission/waterline-demo.webm']) console.log(f, ((await fs.stat(f)).size / 1e6).toFixed(1), 'MB');
+  for (const f of ['submission/waterline-demo.mp4']) console.log(f, ((await fs.stat(f)).size / 1e6).toFixed(1), 'MB');
 } finally {
   await browser.close();
   server.close();

@@ -14,7 +14,7 @@ const server = http.createServer(async (req, res) => {
   const range = /bytes=(\d*)-(\d*)/.exec(req.headers.range ?? '');
   const start = range?.[1] ? Number(range[1]) : 0;
   const end = range?.[2] ? Number(range[2]) : size - 1;
-  res.writeHead(range ? 206 : 200, { 'content-type': 'video/webm', 'accept-ranges': 'bytes', 'content-length': end - start + 1, ...(range && { 'content-range': `bytes ${start}-${end}/${size}` }) });
+  res.writeHead(range ? 206 : 200, { 'content-type': input.endsWith('.mp4') ? 'video/mp4' : 'video/webm', 'accept-ranges': 'bytes', 'content-length': end - start + 1, ...(range && { 'content-range': `bytes ${start}-${end}/${size}` }) });
   createReadStream(input, { start, end }).pipe(res);
 });
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));

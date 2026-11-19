@@ -322,6 +322,7 @@ ${slide('Build and tools', 'How it is built, and with what.', `
     <tr><td>OpenStreetMap · Overpass · OSRM</td><td>Buildings, roads, services; walking routes</td></tr>
     <tr><td>JRC / Copernicus EMS</td><td>Global river flood hazard maps v2.1 (geotiff.js)</td></tr>
     <tr><td>three.js · Spark (MIT)</td><td>Showing Aholo World rooms</td></tr>
+    <tr><td>Microsoft Zira (Windows text-to-speech)</td><td>The demo video’s voice-over</td></tr>
     <tr><td>Playwright + Microsoft Edge · model-viewer</td><td>Tests, screenshots, this PDF, the demo video · renders</td></tr>
     <tr><td><b>Claude Code (Anthropic)</b>, an AI coding assistant</td><td>Wrote most of the code and tests and drafted this report, under the participant’s direction: concept, design references, decisions and user testing</td></tr>
   </table></div>
