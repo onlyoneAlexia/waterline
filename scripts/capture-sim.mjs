@@ -90,6 +90,7 @@ async function openApp(viewport = { width: 1600, height: 900 }) {
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`${origin}/?app&debug&nodemo`);
   await page.waitForFunction(() => window.waterline?.storm, null, { timeout: 90_000 });
+  await page.addStyleTag({ content: '#toast { display: none !important; }' }); // hints are for people, not report pictures
   return page;
 }
 
@@ -178,6 +179,24 @@ try {
     await settle(page, 4000);
     stats.lagos = await peakStats(page);
     await shot(page, 'sim-lagos');
+    await page.close();
+  }
+
+  // Houston: Meyerland on Brays Bayou, a 400 mm cloudburst what-if (good terrain data, Harvey country).
+  if (want('sim-houston')) {
+    const page = await openApp();
+    await page.evaluate(() => window.waterline.goToPlace('Meyerland, Houston, Texas', Cesium.Cartographic.fromDegrees(-95.4592, 29.6866)));
+    await page.waitForFunction(() => window.waterline.state.pin, null, { timeout: 90_000 });
+    await page.evaluate(() => window.waterline.storm.areaReady);
+    await page.locator('.rail [data-go="water"]').click();
+    await page.evaluate(() => { document.querySelector('[data-scenario="rain"]').click(); });
+    await page.selectOption('#p-rain', '400').catch(() => {});
+    await page.evaluate(() => window.waterline.storm.pause());
+    await peak(page);
+    await aerial(page, 1100, -60);
+    await settle(page, 4000);
+    stats.houston = await peakStats(page);
+    await shot(page, 'sim-houston');
     await page.close();
   }
 

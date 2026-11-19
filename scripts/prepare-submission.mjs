@@ -222,6 +222,10 @@ ${slide('Lux3D, beyond 3D models', 'Mud, a walk, parts and a hinge —<br>all ma
   <div class="panel small"><h2>What the water leaves</h2><p style="margin:0">A mud-stained reference image of the SUV (multimodal-to-image), then material transfer onto the same mesh. In the replay, once the water has reached the car and starts to fall, the muddy model swaps in.</p></div>
   <div class="panel small"><h2>A rig that said no</h2><p style="margin:0">Rigging refused the Library person: <i>arms down against the body, not a T- or A-pose</i>. So Lux3D made an A-pose image of the same person, image-to-3D built it, then rig and retarget gave it a walk — four tasks, about 3 minutes.</p></div>
   <div class="panel small"><h2>Take it home</h2><p style="margin:0">Multi-format export gives USDZ for AR Quick Look and STL for printing (80 mm miniatures). Any placed object can be exported live from the app.</p></div>
+</div>
+<div class="grid g2" style="margin-top:12px; gap:12px">
+  <figure>${img('report/sim-aftermath.jpg', 'The mud-stained SUV in the app after the water drops', 'shot crop" style="height:150px; object-position: 70% 55%')}<figcaption>In the app: the water drops to 0.48 m and the Lux3D “after the flood” SUV swaps in.</figcaption></figure>
+  <figure>${img('report/sim-lux3d.jpg', 'The Lux3D space in the app', 'shot crop" style="height:150px; object-position: 0 40%')}<figcaption>The Lux3D space: Library, photo and text generation, and the extras with downloads.</figcaption></figure>
 </div>`, 'alt')}
 
 ${slide('Lux3D lessons', 'What each Lux3D model taught us.', `
@@ -269,12 +273,8 @@ ${slide('Aholo World · inside your home', 'Then the water comes inside.', `
 
 ${slide('Design', 'A weather desk, not a form.', `
 <div class="grid" style="grid-template-columns: 62fr 38fr">
-  <div>${img('report/sim-home.jpg', 'Homepage', 'shot')}
-    <div class="grid g3" style="margin-top:12px; gap:10px">
-      <figure>${img('report/ui-v1.jpg', 'Interface v1', 'shot crop" style="height:92px')}<figcaption>v1 · a long sidebar form</figcaption></figure>
-      <figure>${img('report/app-things.jpg', 'Interface v3', 'shot crop" style="height:92px')}<figcaption>v3 · sky and cream, one space per function</figcaption></figure>
-      <figure>${img('report/sim-paiporta-street.jpg', 'Interface v4', 'shot crop" style="height:92px')}<figcaption>v4 · storm desk: map first, data at a glance</figcaption></figure>
-    </div>
+  <div>${img('report/sim-home.jpg', 'Homepage', 'shot crop" style="height:300px; object-position: 50% 0')}
+    ${img('report/sim-paiporta-street.jpg', 'The storm desk', 'shot crop" style="height:250px; margin-top:12px; object-position: 50% 100%')}
   </div>
   <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; align-items:start">
     ${img('report/sim-phone.jpg', 'Phone layout', 'shot')}
@@ -291,7 +291,13 @@ ${slide('Development process', 'Six days, built and rebuilt by testing.', `
   <div class="day"><b class="date">18 Nov</b><br><b>Anywhere, then inside.</b> “I can’t put in my location” → search and Use my location. Aholo World rooms.</div>
   <div class="day now"><b class="date">19 Nov</b><br><b>From a picture to a simulator.</b> Terrain flood model, live weather and storm replays, OpenStreetMap impacts, a storm-desk UI, and seven more Lux3D capabilities.</div>
 </div>
-<div class="panel small" style="margin-top:14px"><b>Biggest lesson of the last day:</b> a flat “bathtub” on sloping ground drowned all of Paiporta 11 m deep, and the terrain model carried buildings 4 m above the street. Detrending the valley, filtering building bumps and reading depth beside each building brought it to the scale of the real event — checked against both replays before anything was drawn.</div>`, 'alt')}
+<div class="panel small" style="margin-top:14px"><b>Biggest lesson of the last day:</b> a flat “bathtub” on sloping ground drowned all of Paiporta 11 m deep, and the terrain model carried buildings 4 m above the street. Detrending the valley, filtering building bumps and reading depth beside each building brought it to the scale of the real event — checked against both replays before anything was drawn.</div>
+<div class="grid g4" style="margin-top:14px; gap:12px">
+  <figure>${img('report/ui-v1.jpg', 'Interface v1', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v1 · a long sidebar form</figcaption></figure>
+  <figure>${img('report/ui-v2.jpg', 'Interface v2', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v2 · dark, map-first, live impact panel</figcaption></figure>
+  <figure>${img('report/app-things.jpg', 'Interface v3', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v3 · sky and cream, one space per function</figcaption></figure>
+  <figure>${img('report/sim-paiporta-overview.jpg', 'Interface v4', 'shot crop" style="height:150px; object-position: 0 0')}<figcaption>v4 · the storm desk: a simulator, not an illustration</figcaption></figure>
+</div>`, 'alt')}
 
 ${slide('Build and tools', 'How it is built, and with what.', `
 <div class="grid g37">

@@ -17,6 +17,9 @@ import { DEFAULT_FIXTURES_DIR } from '../lib/disk-cache.mjs';
 export const PLACES = {
   kerrville: { lat: 30.043724, lon: -99.142402, event: { start: '2025-07-02', end: '2025-07-06' } },
   paiporta: { lat: 39.427992, lon: -0.418102, event: { start: '2024-10-27', end: '2024-10-31' } },
+  // "Simulate my area" examples used in the demo video and report (no recorded event).
+  houston: { lat: 29.6866, lon: -95.4592 },
+  lagos: { lat: 6.428, lon: 3.422 },
 };
 const OSM_RADIUS = 900;
 const MAX_FIXTURE_BYTES = 1_400_000;
@@ -67,7 +70,7 @@ for (const [place, spot] of Object.entries(PLACES)) {
   const { lat, lon, event } = spot;
   jobs.push(...[
     ['weather',() => weather.forecast(lat, lon), { lat, lon }],
-    ['event', () => weather.event(lat, lon, event.start, event.end), { lat, lon, ...event }],
+    ...(event ? [['event', () => weather.event(lat, lon, event.start, event.end), { lat, lon, ...event }]] : []),
     ['osm', () => (osmFrom[place] ? osmFromFile(place, spot, osmFrom[place]) : osm.around(lat, lon, OSM_RADIUS)), { lat, lon, radius: OSM_RADIUS }],
   ].map(([kind, run, meta]) => ({ place, kind, run, meta })));
 }

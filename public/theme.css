@@ -286,6 +286,9 @@ input[type='range']#depth { height: 22px; }
 .setup-error { background: rgba(8, 17, 31, .96); color: var(--text); }
 .skip-link { background: var(--accent); color: #1a1206; }
 
+/* Inside a room, the street overlays step aside. */
+#map:has(#room-view:not([hidden])) :is(.wx-card, .legend, .layers, .impact) { display: none; }
+
 /* Room view caption */
 .room-close { background: var(--surface-2); }
 

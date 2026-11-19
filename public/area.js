@@ -397,9 +397,14 @@ czm_material czm_getMaterial(czm_materialInput materialInput) {
     // Both models use the WGS84 ellipsoid, so the 3D city's street height is the best street level,
     // unless it disagrees wildly with the terrain (then trust the terrain's low ground).
     const around = localGround(patched, grid.n, pinCell);
-    const terrainPinRaw = Number.isFinite(pin.height) && Math.abs(pin.height - around) <= 8 ? pin.height
+    const street = Number.isFinite(pin.height) && Math.abs(pin.height - around) <= 8 ? pin.height
       : Math.min(Number.isFinite(pinCarto.height) ? pinCarto.height : Infinity, around);
-    const terrainPin = terrainPinRaw - pinTilt;
+    // A street can't sit below nearly all the land around it. If it does (Lagos: the terrain model runs
+    // ~5 m above the 3D city everywhere), the two models disagree, so use the terrain's own low ground.
+    const landSorted = [...heights].filter(Number.isFinite).sort((a, b) => a - b);
+    const landLow = landSorted[Math.floor(landSorted.length * 0.05)] ?? -Infinity;
+    const terrainPin = Math.max(street - pinTilt, landLow);
+    const terrainPinRaw = terrainPin + pinTilt;
     const sources = lowestCells(heights);
     area = {
       grid, heights, raw: patched, plane, pinCell, terrainPin, sources,

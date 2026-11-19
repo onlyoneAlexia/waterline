@@ -229,26 +229,29 @@ try {
   await hold(800);
   stop();
 
-  // 9. Anywhere: a cloudburst what-if over Lagos (loading cut).
+  // 9. Anywhere: search a street, then a cloudburst what-if (loading cut).
   start();
   await caption('Anywhere in the world: search your street, then pick a storm', 'Live forecast · storm replay · heavy rain · river flood (JRC) · storm surge');
   await click(page.locator('.rail [data-go="spot"]'));
-  await hold(2500);
+  await hold(1200);
+  await click(page.locator('#place-input'));
+  await page.keyboard.type('Meyerland, Houston', { delay: 60 });
+  await hold(1200);
   stop();
-  await page.evaluate(() => window.waterline.goToPlace('Victoria Island, Lagos, Nigeria', Cesium.Cartographic.fromDegrees(3.4219, 6.4281)));
+  await page.evaluate(() => window.waterline.goToPlace('Meyerland, Houston, Texas', Cesium.Cartographic.fromDegrees(-95.4592, 29.6866)));
   await page.evaluate(() => window.waterline.storm.areaReady);
   await click(page.locator('.rail [data-go="water"]'));
   await page.evaluate(() => { document.querySelector('[data-scenario="rain"]').click(); window.waterline.storm.pause(); });
-  await page.selectOption('#p-rain', '250').catch(() => {});
+  await page.selectOption('#p-rain', '400').catch(() => {});
   await page.evaluate(() => { window.waterline.storm.pause(); window.waterline.storm.seek(0); });
-  await aerial(1000, -60, 0);
+  await aerial(1100, -60, 0);
   await settleTiles();
   start();
-  await caption('Victoria Island, Lagos · what if 250 mm of rain falls in 6 hours?', 'The live forecast, the river and the sea level are on the location card');
+  await caption('Meyerland, Houston, on Brays Bayou · what if 400 mm of rain falls in 6 hours?', 'Hurricane Harvey (2017) dropped more than 1,000 mm on parts of Texas. Today’s live forecast is on the card.');
   await click(page.locator('#play'));
-  await hold(9000);
-  await caption('Lagos', await statsLine());
-  await hold(3500);
+  await hold(9500);
+  const houston = await statsLine();
+  if (houston) { await caption('Meyerland, Houston', houston); await hold(3500); }
   stop();
 
   // 10. End card
