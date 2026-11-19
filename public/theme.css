@@ -289,6 +289,11 @@ input[type='range']#depth { height: 22px; }
 /* Inside a room, the street overlays step aside. */
 #map:has(#room-view:not([hidden])) :is(.wx-card, .legend, .layers, .impact) { display: none; }
 
+/* Indoor water readout: dark glass like the street panels (the light card read white-on-white). */
+.room-water { top: 70px; right: 14px; border-radius: 16px; background: var(--glass); backdrop-filter: blur(14px); border: 1px solid var(--line); color: var(--text); font-size: 14px; }
+.room-water strong { color: var(--accent); font-size: 18px; text-transform: none; }
+.room-hint { color: var(--muted); }
+
 /* Room view caption */
 .room-close { background: var(--surface-2); }
 

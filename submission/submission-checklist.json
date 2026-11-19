@@ -1,11 +1,20 @@
 {
   "officialEvent": "https://www.aholo.ai/hackathon",
-  "submissionPortal": "https://www.aholo.ai/hackathon/my",
+  "submissionPortal": "https://www.aholo.ai/hackathon (My Submission)",
   "deadlineUtc": "2026-11-19T11:00:00Z",
   "deadlineLagos": "19 November 2026 at 12:00 noon",
+  "deadlineEst": "19 November 2026 at 06:00 EST",
+  "required": [
+    "Project report (PDF or PPT)",
+    "Working demo: a link, or a video showing the actual project running"
+  ],
+  "bonus": [
+    "Public X post with #Manycorehackathon (5% of the expert score)",
+    "Source code"
+  ],
   "ready": [
-    "Project report PDF (13 pages)",
-    "Lux3D evidence for every Library model",
+    "Project report PDF (15 pages)",
+    "Lux3D evidence for every Library model and extra",
     "Source archive",
     "Demo video (WebM): review before uploading",
     "Demo video (MP4 copy) for forms that need MP4"
@@ -14,7 +23,8 @@
     "Confirm registration and team (solo counts) in the official portal.",
     "Check the tools list in the report and add any other tool you used.",
     "Upload the report and the demo video (or a working hosted link) to My Submission before the deadline.",
-    "Post on X with #Manycorehackathon and add the link (5% of the expert score; register it for the Popularity Award by 30 Nov)."
+    "Post on X with #Manycorehackathon and add the link.",
+    "Push the source to GitHub if you want to share it (it is not pushed by these scripts)."
   ],
   "submission": "Not submitted by this script."
 }

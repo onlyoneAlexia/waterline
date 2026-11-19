@@ -1,5 +1,11 @@
-Flood maps show a blue patch. Waterline shows the water at your car’s windows, on your street.
+POST (244 characters + a link or the attached demo video):
 
-Snap your car, Aholo Lux3D makes it 3D at true scale, then raise the flood in a real 3D city and find the way to higher ground.
+Flood maps show a blue patch. Waterline shows what the storm does to YOUR street, before it comes 🌧️
 
-[attach the demo video, or paste its link] #Manycorehackathon #Lux3D
+Live rain + real terrain + OpenStreetMap, hour by hour. Aholo Lux3D puts your own car in the water at true scale.
+
+#Manycorehackathon #Lux3D
+
+OPTIONAL REPLY (189 characters):
+
+Replays of Valencia 2024 and Kerrville 2025, buildings and roads that go under, the mud Lux3D material transfer leaves on your car, and a Lux3D-rigged person who walks you to higher ground.

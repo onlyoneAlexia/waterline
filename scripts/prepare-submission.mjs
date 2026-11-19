@@ -377,14 +377,21 @@ await fs.writeFile(path.join(out, 'submission-checklist.json'), JSON.stringify({
     'Post on X with #Manycorehackathon and add the link.', 'Push the source to GitHub if you want to share it (it is not pushed by these scripts).'],
   submission: 'Not submitted by this script.',
 }, null, 2));
+// X counts most characters as 1 (emoji as 2); keep the main post within 280 with room for a link.
+const post = [
+  'Flood maps show a blue patch. Waterline shows what the storm does to YOUR street, before it comes 🌧️',
+  '',
+  'Live rain + real terrain + OpenStreetMap, hour by hour. Aholo Lux3D puts your own car in the water at true scale.',
+  '',
+  '#Manycorehackathon #Lux3D',
+].join('\n');
+const reply = 'Replays of Valencia 2024 and Kerrville 2025, buildings and roads that go under, the mud Lux3D material transfer leaves on your car, and a Lux3D-rigged person who walks you to higher ground.';
+const xLength = (text) => [...text].reduce((n, ch) => n + (ch.codePointAt(0) > 0x2fff ? 2 : 1), 0);
+if (xLength(post) + 24 > 280) throw new Error(`X post is ${xLength(post)} characters; keep it under 256 to leave room for a link.`);
+if (xLength(reply) > 280) throw new Error(`X reply is ${xLength(reply)} characters.`);
 await fs.writeFile(path.join(out, 'x-post-draft.txt'), [
-  'Flood maps show a blue patch. Waterline shows what the storm does to your street — before it comes. 🌧️',
-  '',
-  'Live rain + real terrain + OpenStreetMap: watch the water spread hour by hour, and see which buildings, roads and schools go under.',
-  '',
-  'Aholo Lux3D puts your own car in the water at true scale, shows the mud it leaves, and a Lux3D-rigged person walks you to higher ground.',
-  '',
-  '[attach the demo video, or paste its link] #Manycorehackathon #Lux3D',
+  `POST (${xLength(post)} characters + a link or the attached demo video):`, '', post, '',
+  `OPTIONAL REPLY (${xLength(reply)} characters):`, '', reply, '',
 ].join('\n'));
 const tests = (await fs.readdir('test')).filter((name) => name.endsWith('.mjs')).map((name) => `test/${name}`);
 const includes = ['package.json', 'package-lock.json', 'server.mjs', 'lib', 'public', 'scripts', 'data', 'docs', ...tests, 'README.md', '.env.example', '.gitignore', 'Dockerfile', '.dockerignore', 'THIRD_PARTY_NOTICES.txt'];
