@@ -21,14 +21,14 @@ const fakeFetch = async (url, init) => {
 };
 
 before(async () => {
-  server = createAppServer({ CESIUM_ION_TOKEN: 'test-token' }, { floodDepth: fakeFloodDepth, fetchImpl: fakeFetch });
+  server = createAppServer({ CESIUM_ION_TOKEN: ' test-token\n' }, { floodDepth: fakeFloodDepth, fetchImpl: fakeFetch });
   await new Promise((resolve) => server.listen(0, resolve));
   base = `http://127.0.0.1:${server.address().port}`;
 });
 
 after(() => new Promise((resolve) => server.close(resolve)));
 
-test('config reports the Cesium token and that generation is off without a Lux3D key', async () => {
+test('config reports the Cesium token (trimmed of pasted whitespace) and that generation is off without a Lux3D key', async () => {
   const body = await (await fetch(`${base}/api/config`)).json();
   assert.deepEqual(body, { cesiumToken: 'test-token', generationEnabled: false });
 });

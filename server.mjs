@@ -95,6 +95,8 @@ export function createAppServer(env = process.env, {
   weather = createWeatherService({ fetchImpl: dataFetchImpl, cacheDir, fixturesDir }),
   osm = createOsmService({ fetchImpl: dataFetchImpl, cacheDir, fixturesDir }),
 } = {}) {
+  // Keys pasted into a host's dashboard often carry a trailing space or line break, which the APIs reject.
+  env = { ...env, LUX3D_API_KEY: env.LUX3D_API_KEY?.trim(), CESIUM_ION_TOKEN: env.CESIUM_ION_TOKEN?.trim() };
   const maxPerDay = Number(env.MAX_GENERATIONS_PER_DAY ?? 40);
   const maxPerIpPerHour = Number(env.MAX_GENERATIONS_PER_IP_PER_HOUR ?? 6);
   const trustProxy = env.TRUST_PROXY === '1';
@@ -440,6 +442,6 @@ if (import.meta.url === pathToFileURL(process.argv[1] ?? '').href) {
   const port = Number(process.env.PORT ?? 3000);
   createAppServer().listen(port, () => {
     console.log(`Waterline running at http://localhost:${port}`);
-    if (!process.env.CESIUM_ION_TOKEN) console.warn('[cesium] No ion token; Studio demo works, real-street mode needs a token.');
+    if (!process.env.CESIUM_ION_TOKEN?.trim()) console.warn('[cesium] No ion token; Studio demo works, real-street mode needs a token.');
   });
 }
