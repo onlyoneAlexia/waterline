@@ -20,72 +20,76 @@
   <link rel="stylesheet" href="/vendor/cesium/Widgets/widgets.css">
   <link rel="stylesheet" href="style.css">
   <link rel="stylesheet" href="theme.css">
+  <link rel="stylesheet" href="home.css">
 </head>
 <body>
   <a class="skip-link" href="#explore">Skip to exploration controls</a>
 
   <!-- ===================== HOMEPAGE ===================== -->
   <div id="home" class="home" aria-label="Waterline introduction">
-    <div class="clouds" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-    <header class="home-bar">
-      <span class="logotype">WATERLINE</span>
-      <span class="counter-pill"><span class="long">Aholo Lux3D · 3D AI Hackathon 2026</span><span class="short">Lux3D Hackathon</span></span>
-    </header>
-
-    <section class="home-hero">
-      <p class="script">Flood impact simulator</p>
-      <h1 class="display">See what the storm does<br>to your street.</h1>
-      <p class="home-lede">Live rain, river and terrain data flood a photorealistic 3D city. <strong>Aholo Lux3D</strong> puts your own car, door or scooter in the water at true scale.</p>
-      <ul class="home-stats" aria-label="What Waterline simulates">
-        <li><strong>Live forecast</strong>rain, wind, rivers</li>
-        <li><strong>3.2 km² of terrain</strong>simulated at 20 m</li>
-        <li><strong>OpenStreetMap</strong>buildings, roads, schools</li>
-        <li><strong>Aholo Lux3D</strong>your things, true scale</li>
-      </ul>
-
-      <div class="hero-stage" aria-hidden="true">
-        <!-- The waterline ring: back half behind the car, front half in front, rising with the water. -->
-        <div class="ring">
-          <svg class="ring-back" viewBox="0 0 1000 200" preserveAspectRatio="none"><path class="surface" d="M12 100 A488 88 0 0 1 988 100 Z"/><path d="M12 100 A488 88 0 0 1 988 100"/></svg>
-          <svg class="ring-front" viewBox="0 0 1000 200" preserveAspectRatio="none"><path d="M12 100 A488 88 0 0 0 988 100"/></svg>
-          <svg class="ring-ripple" viewBox="0 0 1000 200" preserveAspectRatio="none"><ellipse cx="500" cy="100" rx="488" ry="88"/></svg>
+    <!-- 1 · Hero: one giant line, the flooded car in front of it shatters as you scroll. -->
+    <section class="h-hero">
+      <div class="h-card">
+        <header class="h-bar">
+          <div class="h-micro"><span>Flood impact<br>simulator</span><span>Aholo Lux3D<br>&amp; Aholo World</span></div>
+          <span class="logotype">WATERLINE</span>
+          <div class="h-bar-end"><span class="h-link"><span class="long">3D AI Hackathon 2026</span><span class="short">2026</span></span><span class="h-dot" aria-hidden="true"></span></div>
+        </header>
+        <h1 class="h-giant display">See it rise</h1>
+        <div class="h-labels" aria-hidden="true"><span>Live<br>forecast</span><span>Real<br>terrain</span><span>Your<br>things</span></div>
+        <div class="h-stage" aria-hidden="true">
+          <img class="h-art" src="/img/hero-family-suv.png" alt="">
+          <canvas class="h-shatter"></canvas>
         </div>
-        <img class="hero-car" src="/img/hero-family-suv.png" alt="">
-        <div class="hero-water"><span class="wave"></span></div>
-        <span class="hero-tag">Water at 1.2 m · up to the windows</span>
+        <p class="h-sub display">Before the<br>water comes.</p>
+        <button id="home-inside" class="h-float" type="button">
+          <img src="/models/worlds/example-living-room.jpg" alt="">
+          <span><strong>Aholo World × Waterline</strong>Inside your home<em>See the water come in →</em></span>
+        </button>
+        <div class="h-stat">
+          <div><strong>1.2 m</strong><span>Up to the windows of a family SUV</span></div>
+          <img src="/models/thumbs/family-suv.png" alt="">
+        </div>
       </div>
-
-      <p class="pill-note">Forecast → terrain simulation → buildings, roads and your things → a way out.</p>
-      <div class="home-ctas">
-        <button id="home-demo" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Replay a real flood</button>
-        <button id="home-street" class="cta-ghost">Simulate my area</button>
-        <button id="home-studio" class="cta-ghost">Offline studio</button>
+      <div class="h-intro">
+        <p class="home-lede">Live rain, river and terrain data flood a photorealistic 3D city. <strong>Aholo Lux3D</strong> puts your own car, door or scooter in the water at true scale.</p>
+        <div class="home-ctas">
+          <button id="home-demo" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Replay a real flood</button>
+          <button id="home-street" class="cta-ghost">Simulate my area</button>
+          <button id="home-studio" class="cta-ghost">Offline studio</button>
+        </div>
       </div>
     </section>
 
-    <section class="home-steps" aria-label="How it works">
-      <h2 class="display small">How it works</h2>
-      <div class="step-cards">
-        <article class="step-card sky">
-          <span class="step-no">01</span>
-          <span class="step-icon" aria-hidden="true"></span>
-          <h3>Pick a storm</h3>
-          <p>Today’s forecast, a replay of a real flood with its recorded rainfall, a river flood from the JRC model, or your own “what if”.</p>
-        </article>
-        <article class="step-card cream">
-          <span class="step-no">02</span>
-          <img src="/img/hero-small-car.png" alt="" loading="lazy">
-          <h3>Watch the area flood</h3>
-          <p>Water spreads across real terrain, hour by hour. Buildings, roads, schools and hospitals light up as it reaches them.</p>
-        </article>
-        <article class="step-card sky">
-          <span class="step-no">03</span>
-          <img src="/img/hero-adult-person.png" alt="" loading="lazy" class="tall">
-          <h3>Make it personal</h3>
-          <p>Aholo Lux3D turns a photo of your car or door into a true-scale 3D model on your street. Then find higher ground.</p>
-        </article>
+    <!-- 2 · Mixed giant type around a tilted card -->
+    <section class="h-split" aria-label="What Waterline shows">
+      <div class="h-circle"><strong>60 cm</strong><span>of moving water can sweep a car away</span></div>
+      <div class="h-note"><span class="h-num">#01</span><div><strong>Real data, honest limits</strong><p>Live forecast, the JRC river model, OpenStreetMap and Google’s 3D city. <em>Where a model shows nothing, Waterline says so.</em></p></div></div>
+      <p class="h-mixed display" aria-label="Your street, your things.">
+        <span class="row"><span class="dim">Your</span> Street,</span>
+        <span class="row">Your <span class="dim">Things.</span></span>
+      </p>
+      <figure class="h-tilt">
+        <img id="h-tilt-img" src="/models/worlds/example-living-room.jpg" alt="A room built by Aholo World">
+        <figcaption id="h-tilt-cap"><strong>Inside your home</strong>A room built by Aholo World</figcaption>
+      </figure>
+      <div class="h-arrows"><button type="button" class="h-prev" aria-label="Previous picture"></button><button type="button" class="h-next" aria-label="Next picture"></button></div>
+    </section>
+
+    <!-- 3 · Tour -->
+    <section class="home-steps h-tour" aria-label="How it works">
+      <div class="h-tour-text">
+        <img class="h-chip" src="/models/thumbs/small-car.png" alt="">
+        <h2 class="h-tour-title display">Take a tour<br>of Waterline</h2>
+        <p>Replay the Kerrville flood of July 2025, search your own street anywhere in the world, or step inside a room built by Aholo World.</p>
+        <div class="steps-cta"><button id="home-demo-2" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Replay a real flood</button></div>
       </div>
-      <div class="steps-cta"><button id="home-demo-2" class="cta-pill"><span class="cta-circle" aria-hidden="true"></span>Replay a real flood</button></div>
+      <div class="h-tour-cards">
+        <article class="h-tcard sky"><img src="/models/thumbs/family-suv.png" alt="" loading="lazy"><div><h3>Pick a storm</h3><p>Today’s forecast, a real flood replayed, or your own “what if”.</p></div></article>
+        <article class="h-tcard cream"><img src="/img/hero-small-car.png" alt="" loading="lazy"><div><h3>Watch it flood</h3><p>Water spreads over real terrain; roads and buildings light up.</p></div></article>
+        <article class="h-tcard sky"><img src="/img/hero-adult-person.png" alt="" loading="lazy" class="tall"><div><h3>Make it personal</h3><p>Lux3D turns a photo of your car into a true-scale model.</p></div></article>
+        <article class="h-tcard photo"><img src="/models/worlds/example-living-room.jpg" alt="" loading="lazy"><div><h3>Step inside</h3><p>Aholo World builds your room in 3D.</p></div></article>
+      </div>
       <p class="home-foot"><strong>A planning tool, not an official warning.</strong> Follow your local authorities. Never walk or drive into floodwater.</p>
     </section>
   </div>

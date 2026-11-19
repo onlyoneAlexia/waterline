@@ -98,7 +98,7 @@ export function createTimeline(canvas, { onScrub = () => {} } = {}) {
 
     // Cursor.
     const cx = x(Math.max(0, Math.min(n - 1, t)));
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = css('--text', '#ffffff');
     ctx.fillRect(cx - 1, top - 2, 2, plotH + 4);
     ctx.beginPath();
     ctx.arc(cx, top + 1, 4, 0, Math.PI * 2);

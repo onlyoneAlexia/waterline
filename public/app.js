@@ -5,6 +5,7 @@ import { createStorm } from './storm.js';
 import { createStudio, studioHeight, pickStudioGround, STUDIO } from './studio.js';
 import { pickGround } from './ground-pick.js';
 import { validateScene } from './scene.js';
+import { shatterOnScroll } from './shatter.js';
 
 const Cesium = window.Cesium;
 const $ = (selector) => document.querySelector(selector);
@@ -2156,6 +2157,32 @@ function wireHome() {
   new MutationObserver(syncInert).observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
   syncInert();
   $('#home-demo-2')?.addEventListener('click', () => $('#home-demo').click());
+  // The flooded car in the hero shatters as you scroll down the homepage.
+  try { shatterOnScroll({ scroller: $('#home'), stage: document.querySelector('.h-stage'), canvas: document.querySelector('.h-shatter'), art: document.querySelector('.h-art') }); } catch (error) { console.warn('Hero effect unavailable', error); }
+  $('#home-inside')?.addEventListener('click', async () => {
+    leaveHome();
+    showSpace('inside');
+    await appReady;
+    $('#room-example').click();
+  });
+  // The tilted card cycles through things Aholo made.
+  const TILT = [
+    { src: '/models/worlds/example-living-room.jpg', title: 'Inside your home', text: 'A room built by Aholo World', thumb: false },
+    { src: '/models/thumbs/family-suv.png', title: 'Family SUV', text: 'Aholo Lux3D, from a description', thumb: true },
+    { src: '/models/thumbs/scooter.png', title: 'Scooter', text: 'Aholo Lux3D, from a photo', thumb: true },
+    { src: '/models/thumbs/front-door.png', title: 'Front door', text: 'Aholo Lux3D, from a description', thumb: true },
+  ];
+  let tilt = 0;
+  const showTilt = (step) => {
+    tilt = (tilt + step + TILT.length) % TILT.length;
+    const item = TILT[tilt];
+    $('#h-tilt-img').src = item.src;
+    $('#h-tilt-img').alt = item.text;
+    $('#h-tilt-cap').replaceChildren(el('strong', '', item.title), document.createTextNode(item.text));
+    document.querySelector('.h-tilt').classList.toggle('thumb', item.thumb);
+  };
+  document.querySelector('.h-prev')?.addEventListener('click', () => showTilt(-1));
+  document.querySelector('.h-next')?.addEventListener('click', () => showTilt(1));
   document.querySelectorAll('[data-go]').forEach((button) => button.addEventListener('click', () => showSpace(button.dataset.go)));
   document.querySelector('[data-home]')?.addEventListener('click', () => document.documentElement.classList.add('home-open'));
   $('#home-demo').onclick = async () => {
