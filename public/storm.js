@@ -4,6 +4,7 @@
 import { createTimeline } from './timeline.js';
 import { forecastScenario, eventScenario, heavyRainScenario, riverScenario, surgeScenario } from './scenarios.js';
 import { BANDS, sampleSeries } from './sim.js';
+import { fetchForecastDirect, fetchEventDirect, withDirectFallback } from './openmeteo.js';
 
 const YEARLY_CHANCE = { 10: '10% a year', 20: '5% a year', 50: '2% a year', 100: '1% a year', 200: '0.5% a year', 500: '0.2% a year' };
 
@@ -89,13 +90,22 @@ export function createStorm({ Cesium, state, setDepth, stopPlaying, toast, el, r
     status.textContent = `${statusText(weather.status)} · Open-Meteo${weather.river ? ', GloFAS' : ''}${tz ? ` · ${tz}` : ''}`;
   }
 
+  async function askServer(url) {
+    const response = await fetch(url, { signal: AbortSignal.timeout(30_000) });
+    let data = null;
+    try { data = await response.json(); } catch { /* not JSON */ }
+    return { ok: response.ok, data };
+  }
+
   async function loadWeather(forPin) {
     const lat = Cesium.Math.toDegrees(forPin.lat).toFixed(5);
     const lon = Cesium.Math.toDegrees(forPin.lon).toFixed(5);
     try {
-      const response = await fetch(`/api/weather?lat=${lat}&lon=${lon}`, { signal: AbortSignal.timeout(30_000) });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+      // Our server first; if it is out of Open-Meteo requests, the browser asks Open-Meteo itself.
+      const data = await withDirectFallback(
+        () => askServer(`/api/weather?lat=${lat}&lon=${lon}`),
+        () => fetchForecastDirect(lat, lon),
+      );
       if (pin !== forPin) return;
       weather = data;
     } catch (error) {
@@ -339,9 +349,10 @@ export function createStorm({ Cesium, state, setDepth, stopPlaying, toast, el, r
   async function loadEvent(scene) {
     if (!scene?.event) return null;
     const { start, end, window } = scene.event;
-    const response = await fetch(`/api/weather/event?lat=${scene.lat}&lon=${scene.lon}&start=${start}&end=${end}`, { signal: AbortSignal.timeout(30_000) });
-    const data = await response.json();
-    if (!response.ok) throw new Error(data.error || `HTTP ${response.status}`);
+    const data = await withDirectFallback(
+      () => askServer(`/api/weather/event?lat=${scene.lat}&lon=${scene.lon}&start=${start}&end=${end}`),
+      () => fetchEventDirect(scene.lat, scene.lon, start, end),
+    );
     eventData = { scene, data: trimWindow(data, window) };
     const button = document.querySelector('[data-scenario="event"]');
     button.hidden = false;
